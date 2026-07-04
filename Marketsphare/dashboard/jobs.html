@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jobs — Marketsphare</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/responsive.css">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
+<style>
+:root{
+  --ws-bg:#ffffff; --ws-ink:#16181c; --ws-muted:#6b7280; --ws-line:#e6e8eb;
+  --ws-accent:#2f6feb; --ws-accent-ink:#ffffff; --ws-success:#1a9e6b; --ws-success-bg:#e7f8f0;
+  --ws-warn:#b9770e; --ws-warn-bg:#fdf1de; --ws-danger:#c23b3b; --ws-danger-bg:#fbeaea; --ws-surface:#f7f8fa;
+}
+.listing-card{display:flex;flex-direction:column;}
+.listing-footer{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.btn-workspace{background:var(--ws-surface);color:var(--ws-ink);border:1px solid var(--ws-line);border-radius:8px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+.btn-workspace:hover{background:#eef0f3;}
+.job-status-tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;margin-left:6px;text-transform:uppercase;letter-spacing:.03em;}
+.job-status-tag.not-started{background:#eef0f3;color:var(--ws-muted);}
+.job-status-tag.in-progress{background:var(--ws-warn-bg);color:var(--ws-warn);}
+.job-status-tag.paid{background:var(--ws-success-bg);color:var(--ws-success);}
+
+.view{display:none;}
+.view.active{display:block;}
+
+.ws-back{display:inline-flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;color:var(--ws-muted);font-size:13px;font-weight:600;padding:0;margin-bottom:16px;}
+.ws-back:hover{color:var(--ws-ink);}
+
+.ws-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-bottom:18px;margin-bottom:18px;border-bottom:1px solid var(--ws-line);}
+.ws-header-left{display:flex;align-items:center;gap:14px;}
+.ws-logo{width:46px;height:46px;border-radius:10px;background:var(--ws-accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0;}
+.ws-header h1{font-size:20px;margin:0 0 2px;}
+.ws-header .meta{font-size:13px;color:var(--ws-muted);}
+.ws-daycounter{display:inline-block;margin-top:4px;font-size:11.5px;font-weight:700;color:var(--ws-accent);background:#eaf1ff;padding:2px 9px;border-radius:999px;}
+
+.ws-brief{background:var(--ws-surface);border:1px solid var(--ws-line);border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:13.5px;line-height:1.6;color:var(--ws-ink);}
+.ws-brief strong{color:var(--ws-ink);}
+
+.ws-body{display:grid;grid-template-columns:1.5fr 1fr;gap:24px;align-items:start;}
+@media (max-width:860px){.ws-body{grid-template-columns:1fr;}}
+
+.ws-section-title{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--ws-muted);font-weight:700;margin:0 0 12px;}
+.ws-section-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.ws-countdown{font-size:11.5px;color:var(--ws-muted);font-weight:600;}
+
+.ws-tasklist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;}
+.ws-task{border:1px solid var(--ws-line);border-radius:10px;background:var(--ws-surface);padding:14px;}
+.ws-task.done{background:var(--ws-success-bg);border-color:#c7ecdc;}
+.ws-task.locked{opacity:.55;}
+.ws-task-top{display:flex;align-items:flex-start;gap:10px;}
+.ws-task-num{width:22px;height:22px;border-radius:50%;background:var(--ws-line);color:var(--ws-muted);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.ws-task.done .ws-task-num{background:var(--ws-success);color:#fff;}
+.ws-task.active .ws-task-num{background:var(--ws-accent);color:#fff;}
+.ws-task-prompt{font-size:14px;line-height:1.5;color:var(--ws-ink);}
+.ws-task.locked .ws-task-prompt{color:var(--ws-muted);}
+.ws-task-reward{display:inline-block;margin-left:6px;font-size:11px;font-weight:800;color:var(--ws-success);background:#fff;border:1px solid #c7ecdc;padding:1px 7px;border-radius:999px;white-space:nowrap;}
+.ws-task-reward.muted{color:var(--ws-muted);background:#fff;border-color:var(--ws-line);}
+.ws-lock-note{font-size:12px;color:var(--ws-muted);margin-top:6px;margin-left:32px;}
+
+.ws-answer-box{margin-top:10px;margin-left:32px;}
+.ws-answer-box textarea{
+  width:100%;min-height:78px;border:1px solid var(--ws-line);border-radius:8px;padding:10px 12px;
+  font-size:13.5px;font-family:inherit;resize:vertical;box-sizing:border-box;
+}
+.ws-answer-box textarea:focus{outline:none;border-color:var(--ws-accent);}
+.ws-answer-row{display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:10px;}
+.ws-submit-btn{background:var(--ws-accent);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;}
+.ws-submit-btn:hover{opacity:.92;}
+.ws-feedback{font-size:12.5px;line-height:1.5;flex:1;}
+.ws-feedback.error{color:var(--ws-danger);}
+.ws-feedback.success{color:var(--ws-success);}
+.ws-approved-answer{margin-top:8px;margin-left:32px;font-size:13px;color:var(--ws-muted);background:#fff;border:1px dashed #c7ecdc;border-radius:8px;padding:8px 10px;}
+.ws-approved-answer b{color:var(--ws-success);}
+
+.ws-side{display:flex;flex-direction:column;gap:18px;position:sticky;top:0;}
+.ws-card{border:1px solid var(--ws-line);border-radius:10px;padding:16px;background:var(--ws-surface);}
+.ws-progress-track{height:8px;border-radius:99px;background:#e2e5e9;overflow:hidden;margin:10px 0 6px;}
+.ws-progress-fill{height:100%;background:var(--ws-accent);border-radius:99px;transition:width .25s ease;}
+.ws-progress-label{font-size:12px;color:var(--ws-muted);}
+
+.ws-pay-row{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--ws-line);}
+.ws-pay-row:last-of-type{border-bottom:none;}
+.ws-pay-label{font-size:12.5px;color:var(--ws-muted);}
+.ws-pay-value{font-size:14px;font-weight:700;color:var(--ws-ink);}
+.ws-pay-value.accent{color:var(--ws-accent);}
+.ws-pay-value.success{color:var(--ws-success);}
+
+.ws-next-payout{background:#fff;border:1px solid var(--ws-line);border-radius:8px;padding:10px 12px;margin-top:10px;font-size:12.5px;color:var(--ws-ink);}
+.ws-next-payout b{display:block;font-size:13.5px;margin-top:2px;}
+
+.ws-btn-success{background:var(--ws-success);color:#fff;width:100%;padding:10px;font-size:13.5px;border-radius:9px;margin-top:12px;border:none;font-weight:700;cursor:pointer;}
+.ws-btn-success:disabled{background:#bfe4d5;cursor:not-allowed;}
+.ws-btn-success:not(:disabled):hover{opacity:.92;}
+
+.ws-history{display:flex;flex-direction:column;gap:6px;margin-top:8px;max-height:140px;overflow-y:auto;}
+.ws-history-empty{font-size:12px;color:var(--ws-muted);font-style:italic;}
+.ws-history-item{display:flex;justify-content:space-between;font-size:12.5px;background:#fff;border:1px solid var(--ws-line);border-radius:6px;padding:6px 9px;}
+.ws-history-item span:last-child{font-weight:700;color:var(--ws-success);}
+
+.ws-complete-banner{display:none;align-items:center;gap:8px;background:var(--ws-success-bg);color:var(--ws-success);border:1px solid #c7ecdc;padding:10px 12px;border-radius:9px;font-size:13px;font-weight:600;margin-bottom:16px;}
+.ws-complete-banner.show{display:flex;}
+.ws-note{font-size:12px;color:var(--ws-muted);line-height:1.5;}
+
+/* Hourly session card */
+.ws-session-timer{font-size:30px;font-weight:800;letter-spacing:.02em;color:var(--ws-ink);text-align:center;margin:6px 0 2px;font-variant-numeric:tabular-nums;}
+.ws-session-rate{text-align:center;font-size:12px;color:var(--ws-muted);margin-bottom:10px;}
+.ws-session-btn{background:var(--ws-accent);color:#fff;width:100%;padding:11px;font-size:13.5px;border-radius:9px;border:none;font-weight:700;cursor:pointer;}
+.ws-session-btn:hover{opacity:.92;}
+.ws-session-btn.running{background:var(--ws-danger);}
+
+/* Approval modal */
+.ws-modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,17,21,.5);z-index:999;align-items:center;justify-content:center;padding:20px;}
+.ws-modal-overlay.show{display:flex;}
+.ws-modal{background:#fff;border-radius:14px;padding:28px 26px;max-width:420px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.25);}
+.ws-modal-icon{font-size:42px;line-height:1;margin-bottom:10px;}
+.ws-modal h2{font-size:19px;margin:0 0 10px;color:var(--ws-ink);}
+.ws-modal p{font-size:13.5px;color:var(--ws-muted);line-height:1.6;margin:0 0 20px;}
+.ws-modal-actions{display:flex;gap:10px;justify-content:center;}
+.ws-modal-btn-primary{background:var(--ws-accent);color:#fff;border:none;border-radius:9px;padding:10px 18px;font-size:13.5px;font-weight:700;cursor:pointer;}
+.ws-modal-btn-primary:hover{opacity:.92;}
+.ws-modal-btn-secondary{background:var(--ws-surface);color:var(--ws-ink);border:1px solid var(--ws-line);border-radius:9px;padding:10px 18px;font-size:13.5px;font-weight:700;cursor:pointer;}
+.ws-modal-btn-secondary:hover{background:#eef0f3;}
+</style>
+</head>
+<body>
+<div class="app-body">
+  <aside class="app-sidebar">
+    <a href="../index.html" class="sidebar-logo"><span class="logo-mark">MS</span> Marketsphare</a>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-title">Main</div>
+      <a href="index.html" class="sidebar-link "><span class="icon">🏠</span> Overview</a>
+      <a href="profile.html" class="sidebar-link "><span class="icon">👤</span> My Profile</a>
+      <a href="jobs.html" class="sidebar-link active"><span class="icon">💼</span> Jobs <span class="count">24</span></a>
+      <a href="applications.html" class="sidebar-link "><span class="icon">📄</span> Applications</a>
+      <div class="sidebar-section-title">Finance</div>
+      <a href="earnings.html" class="sidebar-link "><span class="icon">💰</span> Earnings</a>
+      <div class="sidebar-section-title">Communication</div>
+      <a href="messages.html" class="sidebar-link "><span class="icon">💬</span> Messages <span class="count">3</span></a>
+      <div class="sidebar-section-title">Account</div>
+      <a href="settings.html" class="sidebar-link "><span class="icon">⚙️</span> Settings</a>
+      <a href="#" data-logout class="sidebar-link"><span class="icon">🚪</span> Log Out</a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="profile.html" class="sidebar-user">
+        <div class="avatar-fallback" data-user-initial>A</div>
+        <div class="info"><strong data-user-name>Alex Johnson</strong><span>Worker Account</span></div>
+      </a>
+    </div>
+  </aside>
+
+  <div class="app-main">
+    <header class="app-topbar">
+      <div class="flex items-center gap-2">
+        <button class="sidebar-burger" aria-label="Toggle sidebar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg></button>
+        <div class="topbar-search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input type="text" placeholder="Search jobs, messages, files...">
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button class="theme-toggle" aria-label="Toggle dark mode">
+          <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
+          <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </button>
+        <button class="btn-icon notif-bell badge-notification" data-count="3" aria-label="Notifications">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        </button>
+        <div class="avatar-fallback" data-user-initial style="width:38px;height:38px;">A</div>
+      </div>
+    </header>
+
+    <main class="app-content">
+
+      <div class="view active" id="view-jobs">
+        <div class="page-title-row"><div><h1>Jobs</h1><p>Browse opportunities or post a new role.</p></div><button class="btn btn-primary">+ Post a Job</button></div>
+        <div class="search-bar mb-3">
+          <input type="text" placeholder="Search jobs...">
+          <div class="divider"></div>
+          <select><option>All Categories</option><option>SEO</option><option>Paid Ads</option><option>Social Media</option></select>
+          <button class="btn btn-primary">Search</button>
+        </div>
+        <div class="filters-row">
+          <button class="filter-chip active">All</button>
+          <button class="filter-chip">Saved</button>
+          <button class="filter-chip">Applied</button>
+          <button class="filter-chip">Full-time</button>
+          <button class="filter-chip">Contract</button>
+        </div>
+        <div class="grid-3" id="jobsGrid"></div>
+      </div>
+
+      <div class="view" id="view-workspace">
+        <button class="ws-back" id="wsBack">← Back to Jobs</button>
+        <div class="ws-header">
+          <div class="ws-header-left">
+            <div class="ws-logo" id="wsLogo">—</div>
+            <div>
+              <h1 id="wsTitle">Job title</h1>
+              <div class="meta" id="wsMeta">Company · Remote</div>
+              <span class="ws-daycounter" id="wsDayCounter" style="display:none;"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ws-brief" id="wsBrief"></div>
+        <div class="ws-complete-banner" id="wsCompleteBanner">🎉 Contract complete — you finished all 7 days of tasks. Your full contract value has been credited across the week.</div>
+
+        <div class="ws-body">
+          <div>
+            <div class="ws-section-head">
+              <p class="ws-section-title">Tasks — complete in order</p>
+              <span class="ws-countdown" id="wsCountdown"></span>
+            </div>
+            <ul class="ws-tasklist" id="wsTaskList"></ul>
+          </div>
+
+          <div class="ws-side">
+
+            <div class="ws-card" id="wsSessionCard" style="display:none;">
+              <p class="ws-section-title">Work Session (paid hourly)</p>
+              <div class="ws-session-timer" id="wsSessionTimer">00:00:00</div>
+              <div class="ws-session-rate" id="wsSessionRate">—</div>
+              <button class="ws-session-btn" id="wsSessionBtn">▶ Start Work Session</button>
+              <p class="ws-note" style="margin-top:8px;">Keep this tab open — the timer only runs while this page is open. Switching tabs or closing the page automatically pauses and banks your time.</p>
+              <div class="ws-pay-row" style="margin-top:8px;"><span class="ws-pay-label">Hours logged today</span><span class="ws-pay-value" id="wsHoursToday">0.00h</span></div>
+              <div class="ws-pay-row"><span class="ws-pay-label">Total hours logged</span><span class="ws-pay-value" id="wsHoursTotal">0.00h</span></div>
+            </div>
+
+            <div class="ws-card">
+              <p class="ws-section-title">Progress</p>
+              <div class="ws-progress-track"><div class="ws-progress-fill" id="wsProgressFill" style="width:0%"></div></div>
+              <div class="ws-progress-label" id="wsProgressLabel">0 of 0 tasks approved today</div>
+            </div>
+
+            <div class="ws-card">
+              <p class="ws-section-title">Earnings &amp; weekly payout</p>
+              <div class="ws-pay-row"><span class="ws-pay-label">Contract value</span><span class="ws-pay-value" id="wsContractValue">$0</span></div>
+              <div class="ws-pay-row"><span class="ws-pay-label">Approved this cycle</span><span class="ws-pay-value accent" id="wsPendingValue">$0.00</span></div>
+              <div class="ws-pay-row"><span class="ws-pay-label">Paid to date</span><span class="ws-pay-value success" id="wsPaidValue">$0.00</span></div>
+
+              <div class="ws-next-payout">
+                Payments are processed <strong>weekly, every Friday</strong>. Approved earnings are held here and released automatically on the next scheduled date.
+                <b id="wsNextPayoutDate">—</b>
+              </div>
+
+              <button class="ws-btn-success" id="wsPayoutBtn" disabled>Nothing to pay out yet</button>
+              <p class="ws-note" style="margin-top:6px;">The button above simulates Friday's automatic payout run so you can preview it now.</p>
+
+              <p class="ws-section-title" style="margin-top:16px;">Payout history</p>
+              <div class="ws-history" id="wsHistory"><div class="ws-history-empty">No payouts yet.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Apply approval modal -->
+<div class="ws-modal-overlay" id="approvalModal">
+  <div class="ws-modal">
+    <div class="ws-modal-icon">🎉</div>
+    <h2>Congratulations!</h2>
+    <p id="approvalModalText">Your application has been approved.</p>
+    <div class="ws-modal-actions">
+      <button class="ws-modal-btn-secondary" id="approvalModalClose">Maybe later</button>
+      <button class="ws-modal-btn-primary" id="approvalModalGo">Start Working →</button>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/marketsphare-shared.js"></script>
+<script src="../assets/js/app.js"></script>
+<script src="../assets/js/dashboard.js"></script>
+
+<script>
+/* ---------------- Shared data & persisted state ---------------- */
+const { jobs, loadState, saveState, formatDate } = window.Marketsphare;
+const state = loadState();
+
+let activeJobId = null;
+let approvalModalJobId = null;
+let draftSaveTimer = null;
+
+/* ---------------- View switching ---------------- */
+const viewJobs = document.getElementById("view-jobs");
+const viewWorkspace = document.getElementById("view-workspace");
+
+function showJobsView(){
+  viewWorkspace.classList.remove("active");
+  viewJobs.classList.add("active");
+  activeJobId = null;
+  renderCards();
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+function showWorkspaceView(jobId){
+  if(!state[jobId] || !state[jobId].applied){
+    showJobsView();
+    return;
+  }
+  activeJobId = jobId;
+  viewJobs.classList.remove("active");
+  viewWorkspace.classList.add("active");
+  loadWorkspace(jobId);
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+document.getElementById("wsBack").addEventListener("click", ()=>{
+  history.replaceState(null, "", window.location.pathname);
+  showJobsView();
+});
+
+/* ---------------- Job cards ---------------- */
+const grid = document.getElementById("jobsGrid");
+
+function statusFor(job){
+  const s = state[job.id];
+  if(!s.applied) return {cls:"not-started", label:"Not Started"};
+  if(job.payType === "monthly" && s.daysCompleted >= 7) return {cls:"paid", label:"Completed"};
+  return {cls:"in-progress", label:"Active"};
+}
+
+function renderCards(){
+  grid.innerHTML = jobs.map(job=>{
+    const s = state[job.id];
+    const st = statusFor(job);
+    const priceLabel = job.payType === "hourly" ? `${job.currency}${job.payAmount}/hr` : `${job.currency}${job.payAmount.toLocaleString()}/mo`;
+    const actionBtn = !s.applied
+      ? `<button class="btn btn-sm btn-primary" data-apply="${job.id}">Apply</button>`
+      : `<button class="btn-workspace" data-workspace="${job.id}">🛠 Open Workspace</button>`;
+    return `
+      <div class="listing-card">
+        <div class="listing-top">
+          <div class="listing-company">
+            <div class="company-logo">${job.logo}</div>
+            <div><h3 style="font-size:15px;">${job.title}</h3><span class="meta">${job.company} · ${job.location}</span></div>
+          </div>
+          <span class="pill pill-${job.matchTone}">${job.match}%</span>
+        </div>
+        <div class="listing-tags">${job.tags.map(t=>`<span class="pill">${t}</span>`).join("")}</div>
+        <div class="listing-footer">
+          <span class="listing-price">${priceLabel}</span>
+          ${actionBtn}
+          <span class="job-status-tag ${st.cls}">${st.label}</span>
+        </div>
+      </div>`;
+  }).join("");
+}
+renderCards();
+
+grid.addEventListener("click", e=>{
+  const wsBtn = e.target.closest("[data-workspace]");
+  if(wsBtn){ showWorkspaceView(wsBtn.dataset.workspace); return; }
+  const applyBtn = e.target.closest("[data-apply]");
+  if(applyBtn){ applyToJob(applyBtn.dataset.apply); }
+});
+
+/* ---------------- Apply flow ---------------- */
+function applyToJob(jobId){
+  const job = jobs.find(j=>j.id===jobId);
+  const s = state[jobId];
+  if(s.applied) return;
+
+  window.Marketsphare.applyToJob(job, s);
+  saveState(state);
+  renderCards();
+  openApprovalModal(job);
+}
+
+const approvalModal = document.getElementById("approvalModal");
+function openApprovalModal(job){
+  approvalModalJobId = job.id;
+  document.getElementById("approvalModalText").innerHTML =
+    `Your application for <b>${job.title}</b> at <b>${job.company}</b> has been approved.<br>You can start working right away — today's tasks are ready in your workspace.`;
+  approvalModal.classList.add("show");
+}
+document.getElementById("approvalModalGo").addEventListener("click", ()=>{
+  approvalModal.classList.remove("show");
+  if(approvalModalJobId) showWorkspaceView(approvalModalJobId);
+});
+document.getElementById("approvalModalClose").addEventListener("click", ()=>{
+  approvalModal.classList.remove("show");
+});
+
+/* ---------------- Workspace ---------------- */
+const elLogo = document.getElementById("wsLogo");
+const elTitle = document.getElementById("wsTitle");
+const elMeta = document.getElementById("wsMeta");
+const elDayCounter = document.getElementById("wsDayCounter");
+const elBrief = document.getElementById("wsBrief");
+const elCountdown = document.getElementById("wsCountdown");
+const elTaskList = document.getElementById("wsTaskList");
+const elProgressFill = document.getElementById("wsProgressFill");
+const elProgressLabel = document.getElementById("wsProgressLabel");
+const elContractValue = document.getElementById("wsContractValue");
+const elPendingValue = document.getElementById("wsPendingValue");
+const elPaidValue = document.getElementById("wsPaidValue");
+const elNextPayoutDate = document.getElementById("wsNextPayoutDate");
+const elPayoutBtn = document.getElementById("wsPayoutBtn");
+const elHistory = document.getElementById("wsHistory");
+const elCompleteBanner = document.getElementById("wsCompleteBanner");
+
+const elSessionCard = document.getElementById("wsSessionCard");
+const elSessionTimer = document.getElementById("wsSessionTimer");
+const elSessionRate = document.getElementById("wsSessionRate");
+const elSessionBtn = document.getElementById("wsSessionBtn");
+const elHoursToday = document.getElementById("wsHoursToday");
+const elHoursTotal = document.getElementById("wsHoursTotal");
+
+function loadWorkspace(jobId){
+  const job = jobs.find(j=>j.id===jobId);
+  const s = state[jobId];
+
+  window.Marketsphare.ensureCurrentDay(job, s);
+  saveState(state);
+
+  elLogo.textContent = job.logo;
+  elTitle.textContent = job.title;
+  elMeta.textContent = `${job.company} · ${job.location} · ${job.payType==="hourly" ? job.currency+job.payAmount+"/hr" : job.currency+job.payAmount.toLocaleString()+"/mo"}`;
+  elBrief.innerHTML = `<strong>Client:</strong> ${job.client} — ${job.industry}<br>${job.brief}`;
+
+  if(job.payType === "monthly"){
+    elDayCounter.style.display = "inline-block";
+    elDayCounter.textContent = s.daysCompleted >= 7 ? "Contract complete · 7/7 days" : `Day ${Math.min(s.dayIndex+1,7)} of 7`;
+  } else {
+    elDayCounter.style.display = "none";
+  }
+
+  elSessionCard.style.display = job.payType === "hourly" ? "block" : "none";
+  if(job.payType === "hourly"){
+    elSessionRate.textContent = `${job.currency}${job.payAmount}/hr while your session is running`;
+  }
+
+  renderTasks(job);
+  renderSidebar(job);
+}
+
+function renderTasks(job){
+  const s = state[job.id];
+
+  if(job.payType === "monthly" && s.daysCompleted >= 7){
+    elTaskList.innerHTML = `<li class="ws-task done"><div class="ws-task-top"><div class="ws-task-num">🎉</div><div class="ws-task-prompt"><b>Contract complete!</b> You completed all 7 daily task batches. Full contract value has been credited across the week.</div></div></li>`;
+    return;
+  }
+  if(!s.dayOrder || !s.dayOrder.length){
+    elTaskList.innerHTML = `<li class="ws-task"><div class="ws-task-top"><div class="ws-task-num">•</div><div class="ws-task-prompt">Preparing today's tasks…</div></div></li>`;
+    return;
+  }
+
+  elTaskList.innerHTML = s.dayOrder.map((origIdx, i)=>{
+    const task = job.tasks[origIdx];
+    const isDone = s.dayApproved[i];
+    const isActive = !isDone && i === s.dayCursor;
+    const isLocked = !isDone && i > s.dayCursor;
+    let cls = "ws-task";
+    if(isDone) cls += " done"; else if(isActive) cls += " active"; else if(isLocked) cls += " locked";
+
+    const rewardBadge = job.payType === "monthly"
+      ? `<span class="ws-task-reward">+${job.currency}${window.Marketsphare.monthlyPayPerTask(job, s).toFixed(2)}</span>`
+      : `<span class="ws-task-reward muted">Paid hourly</span>`;
+
+    let inner = `
+      <div class="ws-task-top">
+        <div class="ws-task-num">${isDone ? "✓" : i+1}</div>
+        <div class="ws-task-prompt">${task.prompt} ${rewardBadge}</div>
+      </div>`;
+
+    if(isDone){
+      inner += `<div class="ws-approved-answer"><b>Approved.</b> ${job.payType==="monthly" ? "Payment for this task has been added to your pending balance." : "Logged. Keep your session timer running to get paid for this work."}</div>`;
+    } else if(isActive){
+      inner += `
+        <div class="ws-answer-box">
+          <textarea id="answer-${i}" placeholder="Write your answer for this task...">${s.drafts[origIdx] || ""}</textarea>
+          <div class="ws-answer-row">
+            <div class="ws-feedback" id="feedback-${i}"></div>
+            <button class="ws-submit-btn" data-submit="${i}">Submit</button>
+          </div>
+        </div>`;
+    } else if(isLocked){
+      inner += `<div class="ws-lock-note">🔒 Unlocks once you complete task ${s.dayCursor+1}.</div>`;
+    }
+    return `<li class="${cls}">${inner}</li>`;
+  }).join("");
+}
+
+elTaskList.addEventListener("click", e=>{
+  const btn = e.target.closest("[data-submit]");
+  if(!btn || !activeJobId) return;
+  const i = Number(btn.dataset.submit);
+  submitTask(activeJobId, i);
+});
+
+elTaskList.addEventListener("input", e=>{
+  const ta = e.target.closest("textarea[id^='answer-']");
+  if(!ta || !activeJobId) return;
+  const i = Number(ta.id.split("-")[1]);
+  const s = state[activeJobId];
+  if(!s.dayOrder.length) return;
+  const origIdx = s.dayOrder[i];
+  s.drafts[origIdx] = ta.value;
+  clearTimeout(draftSaveTimer);
+  draftSaveTimer = setTimeout(()=> saveState(state), 400);
+});
+
+function checkAnswer(text, task){
+  const t = text.trim();
+  if(!t) return {ok:false, msg:"Please write an answer before submitting."};
+  const wc = t.split(/\s+/).filter(Boolean).length;
+  if(wc < task.minWords) return {ok:false, msg:`That's too short — give at least ${task.minWords} words with real specifics.`};
+  const lower = t.toLowerCase();
+  const missing = task.groups.filter(g => !g.some(k => lower.includes(k)));
+  if(missing.length){
+    return {ok:false, msg:"Not quite — your answer needs to clearly address: " + missing.map(g=>g[0]).join(", ") + ". Please revise and resubmit."};
+  }
+  return {ok:true};
+}
+
+function submitTask(jobId, batchIndex){
+  const job = jobs.find(j=>j.id===jobId);
+  const s = state[jobId];
+  if(!s.dayOrder.length) return;
+
+  const origIdx = s.dayOrder[batchIndex];
+  const task = job.tasks[origIdx];
+  const textarea = document.getElementById(`answer-${batchIndex}`);
+  const feedbackEl = document.getElementById(`feedback-${batchIndex}`);
+  const result = checkAnswer(textarea.value, task);
+
+  s.drafts[origIdx] = textarea.value;
+
+  if(!result.ok){
+    feedbackEl.textContent = "✗ " + result.msg;
+    feedbackEl.className = "ws-feedback error";
+    saveState(state);
+    return;
+  }
+
+  s.dayApproved[batchIndex] = true;
+  s.dayCursor = batchIndex + 1;
+
+  if(job.payType === "monthly"){
+    s.pending += window.Marketsphare.monthlyPayPerTask(job, s);
+  }
+
+  renderTasks(job);
+  renderSidebar(job);
+  renderCards();
+  saveState(state);
+}
+
+function renderSidebar(job){
+  const s = state[job.id];
+  const total = (s.dayOrder && s.dayOrder.length) || job.tasks.length;
+  const done = (s.dayApproved || []).filter(Boolean).length;
+  const pct = total ? Math.round((done/total)*100) : 0;
+
+  elProgressFill.style.width = pct + "%";
+  elProgressLabel.textContent = `${done} of ${total} tasks approved today`;
+
+  elContractValue.textContent = job.payType === "monthly"
+    ? `${job.currency}${job.totalPay.toLocaleString(undefined,{maximumFractionDigits:0})}`
+    : `${job.currency}${job.payAmount}/hr`;
+
+  const liveSession = (job.payType === "hourly" && s.sessionRunning && s.sessionStartedAt)
+    ? (Date.now() - s.sessionStartedAt) / 3600000 * job.payAmount
+    : 0;
+  const displayPending = s.pending + liveSession;
+
+  elPendingValue.textContent = `${job.currency}${displayPending.toFixed(2)}`;
+  elPaidValue.textContent = `${job.currency}${s.paid.toFixed(2)}`;
+  elNextPayoutDate.textContent = formatDate(s.nextPayout);
+
+  elPayoutBtn.disabled = displayPending <= 0;
+  elPayoutBtn.textContent = displayPending > 0
+    ? `Process this week's payout — ${job.currency}${displayPending.toFixed(2)}`
+    : "Nothing to pay out yet";
+
+  elHistory.innerHTML = s.history.length
+    ? s.history.map(h => `<div class="ws-history-item"><span>${h.date}</span><span>+${job.currency}${h.amount.toFixed(2)}</span></div>`).join("")
+    : `<div class="ws-history-empty">No payouts yet.</div>`;
+
+  const contractDone = job.payType === "monthly" && s.daysCompleted >= 7;
+  elCompleteBanner.classList.toggle("show", contractDone);
+
+  if(contractDone){
+    elCountdown.textContent = "Contract complete — no further task batches.";
+  } else {
+    const msLeft = window.Marketsphare.msUntilNextBatch(s);
+    elCountdown.textContent = `New tasks in ${window.Marketsphare.formatHMS(msLeft)}`;
+  }
+
+  if(job.payType === "hourly"){
+    elHoursToday.textContent = `${s.hoursLoggedToday.toFixed(2)}h`;
+    elHoursTotal.textContent = `${s.totalHoursLogged.toFixed(2)}h`;
+    elSessionBtn.textContent = s.sessionRunning ? "⏸ Pause Work Session" : "▶ Start Work Session";
+    elSessionBtn.classList.toggle("running", s.sessionRunning);
+    elSessionTimer.textContent = s.sessionRunning
+      ? window.Marketsphare.formatHMS(Date.now() - s.sessionStartedAt)
+      : "00:00:00";
+  }
+}
+
+elPayoutBtn.addEventListener("click", ()=>{
+  if(!activeJobId) return;
+  const job = jobs.find(j=>j.id===activeJobId);
+  const s = state[activeJobId];
+
+  if(job.payType === "hourly" && s.sessionRunning){
+    window.Marketsphare.bankSession(job, s);
+  }
+  if(s.pending <= 0) return;
+
+  s.history.unshift({ date: formatDate(s.nextPayout), amount: s.pending });
+  s.paid += s.pending;
+  s.pending = 0;
+  s.nextPayout = window.Marketsphare.getNextFriday(new Date(s.nextPayout.getTime() + 24*60*60*1000));
+
+  renderSidebar(job);
+  renderCards();
+  saveState(state);
+});
+
+/* ---------------- Hourly session controls ---------------- */
+elSessionBtn.addEventListener("click", ()=>{
+  if(!activeJobId) return;
+  const job = jobs.find(j=>j.id===activeJobId);
+  if(job.payType !== "hourly") return;
+  const s = state[activeJobId];
+
+  if(!s.sessionRunning){
+    const ok = confirm(
+      `Starting your work session for ${job.title} at ${job.company}.\n\n` +
+      `Keep this tab open — your timer only runs while this page stays open. ` +
+      `Switching tabs, minimizing, or closing the page will automatically pause and bank your time.\n\n` +
+      `Start now?`
+    );
+    if(!ok) return;
+    window.Marketsphare.startSession(job, s);
+  } else {
+    const earned = window.Marketsphare.bankSession(job, s);
+    alert(`Session paused. You worked ${earned.hours.toFixed(2)} hours and earned ${job.currency}${earned.amount.toFixed(2)}.`);
+  }
+
+  renderSidebar(job);
+  renderCards();
+  saveState(state);
+});
+
+/* Auto-pause any running hourly session if the tab is hidden or the page
+   is closed/refreshed, so time can't accrue while the page isn't open. */
+function autoPauseRunningSessions(){
+  let changed = false;
+  jobs.forEach(job=>{
+    if(job.payType !== "hourly") return;
+    const s = state[job.id];
+    if(s.sessionRunning){
+      window.Marketsphare.bankSession(job, s);
+      changed = true;
+    }
+  });
+  if(changed){
+    saveState(state);
+    if(activeJobId){
+      const job = jobs.find(j=>j.id===activeJobId);
+      if(job.payType === "hourly") renderSidebar(job);
+    }
+    renderCards();
+  }
+}
+document.addEventListener("visibilitychange", ()=>{
+  if(document.hidden) autoPauseRunningSessions();
+});
+window.addEventListener("beforeunload", autoPauseRunningSessions);
+
+/* ---------------- Heartbeat: day rollover + live timer/countdown ---------------- */
+// Checks every job (not just the open one) so cards/status stay correct
+// even while the user is browsing the jobs grid.
+setInterval(()=>{
+  let changed = false;
+  jobs.forEach(job=>{
+    if(window.Marketsphare.ensureCurrentDay(job, state[job.id])) changed = true;
+  });
+  if(changed){
+    saveState(state);
+    renderCards();
+    if(activeJobId){
+      const job = jobs.find(j=>j.id===activeJobId);
+      renderTasks(job);
+      renderSidebar(job);
+    }
+  }
+}, 15000);
+
+// Smooth per-second UI updates for the open workspace (no state mutation).
+setInterval(()=>{
+  if(!activeJobId) return;
+  const job = jobs.find(j=>j.id===activeJobId);
+  const s = state[activeJobId];
+
+  const contractDone = job.payType === "monthly" && s.daysCompleted >= 7;
+  elCountdown.textContent = contractDone
+    ? "Contract complete — no further task batches."
+    : `New tasks in ${window.Marketsphare.formatHMS(window.Marketsphare.msUntilNextBatch(s))}`;
+
+  if(job.payType === "hourly" && s.sessionRunning){
+    const elapsed = Date.now() - s.sessionStartedAt;
+    elSessionTimer.textContent = window.Marketsphare.formatHMS(elapsed);
+    const liveEarn = elapsed/3600000*job.payAmount;
+    const displayPending = s.pending + liveEarn;
+    elPendingValue.textContent = `${job.currency}${displayPending.toFixed(2)}`;
+    elPayoutBtn.textContent = `Process this week's payout — ${job.currency}${displayPending.toFixed(2)}`;
+    elPayoutBtn.disabled = displayPending <= 0;
+  }
+}, 1000);
+
+/* ---------------- Deep link from Overview: jobs.html?job=<id> ---------------- */
+(function(){
+  const params = new URLSearchParams(window.location.search);
+  const target = params.get("job");
+  if(target && jobs.some(j=>j.id===target)){
+    if(state[target].applied){
+      showWorkspaceView(target);
+    } else {
+      showJobsView();
+    }
+  }
+})();
+</script>
+</body>
+</html>

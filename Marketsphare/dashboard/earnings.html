@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Earnings — Marketsphare</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+  <link rel="stylesheet" href="../assets/css/dashboard.css">
+  <style>
+    .apps-empty-row td{ text-align:center; padding:28px 12px; color:#6b7280; font-size:13.5px; }
+    .apps-live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#1a9e6b;margin-right:6px;box-shadow:0 0 0 0 rgba(26,158,107,.5);animation:apps-pulse 1.6s infinite;}
+    @keyframes apps-pulse{
+      0%{box-shadow:0 0 0 0 rgba(26,158,107,.45);}
+      70%{box-shadow:0 0 0 6px rgba(26,158,107,0);}
+      100%{box-shadow:0 0 0 0 rgba(26,158,107,0);}
+    }
+    .apps-live-note{display:flex;align-items:center;font-size:12px;color:#6b7280;margin:-4px 0 12px;}
+    .stat-value.zero{opacity:.55;}
+    #withdrawBtn:disabled{opacity:.5;cursor:not-allowed;}
+
+    /* ---- Crypto withdraw modal ---- */
+    .wd-overlay{display:none;position:fixed;inset:0;background:rgba(15,17,21,.5);z-index:999;align-items:center;justify-content:center;padding:20px;}
+    .wd-overlay.show{display:flex;}
+    .wd-modal{background:#fff;border-radius:14px;padding:26px 26px 22px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25);position:relative;}
+    .wd-modal h2{font-size:18px;margin:0 0 4px;}
+    .wd-modal-sub{font-size:12.5px;color:#6b7280;margin:0 0 16px;}
+    .wd-modal-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:16px;cursor:pointer;color:#6b7280;line-height:1;}
+    .wd-modal-close:hover{color:#16181c;}
+    .wd-friday-notice{font-size:12.5px;font-weight:600;padding:8px 10px;border-radius:8px;margin-bottom:14px;}
+    .wd-friday-notice.ok{background:#e7f8f0;color:#1a9e6b;}
+    .wd-friday-notice.blocked{background:#fdf1de;color:#b9770e;}
+    .wd-field{margin-bottom:12px;}
+    .wd-field label{display:block;font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.03em;margin-bottom:5px;}
+    .wd-field select, .wd-field input{width:100%;box-sizing:border-box;border:1px solid #e6e8eb;border-radius:8px;padding:9px 11px;font-size:13.5px;font-family:inherit;}
+    .wd-field select:focus, .wd-field input:focus{outline:none;border-color:#2f6feb;}
+    .wd-amount-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .wd-price-line{font-size:12px;color:#6b7280;margin:2px 0 10px;}
+    .wd-available-line{font-size:12.5px;color:#16181c;background:#f7f8fa;border:1px solid #e6e8eb;border-radius:8px;padding:8px 10px;margin-bottom:10px;}
+    .wd-available-line b{color:#2f6feb;}
+    .wd-max-btn{background:none;border:1px solid #e6e8eb;border-radius:7px;padding:5px 10px;font-size:11.5px;font-weight:700;cursor:pointer;color:#2f6feb;margin-bottom:12px;}
+    .wd-max-btn:hover{background:#eaf1ff;}
+    .wd-error{font-size:12.5px;color:#c23b3b;min-height:16px;margin-bottom:8px;}
+    .wd-submit-btn{background:#2f6feb;color:#fff;border:none;border-radius:9px;padding:11px;font-size:13.5px;font-weight:700;width:100%;cursor:pointer;}
+    .wd-submit-btn:hover:not(:disabled){opacity:.92;}
+    .wd-submit-btn:disabled{background:#b9c8ec;cursor:not-allowed;}
+  </style>
+</head>
+<body>
+  <div class="app-body">
+    <aside class="app-sidebar">
+      <a href="../index.html" class="sidebar-logo"><span class="logo-mark">MS</span> Marketsphare</a>
+      <nav class="sidebar-nav">
+        <div class="sidebar-section-title">Main</div>
+        <a href="index.html" class="sidebar-link "><span class="icon">🏠</span> Overview</a>
+        <a href="profile.html" class="sidebar-link "><span class="icon">👤</span> My Profile</a>
+        <a href="jobs.html" class="sidebar-link "><span class="icon">💼</span> Jobs <span class="count">24</span></a>
+        <a href="applications.html" class="sidebar-link "><span class="icon">📄</span> Applications</a>
+        <div class="sidebar-section-title">Finance</div>
+        <a href="earnings.html" class="sidebar-link active"><span class="icon">💰</span> Earnings</a>
+        <div class="sidebar-section-title">Communication</div>
+        <a href="messages.html" class="sidebar-link "><span class="icon">💬</span> Messages <span class="count">3</span></a>
+        <div class="sidebar-section-title">Account</div>
+        <a href="settings.html" class="sidebar-link "><span class="icon">⚙️</span> Settings</a>
+        <a href="#" data-logout class="sidebar-link"><span class="icon">🚪</span> Log Out</a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="profile.html" class="sidebar-user">
+          <div class="avatar-fallback" data-user-initial>A</div>
+          <div class="info"><strong data-user-name>Alex Johnson</strong><span>Worker Account</span></div>
+        </a>
+      </div>
+    </aside>
+
+    <div class="app-main">
+      <header class="app-topbar">
+        <div class="flex items-center gap-2">
+          <button class="sidebar-burger" aria-label="Toggle sidebar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg></button>
+          <div class="topbar-search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
+            <input type="text" placeholder="Search jobs, messages, files...">
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <button class="theme-toggle" aria-label="Toggle dark mode">
+            <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
+            <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+          </button>
+          <button class="btn-icon notif-bell badge-notification" data-count="3" aria-label="Notifications">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          </button>
+          <div class="avatar-fallback" data-user-initial style="width:38px;height:38px;">A</div>
+        </div>
+      </header>
+
+      <main class="app-content">
+        <div class="page-title-row">
+          <div><h1>Earnings</h1><p>Track payments, invoices, and payout history.</p></div>
+          <button class="btn btn-primary" id="withdrawBtn" disabled>Withdraw Funds</button>
+        </div>
+
+        <div class="apps-live-note"><span class="apps-live-dot"></span> Live — reflects every job you've applied to, task you've had approved, hour you've worked, and payout you've processed.</div>
+
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-card-top"><div class="stat-icon" style="background:rgba(16,185,129,0.12);color:var(--color-success);">💰</div></div><div class="stat-value" id="statMonth">$0.00</div><div class="stat-label">This Month</div></div>
+          <div class="stat-card"><div class="stat-card-top"><div class="stat-icon" style="background:rgba(79,70,229,0.12);color:var(--color-primary);">🏦</div></div><div class="stat-value" id="statLifetime">$0.00</div><div class="stat-label">Total Lifetime Earnings</div></div>
+          <div class="stat-card"><div class="stat-card-top"><div class="stat-icon" style="background:rgba(245,158,11,0.12);color:var(--color-warning);">⏳</div></div><div class="stat-value" id="statEscrow">$0.00</div><div class="stat-label">Pending Escrow</div></div>
+          <div class="stat-card"><div class="stat-card-top"><div class="stat-icon" style="background:rgba(6,182,212,0.12);color:var(--color-accent);">💳</div></div><div class="stat-value" id="statAvailable">$0.00</div><div class="stat-label">Available to Withdraw</div></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><h3>Transaction History</h3><button class="btn btn-sm btn-outline" id="exportCsvBtn">Export CSV</button></div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Description</th><th>Client</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+              <tbody id="txnTbody">
+                <tr class="apps-empty-row"><td colspan="5">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Crypto withdrawal modal -->
+  <div class="wd-overlay" id="wdOverlay">
+    <div class="wd-modal">
+      <button class="wd-modal-close" id="wdClose" aria-label="Close">✕</button>
+      <h2>Withdraw to Crypto Wallet</h2>
+      <p class="wd-modal-sub">Withdrawals are processed weekly, on Fridays only — same cycle as your job payouts.</p>
+
+      <div class="wd-friday-notice" id="wdFridayNotice"></div>
+
+      <div class="wd-field">
+        <label>Coin</label>
+        <select id="wdCoin"></select>
+      </div>
+
+      <div class="wd-field">
+        <label>Wallet Address</label>
+        <input id="wdWallet" type="text" placeholder="Paste your wallet address" autocomplete="off">
+      </div>
+
+      <div class="wd-amount-row">
+        <div class="wd-field">
+          <label>Amount (<span id="wdCoinLabel">USDT</span>)</label>
+          <input id="wdAmountCrypto" type="number" min="0" step="any" placeholder="0.00">
+        </div>
+        <div class="wd-field">
+          <label>Amount (USD)</label>
+          <input id="wdAmountUsd" type="number" min="0" step="any" placeholder="0.00">
+        </div>
+      </div>
+
+      <div class="wd-price-line" id="wdPriceLine">Fetching live price…</div>
+      <div class="wd-available-line" id="wdAvailableLine"></div>
+      <button class="wd-max-btn" type="button" id="wdMaxBtn">Use max available</button>
+
+      <div class="wd-error" id="wdError"></div>
+      <button class="wd-submit-btn" id="wdSubmit" disabled>Confirm Withdrawal</button>
+    </div>
+  </div>
+
+  <script src="../assets/js/marketsphare-shared.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/dashboard.js"></script>
+
+  <script>
+  /* ----------------------------------------------------------------------
+     Live Earnings page + crypto withdrawal flow.
+
+     Stat cards & transaction history are derived from the exact same
+     persisted workspace state jobs.html writes (window.Marketsphare /
+     localStorage) — see comments further down for the per-card formulas.
+
+     Withdrawals:
+       - Only allowed when it is actually Friday (device's real clock),
+         mirroring the weekly Friday payout cycle used on the job
+         workspace. The button and modal both re-check this live.
+       - User picks a coin, pastes a wallet address, and enters an amount
+         in EITHER the coin or USD — the other field auto-fills from a
+         live price (fetched client-side from CoinGecko's public API,
+         with an offline fallback so the demo still works without
+         network access).
+       - The amount can never exceed "Available to Withdraw". Confirming
+         deducts it from that balance immediately and logs a row in
+         Transaction History — it never lets available go negative.
+       - Withdrawals are tracked in their own small localStorage ledger,
+         kept fully separate from Marketsphare's job/task/pay engine so
+         this page can never interfere with or break it.
+  ---------------------------------------------------------------------- */
+  (function () {
+    const { jobs, loadState, computeStats, formatCurrencyMap, getNextFriday, STORAGE_KEY } = window.Marketsphare;
+    let state = loadState();
+
+    const LEDGER_KEY = "marketsphare_earnings_ledger_v1";
+
+    function loadLedger() {
+      try {
+        const raw = JSON.parse(localStorage.getItem(LEDGER_KEY) || "null");
+        if (raw && typeof raw === "object") return raw;
+      } catch (e) {}
+      return { withdrawn: {}, withdrawals: [] }; // withdrawn: {currency: amountWithdrawnSoFar}
+    }
+    function saveLedger(ledger) {
+      try { localStorage.setItem(LEDGER_KEY, JSON.stringify(ledger)); } catch (e) {}
+      window.dispatchEvent(new CustomEvent("marketsphare-earnings:changed"));
+    }
+    let ledger = loadLedger();
+
+    /* ---------------- Stat elements ---------------- */
+    const elMonth = document.getElementById("statMonth");
+    const elLifetime = document.getElementById("statLifetime");
+    const elEscrow = document.getElementById("statEscrow");
+    const elAvailable = document.getElementById("statAvailable");
+    const elTbody = document.getElementById("txnTbody");
+    const withdrawBtn = document.getElementById("withdrawBtn");
+
+    function fmt(map, key) {
+      const s = formatCurrencyMap(map, key);
+      return s || "$0.00";
+    }
+    function isZeroMap(map, key) {
+      return !Object.keys(map).some((c) => map[c][key] > 0);
+    }
+
+    /* Live pending per job, including whatever a running hourly session
+       has accrued so far — mirrors the exact calc used in jobs.html. */
+    function livePending(job, s) {
+      const live = (job.payType === "hourly" && s.sessionRunning && s.sessionStartedAt)
+        ? (Date.now() - s.sessionStartedAt) / 3600000 * job.payAmount
+        : 0;
+      return s.pending + live;
+    }
+
+    function monthMap() {
+      const now = new Date();
+      const map = {};
+      jobs.forEach((job) => {
+        const s = state[job.id];
+        if (!s.applied) return;
+        (s.history || []).forEach((h) => {
+          const d = new Date(h.date);
+          if (isNaN(d.getTime())) return;
+          if (d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) {
+            if (!map[job.currency]) map[job.currency] = { month: 0 };
+            map[job.currency].month += h.amount;
+          }
+        });
+      });
+      return map;
+    }
+
+    function escrowMap() {
+      const map = {};
+      jobs.forEach((job) => {
+        const s = state[job.id];
+        if (!s.applied) return;
+        const pending = livePending(job, s);
+        if (pending > 0) {
+          if (!map[job.currency]) map[job.currency] = { escrow: 0 };
+          map[job.currency].escrow += pending;
+        }
+      });
+      return map;
+    }
+
+    /* Available-to-withdraw per currency = lifetime paid minus already withdrawn. */
+    function availableMap(stats) {
+      const map = {};
+      Object.keys(stats.byCurrency).forEach((c) => {
+        const paid = stats.byCurrency[c].paid || 0;
+        const withdrawn = (ledger.withdrawn && ledger.withdrawn[c]) || 0;
+        map[c] = { avail: Math.max(0, paid - withdrawn) };
+      });
+      return map;
+    }
+
+    /* Total available across all currencies, treated 1:1 as USD for the
+       purposes of crypto conversion (demo simplification — no live FX). */
+    function totalAvailableUsd(aMap) {
+      return Object.keys(aMap).reduce((sum, c) => sum + aMap[c].avail, 0);
+    }
+
+    function buildTransactions() {
+      const now = new Date();
+      const txns = [];
+
+      jobs.forEach((job) => {
+        const s = state[job.id];
+        if (!s.applied) return;
+
+        (s.history || []).forEach((h) => {
+          const parsed = new Date(h.date);
+          const ts = isNaN(parsed.getTime()) ? 0 : parsed.getTime();
+          txns.push({
+            description: `${job.title} — Payout`,
+            client: job.company,
+            amountLabel: `${job.currency}${h.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+            status: "Released", statusClass: "pill-success",
+            dateLabel: h.date, ts
+          });
+        });
+
+        const pending = livePending(job, s);
+        if (pending > 0.004) {
+          txns.push({
+            description: `${job.title} — Approved work awaiting payout`,
+            client: job.company,
+            amountLabel: `${job.currency}${pending.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+            status: "In Escrow", statusClass: "pill-warning",
+            dateLabel: "Releases next Friday", ts: now.getTime() + 1
+          });
+        }
+      });
+
+      (ledger.withdrawals || []).forEach((w) => {
+        const parsed = new Date(w.ts || w.date);
+        const ts = isNaN(parsed.getTime()) ? 0 : parsed.getTime();
+        const walletShort = w.wallet ? `${w.wallet.slice(0, 6)}…${w.wallet.slice(-4)}` : "";
+        txns.push({
+          description: w.coin
+            ? `Withdrawal to ${w.coin} Wallet ${walletShort}`
+            : "Withdrawal to Bank ****4521",
+          client: "—",
+          amountLabel: w.coin
+            ? `-$${w.usdAmount.toFixed(2)} (${w.cryptoAmount.toFixed(6)} ${w.coin})`
+            : `-$${w.usdAmount.toFixed(2)}`,
+          status: "Completed", statusClass: "pill-primary",
+          dateLabel: w.date, ts
+        });
+      });
+
+      txns.sort((a, b) => b.ts - a.ts);
+      return txns;
+    }
+
+    /* ---------------- Friday gating ---------------- */
+    function isFridayToday() { return new Date().getDay() === 5; }
+    function nextFridayLabel() {
+      const base = isFridayToday() ? new Date(Date.now() + 86400000) : new Date();
+      return window.Marketsphare.formatDate(getNextFriday(base));
+    }
+
+    function render() {
+      jobs.forEach((job) => window.Marketsphare.ensureCurrentDay(job, state[job.id]));
+
+      const stats = computeStats(state);
+      const mMap = monthMap();
+      const eMap = escrowMap();
+      const aMap = availableMap(stats);
+
+      elMonth.textContent = fmt(mMap, "month");
+      elMonth.classList.toggle("zero", isZeroMap(mMap, "month"));
+      elLifetime.textContent = fmt(stats.byCurrency, "paid");
+      elLifetime.classList.toggle("zero", isZeroMap(stats.byCurrency, "paid"));
+      elEscrow.textContent = fmt(eMap, "escrow");
+      elEscrow.classList.toggle("zero", isZeroMap(eMap, "escrow"));
+      elAvailable.textContent = fmt(aMap, "avail");
+      elAvailable.classList.toggle("zero", isZeroMap(aMap, "avail"));
+
+      const hasFunds = !isZeroMap(aMap, "avail");
+      const fridayOk = isFridayToday();
+      withdrawBtn.disabled = !(hasFunds && fridayOk);
+      if (!hasFunds) {
+        withdrawBtn.textContent = "Withdraw Funds";
+      } else if (!fridayOk) {
+        withdrawBtn.textContent = `Withdraw Funds — opens ${nextFridayLabel()}`;
+      } else {
+        withdrawBtn.textContent = `Withdraw Funds (${fmt(aMap, "avail")})`;
+      }
+
+      const txns = buildTransactions();
+      elTbody.innerHTML = txns.length
+        ? txns.map((t) => `
+            <tr>
+              <td>${t.description}</td>
+              <td>${t.client}</td>
+              <td>${t.amountLabel}</td>
+              <td><span class="pill ${t.statusClass}">${t.status}</span></td>
+              <td>${t.dateLabel}</td>
+            </tr>`).join("")
+        : `<tr class="apps-empty-row"><td colspan="5">No activity yet — apply to a job and complete tasks to start earning.</td></tr>`;
+    }
+
+    /* ---------------- CSV export ---------------- */
+    document.getElementById("exportCsvBtn").addEventListener("click", () => {
+      const txns = buildTransactions();
+      const rows = [["Description", "Client", "Amount", "Status", "Date"]];
+      txns.forEach((t) => rows.push([t.description, t.client, t.amountLabel, t.status, t.dateLabel]));
+      const csv = rows.map((r) => r.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = "marketsphare-earnings.csv";
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    /* ---------------- Crypto withdrawal modal ---------------- */
+    const COINS = {
+      BTC:  { id: "bitcoin",     label: "Bitcoin (BTC)",   fallback: 65000 },
+      ETH:  { id: "ethereum",    label: "Ethereum (ETH)",  fallback: 3400 },
+      USDT: { id: "tether",      label: "Tether (USDT)",   fallback: 1 },
+      USDC: { id: "usd-coin",    label: "USD Coin (USDC)", fallback: 1 },
+      BNB:  { id: "binancecoin", label: "BNB",             fallback: 580 },
+      SOL:  { id: "solana",      label: "Solana (SOL)",    fallback: 150 },
+      XRP:  { id: "ripple",      label: "XRP",             fallback: 0.55 },
+      LTC:  { id: "litecoin",    label: "Litecoin (LTC)",  fallback: 85 }
+    };
+    let livePrices = {};
+    let pricesAreLive = false;
+
+    const wdOverlay = document.getElementById("wdOverlay");
+    const wdCoin = document.getElementById("wdCoin");
+    const wdCoinLabel = document.getElementById("wdCoinLabel");
+    const wdWallet = document.getElementById("wdWallet");
+    const wdAmountCrypto = document.getElementById("wdAmountCrypto");
+    const wdAmountUsd = document.getElementById("wdAmountUsd");
+    const wdPriceLine = document.getElementById("wdPriceLine");
+    const wdAvailableLine = document.getElementById("wdAvailableLine");
+    const wdMaxBtn = document.getElementById("wdMaxBtn");
+    const wdError = document.getElementById("wdError");
+    const wdSubmit = document.getElementById("wdSubmit");
+    const wdFridayNotice = document.getElementById("wdFridayNotice");
+    const wdClose = document.getElementById("wdClose");
+
+    Object.keys(COINS).forEach((sym) => {
+      const opt = document.createElement("option");
+      opt.value = sym;
+      opt.textContent = COINS[sym].label;
+      wdCoin.appendChild(opt);
+    });
+
+    async function fetchLivePrices() {
+      const ids = Object.values(COINS).map((c) => c.id).join(",");
+      try {
+        const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
+        if (!res.ok) throw new Error("bad response");
+        const data = await res.json();
+        const prices = {};
+        Object.keys(COINS).forEach((sym) => {
+          const p = data[COINS[sym].id];
+          prices[sym] = p && typeof p.usd === "number" ? p.usd : COINS[sym].fallback;
+        });
+        livePrices = prices;
+        pricesAreLive = true;
+      } catch (e) {
+        const prices = {};
+        Object.keys(COINS).forEach((sym) => { prices[sym] = COINS[sym].fallback; });
+        livePrices = prices;
+        pricesAreLive = false;
+      }
+      updatePriceLine();
+    }
+
+    function currentPrice() {
+      const sym = wdCoin.value;
+      return (livePrices[sym]) || COINS[sym].fallback;
+    }
+
+    function updatePriceLine() {
+      const sym = wdCoin.value;
+      const price = currentPrice();
+      wdPriceLine.textContent = `1 ${sym} ≈ $${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}${pricesAreLive ? " · live" : " · offline estimate"}`;
+    }
+
+    function getAvailableUsd() {
+      const stats = computeStats(state);
+      const aMap = availableMap(stats);
+      return totalAvailableUsd(aMap);
+    }
+
+    function refreshAvailableLine() {
+      const avail = getAvailableUsd();
+      wdAvailableLine.innerHTML = `Available to withdraw: <b>$${avail.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b>`;
+      return avail;
+    }
+
+    function validate() {
+      const avail = refreshAvailableLine();
+      const usd = parseFloat(wdAmountUsd.value) || 0;
+      const wallet = wdWallet.value.trim();
+      let msg = "";
+
+      if (!isFridayToday()) {
+        msg = `Withdrawals only process on Fridays. Next window: ${nextFridayLabel()}.`;
+      } else if (!wallet || wallet.length < 8) {
+        msg = usd > 0 ? "Enter a valid wallet address." : "";
+      } else if (usd <= 0) {
+        msg = "";
+      } else if (usd > avail + 0.0001) {
+        msg = `Amount exceeds your available balance of $${avail.toFixed(2)}.`;
+      }
+
+      wdError.textContent = msg;
+      const ready = isFridayToday() && wallet.length >= 8 && usd > 0 && usd <= avail + 0.0001;
+      wdSubmit.disabled = !ready;
+      return ready;
+    }
+
+    wdCoin.addEventListener("change", () => {
+      wdCoinLabel.textContent = wdCoin.value;
+      updatePriceLine();
+      const usd = parseFloat(wdAmountUsd.value) || 0;
+      wdAmountCrypto.value = usd > 0 ? (usd / currentPrice()).toFixed(6) : "";
+      validate();
+    });
+
+    wdAmountUsd.addEventListener("input", () => {
+      const usd = parseFloat(wdAmountUsd.value) || 0;
+      wdAmountCrypto.value = usd > 0 ? (usd / currentPrice()).toFixed(6) : "";
+      validate();
+    });
+
+    wdAmountCrypto.addEventListener("input", () => {
+      const crypto = parseFloat(wdAmountCrypto.value) || 0;
+      wdAmountUsd.value = crypto > 0 ? (crypto * currentPrice()).toFixed(2) : "";
+      validate();
+    });
+
+    wdWallet.addEventListener("input", validate);
+
+    wdMaxBtn.addEventListener("click", () => {
+      const avail = refreshAvailableLine();
+      wdAmountUsd.value = avail > 0 ? avail.toFixed(2) : "";
+      wdAmountCrypto.value = avail > 0 ? (avail / currentPrice()).toFixed(6) : "";
+      validate();
+    });
+
+    function openModal() {
+      if (withdrawBtn.disabled) return;
+      wdCoin.value = "USDT";
+      wdCoinLabel.textContent = "USDT";
+      wdWallet.value = "";
+      wdAmountCrypto.value = "";
+      wdAmountUsd.value = "";
+      wdError.textContent = "";
+
+      if (isFridayToday()) {
+        wdFridayNotice.className = "wd-friday-notice ok";
+        wdFridayNotice.textContent = "✓ It's Friday — withdrawals are open today.";
+      } else {
+        wdFridayNotice.className = "wd-friday-notice blocked";
+        wdFridayNotice.textContent = `Withdrawals only process on Fridays. Next window: ${nextFridayLabel()}.`;
+      }
+
+      refreshAvailableLine();
+      updatePriceLine();
+      fetchLivePrices();
+      wdSubmit.disabled = true;
+      wdOverlay.classList.add("show");
+    }
+    function closeModal() { wdOverlay.classList.remove("show"); }
+
+    withdrawBtn.addEventListener("click", openModal);
+    wdClose.addEventListener("click", closeModal);
+    wdOverlay.addEventListener("click", (e) => { if (e.target === wdOverlay) closeModal(); });
+
+    wdSubmit.addEventListener("click", () => {
+      if (!validate()) return;
+      if (!isFridayToday()) return; // hard stop, belt-and-suspenders
+
+      const usd = parseFloat(wdAmountUsd.value) || 0;
+      const crypto = parseFloat(wdAmountCrypto.value) || 0;
+      const coin = wdCoin.value;
+      const wallet = wdWallet.value.trim();
+
+      const stats = computeStats(state);
+      const aMap = availableMap(stats);
+      const avail = totalAvailableUsd(aMap);
+      if (usd > avail + 0.0001) { validate(); return; }
+
+      const ok = confirm(
+        `Withdraw ${crypto.toFixed(6)} ${coin} (≈ $${usd.toFixed(2)}) to:\n${wallet}\n\nThis cannot be undone. Continue?`
+      );
+      if (!ok) return;
+
+      // Deduct from available, currency by currency, without ever going negative.
+      ledger.withdrawn = ledger.withdrawn || {};
+      let remaining = usd;
+      Object.keys(aMap).forEach((c) => {
+        if (remaining <= 0.0001) return;
+        const take = Math.min(aMap[c].avail, remaining);
+        if (take <= 0) return;
+        ledger.withdrawn[c] = (ledger.withdrawn[c] || 0) + take;
+        remaining -= take;
+      });
+
+      ledger.withdrawals = ledger.withdrawals || [];
+      ledger.withdrawals.unshift({
+        coin, wallet, cryptoAmount: crypto, usdAmount: usd,
+        priceAtWithdrawal: currentPrice(),
+        date: new Date().toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }),
+        ts: Date.now()
+      });
+
+      saveLedger(ledger);
+      closeModal();
+      render();
+    });
+
+    /* ---------------- Live sync ---------------- */
+    function refreshFromStorage() {
+      state = loadState();
+      ledger = loadLedger();
+      render();
+    }
+    window.addEventListener("marketsphare:state-changed", refreshFromStorage);
+    window.addEventListener("marketsphare-earnings:changed", refreshFromStorage);
+    window.addEventListener("storage", (e) => {
+      if (e.key === STORAGE_KEY || e.key === LEDGER_KEY) refreshFromStorage();
+    });
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshFromStorage(); });
+
+    // Smooth per-second tick so a running hourly session visibly grows
+    // "Pending Escrow" and its live transaction row in real time.
+    setInterval(render, 1000);
+    // Keep crypto prices reasonably fresh while the modal happens to be open.
+    setInterval(() => { if (wdOverlay.classList.contains("show")) fetchLivePrices(); }, 30000);
+
+    render();
+  })();
+  </script>
+</body>
+</html>

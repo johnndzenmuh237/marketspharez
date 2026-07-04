@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Your Email — Marketsphare</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+</head>
+<body>
+  <div class="auth-wrap">
+    <div class="auth-panel">
+      <div class="auth-box text-center">
+        <a href="../index.html" class="logo mb-3" style="justify-content:center;"><span class="logo-mark">MS</span><span class="brand-text">Marketsphare</span></a>
+        <div class="card-icon" style="margin:24px auto 18px;width:64px;height:64px;font-size:28px;">📧</div>
+        <h2 style="font-size:24px;margin-bottom:10px;">Verify your email address</h2>
+        <p class="text-secondary mb-3">We sent a verification link to <strong>your email</strong>. Click the link to activate your account and start using Marketsphare.</p>
+        <button id="resendVerification" class="btn btn-outline btn-block" type="button">Resend Verification Email</button>
+        <p class="text-center mt-3" style="font-size:14px;"><a href="login.html" style="color:var(--color-primary);font-weight:600;">← Back to login</a></p>
+      </div>
+    </div>
+    <div class="auth-side">
+      <div class="auth-side-content">
+        <h2>Almost there!</h2>
+        <p>Verifying your email keeps the marketplace secure and trustworthy for everyone. This page will move on to your dashboard automatically once you click the link in your inbox.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="../assets/js/firebase-config.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/auth.js"></script>
+</body>
+</html>

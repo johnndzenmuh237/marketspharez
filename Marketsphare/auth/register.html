@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up — Marketsphare</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+</head>
+<body>
+  <div class="auth-wrap">
+    <div class="auth-panel">
+      <div class="auth-box">
+        <a href="../index.html" class="logo mb-3"><span class="logo-mark">MS</span><span class="brand-text">Marketsphare</span></a>
+        <h2 style="font-size:26px;margin:18px 0 6px;">Create your account</h2>
+        <p class="text-secondary mb-3">Join the marketplace in less than a minute.</p>
+
+        <div class="role-toggle">
+          <button type="button" class="active" data-role="worker">I'm a Worker</button>
+          <button type="button" data-role="employer">I'm an Employer</button>
+        </div>
+        <input type="hidden" id="selectedRole" value="worker">
+
+        <form id="registerForm" novalidate>
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" name="fullName" class="form-control" placeholder="Jane Doe" required>
+          </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" name="email" class="form-control" placeholder="you@email.com" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Password</label>
+              <div class="input-icon-wrap">
+                <input type="password" name="password" class="form-control" placeholder="••••••••" required minlength="8">
+                <button type="button" class="toggle-pass">👁️</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Confirm Password</label>
+              <div class="input-icon-wrap">
+                <input type="password" name="confirmPassword" class="form-control" placeholder="••••••••" required minlength="8">
+                <button type="button" class="toggle-pass">👁️</button>
+              </div>
+            </div>
+          </div>
+          <label class="checkbox-row mb-3"><input type="checkbox" name="terms" required> I agree to the <a href="#" style="color:var(--color-primary);">Terms of Service</a> &amp; Privacy Policy</label>
+          <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+        </form>
+
+        <p class="text-center mt-3" style="font-size:14px;">Already have an account? <a href="login.html" style="color:var(--color-primary);font-weight:600;">Log in</a></p>
+      </div>
+    </div>
+    <div class="auth-side">
+      <div class="auth-side-content">
+        <h2>Start hiring or get hired in minutes.</h2>
+        <p>AI matching and verified profiles — built for digital marketing professionals.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="../assets/js/firebase-config.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/auth.js"></script>
+</body>
+</html>

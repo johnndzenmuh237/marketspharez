@@ -1,0 +1,67 @@
+/* ==========================================================================
+   Responsive Stylesheet — Tablet & Mobile
+   ========================================================================== */
+
+@media (max-width: 1080px) {
+  .hero-grid { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 44px; }
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .footer-grid { grid-template-columns: 1fr 1fr 1fr; }
+  .auth-side { display: none; }
+  .auth-wrap { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 900px) {
+  .nav-links, .nav-actions .btn { display: none; }
+  .mobile-toggle { display: flex; }
+  .grid-3 { grid-template-columns: repeat(2, 1fr); }
+  .steps { grid-template-columns: repeat(2, 1fr); }
+  .grid-2 { grid-template-columns: 1fr; }
+  .pricing-card.featured { transform: none; }
+  .section { padding: 64px 0; }
+}
+
+@media (max-width: 720px) {
+  .container { padding: 0 18px; }
+  .hero { padding: 80px 0 60px; }
+  .hero h1 { font-size: 34px; }
+  .hero p.lead { font-size: 16px; }
+  .hero-actions .btn { width: 100%; }
+  .hero-actions { flex-direction: column; }
+  .hero-stats { gap: 24px; }
+  .section-header h2 { font-size: 27px; }
+  .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .steps { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 28px; }
+  .footer-brand { grid-column: span 2; }
+  .footer-bottom { flex-direction: column; text-align: center; }
+  .cta-banner { padding: 40px 24px; }
+  .cta-banner h2 { font-size: 26px; }
+  .form-row { flex-direction: column; gap: 0; }
+  .logo-strip-inner { justify-content: center; gap: 22px; font-size: 15px; }
+  .search-bar { flex-direction: column; }
+  .search-bar .divider { display: none; }
+  .page-hero h1 { font-size: 28px; }
+  .listing-top { flex-direction: column; }
+}
+
+@media (max-width: 480px) {
+  .footer-grid { grid-template-columns: 1fr; }
+  .footer-brand { grid-column: span 1; }
+  .logo span.brand-text { display: none; }
+}
+
+/* Dashboard / Admin responsive (shared rules also live in dashboard.css/admin.css) */
+@media (max-width: 960px) {
+  .app-sidebar { transform: translateX(-100%); }
+  .app-sidebar.open { transform: translateX(0); }
+  .app-main { margin-left: 0 !important; }
+  .app-topbar .sidebar-burger { display: flex !important; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .table-wrap { overflow-x: auto; }
+}
+
+@media (max-width: 600px) {
+  .stat-grid { grid-template-columns: 1fr; }
+  .app-content { padding: 18px !important; }
+}
