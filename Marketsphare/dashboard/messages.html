@@ -28,8 +28,8 @@
       </nav>
       <div class="sidebar-footer">
         <a href="profile.html" class="sidebar-user">
-          <div class="avatar-fallback" data-user-initial>A</div>
-          <div class="info"><strong data-user-name>Alex Johnson</strong><span>Worker Account</span></div>
+          <div class="avatar-fallback" data-user-initial>·</div>
+          <div class="info"><strong data-user-name>Loading...</strong><span data-user-title>Worker Account</span></div>
         </a>
       </div>
     </aside>
@@ -51,7 +51,7 @@
           <button class="btn-icon notif-bell badge-notification" data-count="3" aria-label="Notifications">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
           </button>
-          <div class="avatar-fallback" data-user-initial style="width:38px;height:38px;">A</div>
+          <div class="avatar-fallback" data-user-initial style="width:38px;height:38px;">·</div>
         </div>
       </header>
 
@@ -97,7 +97,26 @@
     </div>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="../assets/js/firebase-config.js"></script>
+  <script src="../assets/js/user-profile.js"></script>
   <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/dashboard-auth.js"></script>
+  <script src="../assets/js/marketsphare-shared.js"></script>
   <script src="../assets/js/dashboard.js"></script>
+
+  <script>
+  /* Replace the sent bubbles with actual messages "from" the signed-in
+     user's real name the moment auth resolves, so the chat reflects who's
+     really logged in rather than a hardcoded persona. */
+  window.Marketsphare.authReady.then(function () {
+    const profile = window.Marketsphare.currentProfile;
+    if (profile && profile.fullName) {
+      const firstBubble = document.querySelector(".chat-messages .msg-bubble.sent");
+      if (firstBubble) firstBubble.title = `Sent by ${profile.fullName}`;
+    }
+  });
+  </script>
 </body>
 </html>
