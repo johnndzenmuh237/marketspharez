@@ -19,6 +19,14 @@
     .stat-value.zero{opacity:.55;}
     #withdrawBtn:disabled{opacity:.5;cursor:not-allowed;}
 
+    /* ---- Connect Wallet button ---- */
+    .page-title-actions{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; flex-shrink:0; }
+    #connectWalletBtn{ display:inline-flex; align-items:center; gap:8px; white-space:nowrap; }
+    #connectWalletBtn:disabled{ opacity:.6; cursor:wait; }
+    .wallet-dot{ width:8px; height:8px; border-radius:50%; background:#c6cbd2; flex-shrink:0; }
+    .wallet-dot.connected{ background:#1a9e6b; box-shadow:0 0 0 0 rgba(26,158,107,.5); animation:apps-pulse 1.6s infinite; }
+    .wd-wallet-hint{ display:block; font-size:11px; color:#6b7280; margin-top:4px; overflow-wrap:anywhere; }
+
     /* ---- Rejected-withdrawal notice banner ---- */
     .wd-rejected-banner{display:none;align-items:center;justify-content:space-between;gap:12px;background:#fdf1de;border:1px solid #f3d9ad;color:#8a5a12;border-radius:10px;padding:12px 14px;margin-bottom:16px;flex-wrap:wrap;}
     .wd-rejected-banner.show{ display:flex; }
@@ -181,6 +189,7 @@
       overflow-wrap:anywhere;
     }
     .page-title-row #withdrawBtn{ flex-shrink:0; }
+    .page-title-row .page-title-actions{ flex-shrink:0; }
 
     /* ---------- Sidebar burger: hidden on desktop, appears at tablet/mobile ---------- */
     .sidebar-burger{
@@ -269,7 +278,8 @@
       .app-content{ padding: 14px; }
 
       .page-title-row{ flex-direction:column; align-items:stretch; }
-      .page-title-row #withdrawBtn{ width:100%; }
+      .page-title-actions{ width:100%; flex-direction:column; }
+      .page-title-actions .btn{ width:100%; }
 
       /* Topbar: burger + bell/theme/avatar row on top, full-width search below */
       .app-topbar{ row-gap:10px; }
@@ -347,7 +357,10 @@
       <main class="app-content">
         <div class="page-title-row">
           <div><h1>Earnings</h1><p>Track payments, invoices, and payout history.</p></div>
-          <button class="btn btn-primary" id="withdrawBtn" disabled>Withdraw Funds</button>
+          <div class="page-title-actions">
+            <button class="btn btn-outline" id="connectWalletBtn" type="button"><span class="wallet-dot" id="walletDot"></span> Connect Wallet</button>
+            <button class="btn btn-primary" id="withdrawBtn" disabled>Withdraw Funds</button>
+          </div>
         </div>
 
         <div class="apps-live-note"><span class="apps-live-dot"></span> Live — reflects every job you've applied to, task you've had approved, hour you've worked, and payout you've processed.</div>
@@ -395,6 +408,7 @@
       <div class="wd-field">
         <label>Wallet Address</label>
         <input id="wdWallet" type="text" placeholder="Paste your wallet address" autocomplete="off">
+        <span class="wd-wallet-hint" id="wdWalletHint"></span>
       </div>
 
       <div class="wd-amount-row">
@@ -519,6 +533,84 @@
     function escapeHtml(str) {
       return String(str).replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
     }
+
+    /* ---------------- Connect Wallet ----------------
+       Connects to an injected Web3 wallet (MetaMask, etc.) via
+       window.ethereum and remembers the address per-user in localStorage
+       so it persists across visits. Purely a convenience: it auto-fills
+       the withdrawal modal's wallet address field, but that field stays
+       editable in case the user wants to withdraw to a different address
+       or a non-EVM chain (BTC, LTC, etc.) that a browser extension
+       wallet wouldn't provide anyway. */
+    function walletKey() {
+      const uid = currentUid();
+      return uid ? `marketsphare_connected_wallet_v1:${uid}` : null;
+    }
+    function loadConnectedWallet() {
+      const key = walletKey();
+      if (!key) return null;
+      try { return localStorage.getItem(key) || null; } catch (e) { return null; }
+    }
+    function saveConnectedWallet(addr) {
+      const key = walletKey();
+      if (!key) return;
+      try {
+        if (addr) localStorage.setItem(key, addr);
+        else localStorage.removeItem(key);
+      } catch (e) {}
+      window.dispatchEvent(new CustomEvent("marketsphare-wallet:changed"));
+    }
+    function shortAddr(addr) {
+      return addr ? `${addr.slice(0, 6)}…${addr.slice(-4)}` : "";
+    }
+
+    const connectWalletBtn = document.getElementById("connectWalletBtn");
+
+    function renderWalletBtn() {
+      const addr = loadConnectedWallet();
+      if (addr) {
+        connectWalletBtn.innerHTML = `<span class="wallet-dot connected"></span> ${shortAddr(addr)}`;
+        connectWalletBtn.title = "Click to disconnect this wallet";
+      } else {
+        connectWalletBtn.innerHTML = `<span class="wallet-dot"></span> Connect Wallet`;
+        connectWalletBtn.title = "";
+      }
+    }
+
+    connectWalletBtn.addEventListener("click", async () => {
+      const existing = loadConnectedWallet();
+      if (existing) {
+        if (confirm(`Disconnect wallet ${shortAddr(existing)}?`)) {
+          saveConnectedWallet(null);
+          renderWalletBtn();
+        }
+        return;
+      }
+      if (!window.ethereum) {
+        alert("No Web3 wallet extension detected (e.g. MetaMask). You can still install one, or just paste your wallet address manually when withdrawing.");
+        return;
+      }
+      try {
+        connectWalletBtn.disabled = true;
+        connectWalletBtn.innerHTML = "Connecting…";
+        const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+        if (accounts && accounts[0]) saveConnectedWallet(accounts[0]);
+      } catch (e) {
+        alert("Wallet connection was cancelled or failed.");
+      } finally {
+        connectWalletBtn.disabled = false;
+        renderWalletBtn();
+      }
+    });
+
+    if (window.ethereum && window.ethereum.on) {
+      window.ethereum.on("accountsChanged", (accounts) => {
+        saveConnectedWallet(accounts && accounts[0] ? accounts[0] : null);
+        renderWalletBtn();
+      });
+    }
+    window.addEventListener("marketsphare-wallet:changed", renderWalletBtn);
+    renderWalletBtn();
 
     /* ---------------- Stat elements ---------------- */
     const elMonth = document.getElementById("statMonth");
@@ -910,7 +1002,11 @@
       if (withdrawBtn.disabled) return;
       wdCoin.value = "USDT";
       wdCoinLabel.textContent = "USDT";
-      wdWallet.value = "";
+      const connected = loadConnectedWallet();
+      wdWallet.value = connected || "";
+      document.getElementById("wdWalletHint").textContent = connected
+        ? `Auto-filled from your connected wallet (${shortAddr(connected)}). Edit this if withdrawing to a different address.`
+        : "";
       wdAmountCrypto.value = "";
       wdAmountUsd.value = "";
       wdError.textContent = "";
