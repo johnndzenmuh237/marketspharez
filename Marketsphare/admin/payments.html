@@ -8,6 +8,28 @@
   <link rel="stylesheet" href="../assets/css/responsive.css">
   <link rel="stylesheet" href="../assets/css/dashboard.css">
   <link rel="stylesheet" href="../assets/css/admin.css">
+  <style>
+    /* ---- Pending withdrawal review panel ---- */
+    .wd-req-empty td{ text-align:center; padding:26px 12px; color:#6b7280; font-size:13.5px; }
+    .wd-req-wallet{ max-width:180px; overflow-wrap:anywhere; font-size:12.5px; color:#4b5563; }
+    .wd-req-sub{ display:block; color:#9aa0aa; font-size:11.5px; margin-top:2px; }
+    .wd-req-actions{ white-space:nowrap; display:flex; gap:6px; }
+    .wd-req-actions .btn{ padding:6px 12px; font-size:12.5px; }
+
+    /* ---- Reject-with-note modal (admin side) ---- */
+    .awd-overlay{ display:none; position:fixed; inset:0; background:rgba(15,17,21,.5); z-index:999; align-items:center; justify-content:center; padding:20px; }
+    .awd-overlay.show{ display:flex; }
+    .awd-modal{ background:#fff; border-radius:14px; padding:24px; max-width:420px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,.25); box-sizing:border-box; }
+    .awd-modal h2{ font-size:17px; margin:0 0 6px; }
+    .awd-modal p{ font-size:12.5px; color:#6b7280; margin:0 0 14px; }
+    .awd-modal textarea{ width:100%; box-sizing:border-box; border:1px solid #e6e8eb; border-radius:8px; padding:10px 11px; font-size:13.5px; font-family:inherit; resize:vertical; min-height:90px; }
+    .awd-modal textarea:focus{ outline:none; border-color:#2f6feb; }
+    .awd-modal-actions{ display:flex; justify-content:flex-end; gap:8px; margin-top:14px; }
+
+    @media (max-width: 640px){
+      .wd-req-wallet{ max-width:120px; }
+    }
+  </style>
 </head>
 <body>
   <div class="app-body">
@@ -65,6 +87,22 @@
           <div class="stat-card"><div class="stat-value">312</div><div class="stat-label">Pending Payouts</div></div>
         </div>
 
+        <!-- Pending crypto withdrawal requests, submitted from a worker's Earnings page.
+             Approve finalizes the withdrawal (funds were already reserved on submission).
+             Reject requires a short note explaining why — that note is shown back to the
+             user on their Earnings page, and their reserved funds are released automatically. -->
+        <div class="panel">
+          <div class="panel-header"><h3>Pending Withdrawal Requests</h3></div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Requested</th><th>User</th><th>Coin</th><th>Amount</th><th>Wallet</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="wdRequestsTbody">
+                <tr class="wd-req-empty"><td colspan="7">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <div class="panel">
           <div class="panel-header"><h3>Recent Transactions</h3></div>
           <div class="table-wrap">
@@ -85,8 +123,172 @@
     </div>
   </div>
 
+  <!-- Reject-with-note modal -->
+  <div class="awd-overlay" id="wdRejectOverlay">
+    <div class="awd-modal">
+      <h2>Reject Withdrawal</h2>
+      <p>Add a short note explaining the issue. The user will see this on their Earnings page and their funds will be returned to their available balance.</p>
+      <textarea id="wdRejectNote" placeholder="e.g. Wallet address doesn't match a valid USDT (TRC20) format — please resubmit with a correct address."></textarea>
+      <div class="awd-modal-actions">
+        <button class="btn btn-outline" id="wdRejectCancel">Cancel</button>
+        <button class="btn btn-primary" id="wdRejectConfirm">Reject &amp; Notify User</button>
+      </div>
+    </div>
+  </div>
+
   <script src="../assets/js/app.js"></script>
   <script src="../assets/js/dashboard.js"></script>
   <script src="../assets/js/admin.js"></script>
+
+  <script>
+  /* ==========================================================================
+     Withdrawal request review (Admin ⇄ Worker Earnings page bridge).
+
+     Both this page and earnings.html read/write the same localStorage key,
+     `marketsphare_withdrawal_requests_v1` — a flat array of every withdrawal
+     request ever submitted, each tagged with the requesting user's uid.
+
+     Lifecycle of a request:
+       pending  -> created by earnings.html when the user confirms a withdrawal.
+                   Funds are already reserved out of their available balance
+                   at this point (see `deductions` on the request object),
+                   so they can't be double-spent while awaiting review.
+       approved -> set here when admin clicks Approve. No balance change
+                   needed — the funds were already reserved.
+       rejected -> set here when admin submits the reject-note modal. The
+                   note is stored on the request; earnings.html treats any
+                   `rejected` request as "not reserved" any more, so the
+                   funds are automatically returned to the user's available
+                   balance, and shows a one-time banner with the note until
+                   the user dismisses it.
+     ========================================================================== */
+  (function () {
+    const REQUESTS_KEY = "marketsphare_withdrawal_requests_v1";
+
+    function loadRequests() {
+      try {
+        const raw = JSON.parse(localStorage.getItem(REQUESTS_KEY) || "[]");
+        if (Array.isArray(raw)) return raw;
+      } catch (e) {}
+      return [];
+    }
+    function saveRequests(list) {
+      try { localStorage.setItem(REQUESTS_KEY, JSON.stringify(list)); } catch (e) {}
+      window.dispatchEvent(new CustomEvent("marketsphare-withdrawals:changed"));
+    }
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+    }
+    function fmtDateTime(ts) {
+      const d = new Date(ts);
+      return isNaN(d.getTime()) ? "—" : d.toLocaleString(undefined, { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+    }
+
+    const tbody = document.getElementById("wdRequestsTbody");
+    const emptyRow = `<tr class="wd-req-empty"><td colspan="7">No pending withdrawal requests.</td></tr>`;
+
+    function render() {
+      if (!tbody) return;
+      const pending = loadRequests()
+        .filter((r) => r.status === "pending")
+        .sort((a, b) => (b.requestedTs || 0) - (a.requestedTs || 0));
+
+      tbody.innerHTML = pending.length
+        ? pending.map((r) => `
+            <tr data-req-id="${escapeHtml(r.id)}">
+              <td>${fmtDateTime(r.requestedTs)}</td>
+              <td>${escapeHtml(r.userName || "Unknown User")}</td>
+              <td>${escapeHtml(r.coin || "—")}</td>
+              <td>
+                $${(r.usdAmount || 0).toFixed(2)}
+                <span class="wd-req-sub">${(r.cryptoAmount || 0).toFixed(6)} ${escapeHtml(r.coin || "")}</span>
+              </td>
+              <td class="wd-req-wallet">${escapeHtml(r.wallet || "—")}</td>
+              <td><span class="pill pill-warning">Pending</span></td>
+              <td>
+                <div class="wd-req-actions">
+                  <button class="btn btn-primary wd-approve-btn" data-req-id="${escapeHtml(r.id)}">Approve</button>
+                  <button class="btn btn-outline wd-reject-btn" data-req-id="${escapeHtml(r.id)}">Reject</button>
+                </div>
+              </td>
+            </tr>
+          `).join("")
+        : emptyRow;
+
+      tbody.querySelectorAll(".wd-approve-btn").forEach((btn) => {
+        btn.addEventListener("click", () => handleApprove(btn.dataset.reqId));
+      });
+      tbody.querySelectorAll(".wd-reject-btn").forEach((btn) => {
+        btn.addEventListener("click", () => openRejectModal(btn.dataset.reqId));
+      });
+    }
+
+    function handleApprove(id) {
+      const list = loadRequests();
+      const idx = list.findIndex((r) => r.id === id);
+      if (idx === -1) return;
+      const r = list[idx];
+      const ok = confirm(`Approve withdrawal of $${(r.usdAmount || 0).toFixed(2)} (${r.coin}) for ${r.userName}?\n\nWallet: ${r.wallet}`);
+      if (!ok) return;
+
+      list[idx] = {
+        ...r,
+        status: "approved",
+        note: "",
+        acknowledged: true,
+        reviewedTs: Date.now(),
+        reviewedDateLabel: new Date().toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })
+      };
+      saveRequests(list);
+      render();
+    }
+
+    /* ---- Reject-with-note modal ---- */
+    const rejectOverlay = document.getElementById("wdRejectOverlay");
+    const rejectNote = document.getElementById("wdRejectNote");
+    const rejectCancel = document.getElementById("wdRejectCancel");
+    const rejectConfirm = document.getElementById("wdRejectConfirm");
+    let rejectingId = null;
+
+    function openRejectModal(id) {
+      rejectingId = id;
+      rejectNote.value = "";
+      rejectOverlay.classList.add("show");
+      setTimeout(() => rejectNote.focus(), 0);
+    }
+    function closeRejectModal() {
+      rejectOverlay.classList.remove("show");
+      rejectingId = null;
+    }
+    rejectCancel.addEventListener("click", closeRejectModal);
+    rejectOverlay.addEventListener("click", (e) => { if (e.target === rejectOverlay) closeRejectModal(); });
+
+    rejectConfirm.addEventListener("click", () => {
+      if (!rejectingId) return;
+      const note = rejectNote.value.trim();
+      if (!note) { rejectNote.focus(); return; }
+
+      const list = loadRequests();
+      const idx = list.findIndex((r) => r.id === rejectingId);
+      if (idx !== -1) {
+        list[idx] = {
+          ...list[idx],
+          status: "rejected",
+          note,
+          acknowledged: false,
+          reviewedTs: Date.now(),
+          reviewedDateLabel: new Date().toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })
+        };
+        saveRequests(list);
+      }
+      closeRejectModal();
+      render();
+    });
+
+    window.addEventListener("storage", (e) => { if (e.key === REQUESTS_KEY) render(); });
+    window.addEventListener("marketsphare-withdrawals:changed", render);
+    render();
+  })();
+  </script>
 </body>
 </html>
