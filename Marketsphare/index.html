@@ -8,224 +8,171 @@
   <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/responsive.css">
+
+  <!-- ============================================================
+       NEW: hero slider / ticker / counter / testimonial styles
+       These are scoped under an "ms-" namespace so they layer on
+       top of your existing design system without fighting it.
+       Drop your real photography into assets/images/ using the
+       filenames referenced below (or swap the paths to match yours).
+  ============================================================ -->
   <style>
-    /* =========================================================
-       Hero upgrade: animated sliding hero visual, a right-to-left
-       scan-line accent at the top of the hero, and a matching
-       illustrated graphic for the Featured Jobs section.
-       Built as CSS/SVG composited graphics (no external stock
-       photos) so it's crisp at any size, loads instantly, and
-       never depends on a third-party image link.
-       ========================================================= */
-
-    *{ box-sizing:border-box; }
-    html, body{ max-width:100%; overflow-x:hidden; }
-
-    /* ---------- Top-of-hero scan line, moving right → left ---------- */
-    .hero{ position:relative; overflow:hidden; }
-    .hero-scanline{
-      position:absolute;
-      top:0; left:0;
-      width:100%;
-      height:3px;
-      overflow:hidden;
-      z-index:2;
-      background:rgba(120,120,140,0.12);
+    :root{
+      --ms-ring: rgba(124,109,255,.35);
     }
-    .hero-scanline::before{
+
+    /* ---------- Ticker ---------- */
+    .ms-ticker{
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(90deg, rgba(124,109,255,.12), rgba(0,209,178,.12));
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      padding: 10px 0;
+      white-space: nowrap;
+    }
+    .ms-ticker::before,
+    .ms-ticker::after{
       content:"";
-      position:absolute;
-      top:0; left:0;
-      width:260px;
-      height:100%;
-      background:linear-gradient(90deg, transparent, var(--color-primary, #4f46e5), var(--color-accent, #06b6d4), transparent);
-      filter:blur(0.3px);
-      animation: scanMove 5.5s linear infinite;
-    }
-    @keyframes scanMove{
-      0%   { transform: translateX(140vw); }
-      100% { transform: translateX(-260px); }
-    }
-    @media (prefers-reduced-motion: reduce){
-      .hero-scanline::before{ animation:none; display:none; }
-    }
-
-    /* ---------- Hero visual: sliding / crossfading illustrated slides ---------- */
-    .hero-visual{ position:relative; }
-    .hero-slider{
-      position:relative;
-      width:100%;
-      aspect-ratio: 4 / 3.1;
-      border-radius:22px;
-      overflow:hidden;
-      box-shadow:0 24px 60px -12px rgba(30,20,80,0.28), 0 4px 16px rgba(30,20,80,0.12);
-      background:#11122a;
-      isolation:isolate;
-    }
-    .hero-slide{
-      position:absolute;
-      inset:0;
-      opacity:0;
-      transform:translateX(6%) scale(1.02);
-      transition:opacity 1s ease, transform 1.1s ease;
-      display:flex;
-      align-items:flex-end;
-      padding:26px;
-    }
-    .hero-slide.active{
-      opacity:1;
-      transform:translateX(0) scale(1);
-      z-index:1;
-    }
-    .hero-slide-bg{
-      position:absolute;
-      inset:0;
-      z-index:0;
-    }
-    .hero-slide-1 .hero-slide-bg{ background:
-      radial-gradient(120% 90% at 15% 10%, rgba(255,255,255,0.16), transparent 55%),
-      linear-gradient(135deg, #4f46e5 0%, #7c3aed 45%, #4338ca 100%); }
-    .hero-slide-2 .hero-slide-bg{ background:
-      radial-gradient(120% 90% at 85% 15%, rgba(255,255,255,0.16), transparent 55%),
-      linear-gradient(135deg, #0891b2 0%, #06b6d4 45%, #0e7490 100%); }
-    .hero-slide-3 .hero-slide-bg{ background:
-      radial-gradient(120% 90% at 20% 85%, rgba(255,255,255,0.16), transparent 55%),
-      linear-gradient(135deg, #059669 0%, #10b981 45%, #047857 100%); }
-
-    .hero-slide-orb{
-      position:absolute;
-      border-radius:50%;
-      background:rgba(255,255,255,0.14);
-      filter:blur(2px);
-      animation:orbFloat 6s ease-in-out infinite;
-    }
-    .hero-slide-1 .hero-slide-orb{ width:150px;height:150px; top:12%; right:10%; }
-    .hero-slide-2 .hero-slide-orb{ width:110px;height:110px; bottom:16%; left:8%; animation-delay:.6s; }
-    .hero-slide-3 .hero-slide-orb{ width:130px;height:130px; top:20%; left:14%; animation-delay:1.1s; }
-    @keyframes orbFloat{
-      0%,100%{ transform:translateY(0); }
-      50%{ transform:translateY(-14px); }
-    }
-
-    .hero-slide-graphic{
-      position:relative;
-      z-index:1;
-      display:flex;
-      align-items:center;
-      gap:14px;
-      color:#fff;
-      width:100%;
-    }
-    .hero-slide-icon{
-      flex-shrink:0;
-      width:56px; height:56px;
-      border-radius:16px;
-      background:rgba(255,255,255,0.16);
-      backdrop-filter:blur(6px);
-      display:flex; align-items:center; justify-content:center;
-      font-size:26px;
-      border:1px solid rgba(255,255,255,0.28);
-    }
-    .hero-slide-graphic strong{ display:block; font-size:16px; line-height:1.3; }
-    .hero-slide-graphic span{ display:block; font-size:12.5px; opacity:.85; margin-top:2px; }
-
-    .hero-slider-dots{
-      position:absolute;
-      bottom:14px; right:18px;
-      z-index:3;
-      display:flex;
-      gap:6px;
-    }
-    .hero-slider-dots i{
-      width:7px; height:7px; border-radius:50%;
-      background:rgba(255,255,255,0.4);
-      transition:background .25s ease, transform .25s ease;
-      display:block;
-    }
-    .hero-slider-dots i.active{ background:#fff; transform:scale(1.25); }
-
-    /* Keep the floating stat cards, now overlaid on the slider */
-    .hero-visual .hero-visual-card{
-      position:relative;
-      z-index:4;
-      backdrop-filter:blur(10px);
-    }
-    .hero-visual .ai-pulse{ z-index:0; }
-
-    /* ---------- Featured Jobs section: text + illustrated graphic header ---------- */
-    .jobs-section-head{
-      display:flex;
-      align-items:center;
-      gap:32px;
-      flex-wrap:wrap;
-      margin-bottom:8px;
-    }
-    .jobs-section-head .section-header{ flex:1 1 320px; margin-bottom:0; text-align:left; }
-    .jobs-visual{
-      flex:0 1 320px;
-      min-width:240px;
-      max-width:100%;
-      aspect-ratio:16/11;
-      border-radius:20px;
-      position:relative;
-      overflow:hidden;
-      box-shadow:0 20px 50px -14px rgba(30,20,80,0.25);
-      background:
-        radial-gradient(110% 90% at 85% 10%, rgba(255,255,255,0.14), transparent 55%),
-        linear-gradient(140deg, #1e293b 0%, #334155 55%, #0f172a 100%);
-    }
-    .jobs-visual-chip{
-      position:absolute;
-      display:flex;
-      align-items:center;
-      gap:8px;
-      background:rgba(255,255,255,0.94);
-      color:#16181c;
-      border-radius:12px;
-      padding:9px 12px;
-      font-size:12px;
-      font-weight:600;
-      box-shadow:0 10px 24px rgba(0,0,0,0.18);
-      animation:jobsChipFloat 4.5s ease-in-out infinite;
-      max-width:78%;
-    }
-    .jobs-visual-chip .dot-icon{
-      width:22px;height:22px;border-radius:7px;flex-shrink:0;
-      display:flex;align-items:center;justify-content:center;
-      font-size:12px;
-    }
-    .jobs-visual-chip.c1{ top:14%; left:8%; animation-delay:0s; }
-    .jobs-visual-chip.c1 .dot-icon{ background:#e0e7ff; color:#4f46e5; }
-    .jobs-visual-chip.c2{ top:46%; right:7%; animation-delay:.8s; }
-    .jobs-visual-chip.c2 .dot-icon{ background:#cffafe; color:#0891b2; }
-    .jobs-visual-chip.c3{ bottom:12%; left:14%; animation-delay:1.5s; }
-    .jobs-visual-chip.c3 .dot-icon{ background:#d1fae5; color:#059669; }
-    @keyframes jobsChipFloat{
-      0%,100%{ transform:translateY(0); }
-      50%{ transform:translateY(-8px); }
-    }
-    .jobs-visual-glow{
-      position:absolute; inset:0;
-      background:linear-gradient(135deg, rgba(79,70,229,0.25), transparent 60%);
+      position:absolute; top:0; bottom:0; width:60px; z-index:2;
       pointer-events:none;
     }
+    .ms-ticker::before{ left:0; background:linear-gradient(90deg, var(--bg-surface, #0b0d14), transparent); }
+    .ms-ticker::after{ right:0; background:linear-gradient(270deg, var(--bg-surface, #0b0d14), transparent); }
+    .ms-ticker-track{
+      display:inline-flex;
+      align-items:center;
+      gap: 2.5rem;
+      animation: ms-ticker-scroll 28s linear infinite;
+      will-change: transform;
+    }
+    .ms-ticker:hover .ms-ticker-track{ animation-play-state: paused; }
+    .ms-ticker-item{
+      display:inline-flex;
+      align-items:center;
+      gap:.5rem;
+      font-size:.85rem;
+      font-weight:600;
+      letter-spacing:.02em;
+      color: var(--text-muted, #b7bccb);
+      text-transform: uppercase;
+    }
+    .ms-ticker-item i{ color:#7c6dff; font-size:.6rem; }
+    @keyframes ms-ticker-scroll{
+      0%{ transform: translateX(0); }
+      100%{ transform: translateX(-50%); }
+    }
+
+    /* ---------- Hero image slider ---------- */
+    .ms-hero-media{
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 3.2;
+      border-radius: 24px;
+      overflow: hidden;
+      isolation: isolate;
+      box-shadow: 0 30px 80px -20px rgba(0,0,0,.55);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .ms-hero-media::after{
+      content:"";
+      position:absolute; inset:0;
+      background: linear-gradient(180deg, rgba(10,10,20,0) 40%, rgba(8,8,16,.75) 100%);
+      z-index: 2;
+    }
+    .ms-hero-slide{
+      position:absolute; inset:0;
+      background-size: cover;
+      background-position: center;
+      opacity:0;
+      transform: translateX(6%) scale(1.06);
+      animation: ms-slide 15s infinite;
+    }
+    .ms-hero-slide:nth-child(1){ background-image:url('assets/images/hero-slide-1.jpg'); animation-delay: 0s; }
+    .ms-hero-slide:nth-child(2){ background-image:url('assets/images/hero-slide-2.jpg'); animation-delay: -5s; }
+    .ms-hero-slide:nth-child(3){ background-image:url('assets/images/hero-slide-3.jpg'); animation-delay: -10s; }
+    @keyframes ms-slide{
+      0%      { opacity:0; transform: translateX(6%) scale(1.06); }
+      6%      { opacity:1; transform: translateX(0) scale(1.01); }
+      27%     { opacity:1; transform: translateX(0) scale(1.06); }
+      33%     { opacity:0; transform: translateX(-6%) scale(1.08); }
+      100%    { opacity:0; }
+    }
+    .ms-hero-media .hero-visual-card{
+      position:absolute;
+      z-index:3;
+      backdrop-filter: blur(10px);
+    }
+    .ms-hero-media .hero-visual-card:nth-child(4){ top:8%; left:-6%; }
+    .ms-hero-media .hero-visual-card:nth-child(5){ top:44%; right:-8%; }
+    .ms-hero-media .hero-visual-card:nth-child(6){ bottom:6%; left:6%; }
+
+    /* ---------- Stat counters ---------- */
+    .stat-num{ font-variant-numeric: tabular-nums; }
+
+    /* ---------- Featured jobs banner image ---------- */
+    .ms-jobs-banner{
+      display:flex;
+      align-items:center;
+      gap: 2.5rem;
+      background: var(--bg-surface-alt, #12141d);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2.5rem;
+      overflow:hidden;
+    }
+    .ms-jobs-banner-copy{ flex: 1 1 320px; }
+    .ms-jobs-banner-copy h3{ margin: 0 0 .5rem; font-size: 1.4rem; }
+    .ms-jobs-banner-copy p{ margin:0; color: var(--text-muted,#b7bccb); }
+    .ms-jobs-banner-media{
+      flex: 1 1 280px;
+      position: relative;
+      min-height: 220px;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 20px 50px -18px rgba(0,0,0,.5);
+    }
+    .ms-jobs-banner-media img{
+      width:100%; height:100%; object-fit: cover;
+      display:block;
+      animation: ms-kenburns 12s ease-in-out infinite alternate;
+    }
+    @keyframes ms-kenburns{
+      0%{ transform: scale(1) translate(0,0); }
+      100%{ transform: scale(1.12) translate(-1.5%, -1.5%); }
+    }
+
+    /* ---------- Testimonial photos ---------- */
+    .author-avatar{
+      width: 46px; height:46px; border-radius:50%;
+      overflow:hidden;
+      flex-shrink:0;
+      border: 2px solid var(--ms-ring);
+      box-shadow: 0 0 0 3px rgba(124,109,255,.08);
+    }
+    .author-avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+    /* ---------- Scroll reveal ---------- */
+    .fade-up{ opacity:0; transform: translateY(24px); transition: opacity .7s ease, transform .7s ease; }
+    .fade-up.ms-in-view{ opacity:1; transform: translateY(0); }
 
     @media (prefers-reduced-motion: reduce){
-      .hero-slide-orb, .jobs-visual-chip{ animation:none; }
+      .ms-ticker-track, .ms-hero-slide, .ms-jobs-banner-media img{ animation: none !important; }
+      .fade-up{ opacity:1; transform:none; transition:none; }
     }
 
-    /* ---------- Small-screen tuning ---------- */
-    @media (max-width:900px){
-      .jobs-section-head{ gap:20px; }
-      .jobs-visual{ flex-basis:100%; max-width:420px; margin:0 auto; }
+    @media (max-width: 1024px){
+      .ms-hero-media{ aspect-ratio: 4/3; }
+      .ms-jobs-banner{ flex-direction:column; text-align:center; }
+      .ms-jobs-banner-media{ width:100%; }
     }
-    @media (max-width:640px){
-      .hero-slider{ aspect-ratio:4/3.6; border-radius:18px; }
-      .hero-slide{ padding:18px; }
-      .hero-slide-icon{ width:46px; height:46px; font-size:21px; border-radius:13px; }
-      .hero-slide-graphic strong{ font-size:14.5px; }
-      .jobs-section-head{ flex-direction:column; }
-      .jobs-section-head .section-header{ text-align:center; }
+    @media (max-width: 640px){
+      .ms-ticker-item{ font-size:.72rem; gap:1.5rem; }
+      .ms-hero-media{ aspect-ratio: 1/1; border-radius:18px; }
+      .ms-hero-media .hero-visual-card{ position: static; margin: .4rem; backdrop-filter:none; }
+      .ms-hero-media .hero-visual-card:nth-child(4),
+      .ms-hero-media .hero-visual-card:nth-child(5),
+      .ms-hero-media .hero-visual-card:nth-child(6){ top:auto; left:auto; right:auto; bottom:auto; }
     }
   </style>
 </head>
@@ -308,7 +255,26 @@
 
   <!-- HERO -->
   <section class="hero">
-    <div class="hero-scanline" aria-hidden="true"></div>
+
+    <!-- NEW: sliding ticker line at the top of the hero -->
+    <div class="ms-ticker">
+      <div class="ms-ticker-track">
+        <span class="ms-ticker-item"><i class="fas fa-circle"></i>AI-Powered Matching</span>
+        <span class="ms-ticker-item"><i class="fas fa-circle"></i>Secure Escrow Payments</span>
+        <span class="ms-ticker-item"><i class="fas fa-circle"></i>18,400+ Verified Professionals</span>
+        <span class="ms-ticker-item"><i class="fas fa-circle"></i>6,200+ Jobs Posted Monthly</span>
+        <span class="ms-ticker-item"><i class="fas fa-circle"></i>Remote-First Marketplace</span>
+        <span class="ms-ticker-item"><i class="fas fa-circle"></i>96% Client Satisfaction</span>
+        <!-- duplicated for a seamless infinite loop -->
+        <span class="ms-ticker-item"><i class="fas fa-circle"></i>AI-Powered Matching</span>
+        <span class="ms-ticker-item"><i class="fas fa-circle"></i>Secure Escrow Payments</span>
+        <span class="ms-ticker-item"><i class="fas fa-circle"></i>18,400+ Verified Professionals</span>
+        <span class="ms-ticker-item"><i class="fas fa-circle"></i>6,200+ Jobs Posted Monthly</span>
+        <span class="ms-ticker-item"><i class="fas fa-circle"></i>Remote-First Marketplace</span>
+        <span class="ms-ticker-item"><i class="fas fa-circle"></i>96% Client Satisfaction</span>
+      </div>
+    </div>
+
     <div class="container hero-grid">
       <div class="hero-copy">
         <div class="hero-badge"><span class="dot"></span> AI-Matched Talent &amp; Jobs, Live Now</div>
@@ -319,55 +285,32 @@
           <a href="services.html" class="btn btn-outline">Hire an Expert</a>
         </div>
         <div class="hero-stats">
-          <div><div class="stat-num">18,400+</div><div class="stat-label">Verified Professionals</div></div>
-          <div><div class="stat-num">6,200+</div><div class="stat-label">Jobs Posted Monthly</div></div>
-          <div><div class="stat-num">96%</div><div class="stat-label">Client Satisfaction</div></div>
+          <div><div class="stat-num" data-count-to="18400" data-suffix="+">0</div><div class="stat-label">Verified Professionals</div></div>
+          <div><div class="stat-num" data-count-to="6200" data-suffix="+">0</div><div class="stat-label">Jobs Posted Monthly</div></div>
+          <div><div class="stat-num" data-count-to="96" data-suffix="%">0</div><div class="stat-label">Client Satisfaction</div></div>
         </div>
       </div>
+
+      <!-- NEW: real, animated, sliding hero image carousel (replaces the flat icon-only visual) -->
       <div class="hero-visual fade-up">
         <div class="ai-pulse"></div>
+        <div class="ms-hero-media">
+          <div class="ms-hero-slide"></div>
+          <div class="ms-hero-slide"></div>
+          <div class="ms-hero-slide"></div>
 
-        <div class="hero-slider" id="heroSlider" aria-hidden="true">
-          <div class="hero-slide hero-slide-1 active">
-            <div class="hero-slide-bg"></div>
-            <div class="hero-slide-orb"></div>
-            <div class="hero-slide-graphic">
-              <div class="hero-slide-icon">🎯</div>
-              <div><strong>AI-matched to your next role</strong><span>SEO · Content · Paid Media · Email</span></div>
-            </div>
+          <div class="hero-visual-card">
+            <div class="hero-visual-icon purple">⚡</div>
+            <div><strong>AI Match Score: 97%</strong><span>SEO Strategist · Remote · Full-time</span></div>
           </div>
-          <div class="hero-slide hero-slide-2">
-            <div class="hero-slide-bg"></div>
-            <div class="hero-slide-orb"></div>
-            <div class="hero-slide-graphic">
-              <div class="hero-slide-icon">📊</div>
-              <div><strong>Real campaign results, tracked live</strong><span>Analytics built into every project</span></div>
-            </div>
+          <div class="hero-visual-card">
+            <div class="hero-visual-icon cyan">📈</div>
+            <div><strong>Campaign ROI up 142%</strong><span>Paid Social Specialist · Contract</span></div>
           </div>
-          <div class="hero-slide hero-slide-3">
-            <div class="hero-slide-bg"></div>
-            <div class="hero-slide-orb"></div>
-            <div class="hero-slide-graphic">
-              <div class="hero-slide-icon">🔒</div>
-              <div><strong>Escrow-secured payouts</strong><span>Get paid the moment work is approved</span></div>
-            </div>
+          <div class="hero-visual-card">
+            <div class="hero-visual-icon green">✅</div>
+            <div><strong>Payment Released</strong><span>$1,250 · Email Marketing Project</span></div>
           </div>
-          <div class="hero-slider-dots" id="heroSliderDots">
-            <i class="active"></i><i></i><i></i>
-          </div>
-        </div>
-
-        <div class="hero-visual-card">
-          <div class="hero-visual-icon purple">⚡</div>
-          <div><strong>AI Match Score: 97%</strong><span>SEO Strategist · Remote · Full-time</span></div>
-        </div>
-        <div class="hero-visual-card">
-          <div class="hero-visual-icon cyan">📈</div>
-          <div><strong>Campaign ROI up 142%</strong><span>Paid Social Specialist · Contract</span></div>
-        </div>
-        <div class="hero-visual-card">
-          <div class="hero-visual-icon green">✅</div>
-          <div><strong>Payment Released</strong><span>$1,250 · Email Marketing Project</span></div>
         </div>
       </div>
     </div>
@@ -441,18 +384,22 @@
   <!-- FEATURED JOBS -->
   <section class="section">
     <div class="container">
-      <div class="jobs-section-head">
-        <div class="section-header fade-up">
-          <span class="eyebrow">Live Opportunities</span>
-          <h2>Featured remote jobs</h2>
+      <div class="section-header fade-up">
+        <span class="eyebrow">Live Opportunities</span>
+        <h2>Featured remote jobs</h2>
+      </div>
+
+      <!-- NEW: professional image banner for "Find Remote Jobs" -->
+      <div class="ms-jobs-banner fade-up">
+        <div class="ms-jobs-banner-media">
+          <img src="assets/images/remote-jobs-banner.jpg" alt="Marketing professional working remotely">
         </div>
-        <div class="jobs-visual fade-up" aria-hidden="true">
-          <div class="jobs-visual-glow"></div>
-          <div class="jobs-visual-chip c1"><span class="dot-icon">🔍</span> SEO Strategist · Remote</div>
-          <div class="jobs-visual-chip c2"><span class="dot-icon">📣</span> Paid Social · Contract</div>
-          <div class="jobs-visual-chip c3"><span class="dot-icon">✉️</span> Email Manager · Part-time</div>
+        <div class="ms-jobs-banner-copy">
+          <h3>Your next remote role is one match away</h3>
+          <p>Real employers, real budgets, real deadlines. Browse vetted marketing roles across SEO, paid media, email, and brand — all remote, all screened for legitimacy.</p>
         </div>
       </div>
+
       <div class="grid-3">
         <div class="listing-card fade-up">
           <div class="listing-top">
@@ -494,17 +441,26 @@
         <div class="testimonial-card fade-up">
           <div class="testimonial-stars">★★★★★</div>
           <p>"I landed three contracts in my first month. The AI matching is shockingly accurate."</p>
-          <div class="testimonial-author"><div class="author-avatar">JM</div><div><strong>Jamie Morales</strong><span>SEO Consultant</span></div></div>
+          <div class="testimonial-author">
+            <div class="author-avatar"><img src="assets/images/testimonial-jamie.jpg" alt="Jamie Morales"></div>
+            <div><strong>Jamie Morales</strong><span>SEO Consultant</span></div>
+          </div>
         </div>
         <div class="testimonial-card fade-up">
           <div class="testimonial-stars">★★★★★</div>
           <p>"We hired our entire paid media team through this platform. Incredible quality of talent."</p>
-          <div class="testimonial-author"><div class="author-avatar">RK</div><div><strong>Riya Kapoor</strong><span>Head of Growth, Hatchway</span></div></div>
+          <div class="testimonial-author">
+            <div class="author-avatar"><img src="assets/images/testimonial-riya.jpg" alt="Riya Kapoor"></div>
+            <div><strong>Riya Kapoor</strong><span>Head of Growth, Hatchway</span></div>
+          </div>
         </div>
         <div class="testimonial-card fade-up">
           <div class="testimonial-stars">★★★★★</div>
           <p>"Escrow payments give me total peace of mind. I always get paid on time."</p>
-          <div class="testimonial-author"><div class="author-avatar">TC</div><div><strong>Theo Chen</strong><span>Email Marketing Freelancer</span></div></div>
+          <div class="testimonial-author">
+            <div class="author-avatar"><img src="assets/images/testimonial-theo.jpg" alt="Theo Chen"></div>
+            <div><strong>Theo Chen</strong><span>Email Marketing Freelancer</span></div>
+          </div>
         </div>
       </div>
     </div>
@@ -583,29 +539,72 @@
   <script src="assets/js/app.js"></script>
   <script src="assets/js/mobile-nav.js"></script>
 
+  <!-- ============================================================
+       NEW: scroll-reveal + animated stat counters
+       Self-contained, defensive (won't crash if elements are absent)
+       so it layers safely alongside your existing app.js.
+  ============================================================ -->
   <script>
-  /* ---------------------------------------------------------------
-     Hero slider: crossfades + slides between the three illustrated
-     panels every 3.8s. Pauses politely for users who prefer reduced
-     motion (matches the CSS `prefers-reduced-motion` rule above).
-  --------------------------------------------------------------- */
-  (function(){
-    const slides = document.querySelectorAll("#heroSlider .hero-slide");
-    const dots = document.querySelectorAll("#heroSliderDots i");
-    if (!slides.length) return;
+    (function () {
+      // Scroll reveal for .fade-up elements
+      var revealEls = document.querySelectorAll('.fade-up');
+      if ('IntersectionObserver' in window && revealEls.length) {
+        var revealObserver = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('ms-in-view');
+              revealObserver.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.15 });
+        revealEls.forEach(function (el) { revealObserver.observe(el); });
+      } else {
+        revealEls.forEach(function (el) { el.classList.add('ms-in-view'); });
+      }
 
-    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReduced) return;
+      // Animated count-up for hero stats, triggered once on scroll into view
+      var counters = document.querySelectorAll('[data-count-to]');
+      function formatNumber(n) {
+        return Math.round(n).toLocaleString('en-US');
+      }
+      function animateCounter(el) {
+        var target = parseFloat(el.getAttribute('data-count-to'), 10);
+        var suffix = el.getAttribute('data-suffix') || '';
+        var duration = 1600;
+        var startTime = null;
 
-    let idx = 0;
-    setInterval(() => {
-      slides[idx].classList.remove("active");
-      dots[idx] && dots[idx].classList.remove("active");
-      idx = (idx + 1) % slides.length;
-      slides[idx].classList.add("active");
-      dots[idx] && dots[idx].classList.add("active");
-    }, 3800);
-  })();
+        function step(timestamp) {
+          if (!startTime) startTime = timestamp;
+          var progress = Math.min((timestamp - startTime) / duration, 1);
+          var eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+          el.textContent = formatNumber(target * eased) + suffix;
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          } else {
+            el.textContent = formatNumber(target) + suffix;
+          }
+        }
+        requestAnimationFrame(step);
+      }
+
+      if ('IntersectionObserver' in window && counters.length) {
+        var counterObserver = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              animateCounter(entry.target);
+              counterObserver.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.4 });
+        counters.forEach(function (el) { counterObserver.observe(el); });
+      } else {
+        counters.forEach(function (el) {
+          var target = parseFloat(el.getAttribute('data-count-to'), 10);
+          var suffix = el.getAttribute('data-suffix') || '';
+          el.textContent = formatNumber(target) + suffix;
+        });
+      }
+    })();
   </script>
 
 </body>
