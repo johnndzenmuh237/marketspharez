@@ -39,7 +39,7 @@
       <div class="sidebar-footer">
         <a href="profile.html" class="sidebar-user">
           <div class="avatar-fallback" data-user-initial>·</div>
-          <div class="info"><strong data-user-name>Loading...</strong><span>Worker Account</span></div>
+          <div class="info"><strong data-user-name>Loading...</strong><span data-user-title>Worker Account</span></div>
         </a>
       </div>
     </aside>
@@ -104,8 +104,8 @@
           </div>
           <div class="panel">
             <div class="panel-header"><h3>Profile Strength</h3></div>
-            <div class="mb-2"><div class="flex justify-between mb-1" style="font-size:13px;"><span>85% complete</span><span class="text-muted">Strong</span></div><div class="progress-bar"><div class="progress-bar-fill" style="width:85%;"></div></div></div>
-            <p class="text-secondary" style="font-size:13.5px;">Add a portfolio link to reach 100% and boost your visibility to employers.</p>
+            <div class="mb-2"><div class="flex justify-between mb-1" style="font-size:13px;"><span id="profileStrengthLabel">0% complete</span><span class="text-muted" id="profileStrengthTag">Getting started</span></div><div class="progress-bar"><div class="progress-bar-fill" id="profileStrengthFill" style="width:0%;"></div></div></div>
+            <p class="text-secondary" id="profileStrengthHint" style="font-size:13.5px;">Fill out your profile to boost your visibility to employers.</p>
             <a href="profile.html" class="btn btn-outline btn-block mt-2">Complete Profile</a>
           </div>
         </div>
@@ -124,9 +124,10 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
   <script src="../assets/js/firebase-config.js"></script>
+  <script src="../assets/js/user-profile.js"></script>
+  <script src="../assets/js/app.js"></script>
   <script src="../assets/js/dashboard-auth.js"></script>
   <script src="../assets/js/marketsphare-shared.js"></script>
-  <script src="../assets/js/app.js"></script>
   <script src="../assets/js/dashboard.js"></script>
 
   <script>
@@ -135,7 +136,7 @@
      storage key in marketsphare-shared.js is correct) before rendering.
      ========================================================================== */
   (function(){
-    window.Marketsphare.authReady.then(() => {
+    window.Marketsphare.authReady.then((user) => {
       const { jobs, loadState, computeStats, formatCurrencyMap } = window.Marketsphare;
 
       const els = {
@@ -147,13 +148,30 @@
         pendingValue: document.getElementById("statPendingValue"),
         pendingTrend: document.getElementById("statPendingTrend"),
         activityBody: document.getElementById("activityTableBody"),
-        recommendedGrid: document.getElementById("recommendedGrid")
+        recommendedGrid: document.getElementById("recommendedGrid"),
+        strengthLabel: document.getElementById("profileStrengthLabel"),
+        strengthTag: document.getElementById("profileStrengthTag"),
+        strengthFill: document.getElementById("profileStrengthFill"),
+        strengthHint: document.getElementById("profileStrengthHint")
       };
 
       function statusPill(status){
         if(status === "completed") return `<span class="pill pill-success">Completed</span>`;
         if(status === "in-progress") return `<span class="pill pill-warning">In progress</span>`;
         return `<span class="pill">Not started</span>`;
+      }
+
+      function renderProfileStrength(){
+        const profile = window.MarketsphareProfile.getProfile(user);
+        const fields = [profile.fullName, profile.jobTitle, profile.bio, profile.location, profile.hourlyRate, profile.portfolioLink, (profile.skills || []).length > 0];
+        const filled = fields.filter(Boolean).length;
+        const pct = Math.round((filled / fields.length) * 100);
+        els.strengthLabel.textContent = `${pct}% complete`;
+        els.strengthTag.textContent = pct >= 85 ? "Strong" : pct >= 50 ? "Good" : "Getting started";
+        els.strengthFill.style.width = pct + "%";
+        els.strengthHint.textContent = pct >= 100
+          ? "Your profile is fully filled out — nice work."
+          : "Add a bit more detail (bio, rate, portfolio link, skills) to boost your visibility to employers.";
       }
 
       function render(){
@@ -215,6 +233,8 @@
                 </div>`;
             }).join("")
           : `<div class="empty-state">You're working every available job — nice. Check back for new listings.</div>`;
+
+        renderProfileStrength();
       }
 
       document.addEventListener("click", e=>{
@@ -225,8 +245,9 @@
       render();
 
       window.addEventListener("marketsphare:state-changed", render);
+      window.addEventListener("marketsphare:profile-changed", render);
       window.addEventListener("storage", (e)=>{
-        if(e.key === window.Marketsphare.STORAGE_KEY) render();
+        if(e.key === window.Marketsphare.getStorageKey()) render();
       });
       window.addEventListener("focus", render);
       document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) render(); });
@@ -235,3 +256,4 @@
   </script>
 </body>
 </html>
+
