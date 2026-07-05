@@ -29,16 +29,17 @@
 .ws-back:hover{color:var(--ws-ink);}
 
 .ws-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-bottom:18px;margin-bottom:18px;border-bottom:1px solid var(--ws-line);}
-.ws-header-left{display:flex;align-items:center;gap:14px;}
+.ws-header-left{display:flex;align-items:center;gap:14px;min-width:0;}
 .ws-logo{width:46px;height:46px;border-radius:10px;background:var(--ws-accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0;}
-.ws-header h1{font-size:20px;margin:0 0 2px;}
-.ws-header .meta{font-size:13px;color:var(--ws-muted);}
+.ws-header h1{font-size:20px;margin:0 0 2px;overflow-wrap:anywhere;}
+.ws-header .meta{font-size:13px;color:var(--ws-muted);overflow-wrap:anywhere;}
 .ws-daycounter{display:inline-block;margin-top:4px;font-size:11.5px;font-weight:700;color:var(--ws-accent);background:#eaf1ff;padding:2px 9px;border-radius:999px;}
 
 .ws-brief{background:var(--ws-surface);border:1px solid var(--ws-line);border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:13.5px;line-height:1.6;color:var(--ws-ink);}
 .ws-brief strong{color:var(--ws-ink);}
 
-.ws-body{display:grid;grid-template-columns:1.5fr 1fr;gap:24px;align-items:start;}
+.ws-body{display:grid;grid-template-columns:1.5fr 1fr;gap:24px;align-items:start;width:100%;}
+.ws-body > *{min-width:0;}
 @media (max-width:860px){.ws-body{grid-template-columns:1fr;}}
 
 .ws-section-title{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--ws-muted);font-weight:700;margin:0 0 12px;}
@@ -46,14 +47,14 @@
 .ws-countdown{font-size:11.5px;color:var(--ws-muted);font-weight:600;}
 
 .ws-tasklist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;}
-.ws-task{border:1px solid var(--ws-line);border-radius:10px;background:var(--ws-surface);padding:14px;}
+.ws-task{border:1px solid var(--ws-line);border-radius:10px;background:var(--ws-surface);padding:14px;box-sizing:border-box;}
 .ws-task.done{background:var(--ws-success-bg);border-color:#c7ecdc;}
 .ws-task.locked{opacity:.55;}
 .ws-task-top{display:flex;align-items:flex-start;gap:10px;}
 .ws-task-num{width:22px;height:22px;border-radius:50%;background:var(--ws-line);color:var(--ws-muted);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
 .ws-task.done .ws-task-num{background:var(--ws-success);color:#fff;}
 .ws-task.active .ws-task-num{background:var(--ws-accent);color:#fff;}
-.ws-task-prompt{font-size:14px;line-height:1.5;color:var(--ws-ink);}
+.ws-task-prompt{font-size:14px;line-height:1.5;color:var(--ws-ink);overflow-wrap:anywhere;}
 .ws-task.locked .ws-task-prompt{color:var(--ws-muted);}
 .ws-task-reward{display:inline-block;margin-left:6px;font-size:11px;font-weight:800;color:var(--ws-success);background:#fff;border:1px solid #c7ecdc;padding:1px 7px;border-radius:999px;white-space:nowrap;}
 .ws-task-reward.muted{color:var(--ws-muted);background:#fff;border-color:var(--ws-line);}
@@ -65,22 +66,22 @@
   font-size:13.5px;font-family:inherit;resize:vertical;box-sizing:border-box;
 }
 .ws-answer-box textarea:focus{outline:none;border-color:var(--ws-accent);}
-.ws-answer-row{display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:10px;}
+.ws-answer-row{display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:10px;flex-wrap:wrap;}
 .ws-submit-btn{background:var(--ws-accent);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;}
 .ws-submit-btn:hover{opacity:.92;}
-.ws-feedback{font-size:12.5px;line-height:1.5;flex:1;}
+.ws-feedback{font-size:12.5px;line-height:1.5;flex:1;min-width:120px;}
 .ws-feedback.error{color:var(--ws-danger);}
 .ws-feedback.success{color:var(--ws-success);}
 .ws-approved-answer{margin-top:8px;margin-left:32px;font-size:13px;color:var(--ws-muted);background:#fff;border:1px dashed #c7ecdc;border-radius:8px;padding:8px 10px;}
 .ws-approved-answer b{color:var(--ws-success);}
 
-.ws-side{display:flex;flex-direction:column;gap:18px;position:sticky;top:0;}
-.ws-card{border:1px solid var(--ws-line);border-radius:10px;padding:16px;background:var(--ws-surface);}
+.ws-side{display:flex;flex-direction:column;gap:18px;position:sticky;top:0;min-width:0;}
+.ws-card{border:1px solid var(--ws-line);border-radius:10px;padding:16px;background:var(--ws-surface);box-sizing:border-box;}
 .ws-progress-track{height:8px;border-radius:99px;background:#e2e5e9;overflow:hidden;margin:10px 0 6px;}
 .ws-progress-fill{height:100%;background:var(--ws-accent);border-radius:99px;transition:width .25s ease;}
 .ws-progress-label{font-size:12px;color:var(--ws-muted);}
 
-.ws-pay-row{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--ws-line);}
+.ws-pay-row{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--ws-line);gap:8px;flex-wrap:wrap;}
 .ws-pay-row:last-of-type{border-bottom:none;}
 .ws-pay-label{font-size:12.5px;color:var(--ws-muted);}
 .ws-pay-value{font-size:14px;font-weight:700;color:var(--ws-ink);}
@@ -90,13 +91,13 @@
 .ws-next-payout{background:#fff;border:1px solid var(--ws-line);border-radius:8px;padding:10px 12px;margin-top:10px;font-size:12.5px;color:var(--ws-ink);}
 .ws-next-payout b{display:block;font-size:13.5px;margin-top:2px;}
 
-.ws-btn-success{background:var(--ws-success);color:#fff;width:100%;padding:10px;font-size:13.5px;border-radius:9px;margin-top:12px;border:none;font-weight:700;cursor:pointer;}
+.ws-btn-success{background:var(--ws-success);color:#fff;width:100%;padding:10px;font-size:13.5px;border-radius:9px;margin-top:12px;border:none;font-weight:700;cursor:pointer;box-sizing:border-box;}
 .ws-btn-success:disabled{background:#bfe4d5;cursor:not-allowed;}
 .ws-btn-success:not(:disabled):hover{opacity:.92;}
 
 .ws-history{display:flex;flex-direction:column;gap:6px;margin-top:8px;max-height:140px;overflow-y:auto;}
 .ws-history-empty{font-size:12px;color:var(--ws-muted);font-style:italic;}
-.ws-history-item{display:flex;justify-content:space-between;font-size:12.5px;background:#fff;border:1px solid var(--ws-line);border-radius:6px;padding:6px 9px;}
+.ws-history-item{display:flex;justify-content:space-between;font-size:12.5px;background:#fff;border:1px solid var(--ws-line);border-radius:6px;padding:6px 9px;gap:8px;}
 .ws-history-item span:last-child{font-weight:700;color:var(--ws-success);}
 
 .ws-complete-banner{display:none;align-items:center;gap:8px;background:var(--ws-success-bg);color:var(--ws-success);border:1px solid #c7ecdc;padding:10px 12px;border-radius:9px;font-size:13px;font-weight:600;margin-bottom:16px;}
@@ -106,41 +107,257 @@
 /* Hourly session card */
 .ws-session-timer{font-size:30px;font-weight:800;letter-spacing:.02em;color:var(--ws-ink);text-align:center;margin:6px 0 2px;font-variant-numeric:tabular-nums;}
 .ws-session-rate{text-align:center;font-size:12px;color:var(--ws-muted);margin-bottom:10px;}
-.ws-session-btn{background:var(--ws-accent);color:#fff;width:100%;padding:11px;font-size:13.5px;border-radius:9px;border:none;font-weight:700;cursor:pointer;}
+.ws-session-btn{background:var(--ws-accent);color:#fff;width:100%;padding:11px;font-size:13.5px;border-radius:9px;border:none;font-weight:700;cursor:pointer;box-sizing:border-box;}
 .ws-session-btn:hover{opacity:.92;}
 .ws-session-btn.running{background:var(--ws-danger);}
 
 /* Approval modal */
 .ws-modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,17,21,.5);z-index:999;align-items:center;justify-content:center;padding:20px;}
 .ws-modal-overlay.show{display:flex;}
-.ws-modal{background:#fff;border-radius:14px;padding:28px 26px;max-width:420px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.25);}
+.ws-modal{background:#fff;border-radius:14px;padding:28px 26px;max-width:420px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.25);box-sizing:border-box;}
 .ws-modal-icon{font-size:42px;line-height:1;margin-bottom:10px;}
 .ws-modal h2{font-size:19px;margin:0 0 10px;color:var(--ws-ink);}
 .ws-modal p{font-size:13.5px;color:var(--ws-muted);line-height:1.6;margin:0 0 20px;}
-.ws-modal-actions{display:flex;gap:10px;justify-content:center;}
+.ws-modal-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
 .ws-modal-btn-primary{background:var(--ws-accent);color:#fff;border:none;border-radius:9px;padding:10px 18px;font-size:13.5px;font-weight:700;cursor:pointer;}
 .ws-modal-btn-primary:hover{opacity:.92;}
 .ws-modal-btn-secondary{background:var(--ws-surface);color:var(--ws-ink);border:1px solid var(--ws-line);border-radius:9px;padding:10px 18px;font-size:13.5px;font-weight:700;cursor:pointer;}
 .ws-modal-btn-secondary:hover{background:#eef0f3;}
+
+/* =========================================================
+   Local, self-contained responsiveness layer.
+   Mirrors the layer used on Overview / Applications / Profile
+   so every dashboard screen behaves consistently across
+   breakpoints, regardless of any fixed widths already in
+   style.css / responsive.css / dashboard.css.
+   ========================================================= */
+
+html, body { max-width: 100%; overflow-x: hidden; }
+.app-body{
+  display:flex !important;
+  min-height:100vh;
+  width:100%;
+  position:relative;
+}
+.app-sidebar{
+  flex:0 0 240px;
+  width:240px;
+  max-width:240px;
+  box-sizing:border-box;
+  transition:width .2s ease, flex-basis .2s ease, transform .25s ease;
+  overflow-y:auto;
+  z-index:40;
+}
+.app-main{
+  flex:1 1 auto;
+  width:100%;
+  min-width:0;
+  box-sizing:border-box;
+  overflow-x:hidden;
+}
+.app-content{
+  width:100%;
+  box-sizing:border-box;
+  padding: var(--space-content, 24px);
+}
+
+.grid-3{
+  display:grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap:16px;
+  width:100%;
+}
+.listing-card{ min-width:0; box-sizing:border-box; width:100%; }
+
+/* ---------- Jobs search bar & filter chips ---------- */
+.search-bar{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:10px;
+  width:100%;
+  box-sizing:border-box;
+}
+.search-bar input[type="text"]{
+  flex:1 1 180px;
+  min-width:0;
+  box-sizing:border-box;
+}
+.search-bar select{ flex:0 1 160px; min-width:0; box-sizing:border-box; }
+.search-bar .divider{ display:none; }
+.search-bar .btn{ flex-shrink:0; }
+
+.filters-row{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  white-space:nowrap;
+  padding-bottom:2px;
+  width:100%;
+}
+.filters-row .filter-chip{ flex-shrink:0; }
+
+/* ---------- Topbar: wraps gracefully, search shrinks before it breaks ---------- */
+.app-topbar{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:12px;
+  width:100%;
+  box-sizing:border-box;
+}
+.topbar-search{
+  flex:1 1 160px;
+  min-width:0;
+  max-width:420px;
+}
+.topbar-search input{
+  width:100%;
+  box-sizing:border-box;
+}
+.topbar-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-shrink:0;
+  margin-left:auto;
+}
+
+.page-title-row{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  width:100%;
+}
+.page-title-row > div{ min-width:0; }
+.page-title-row h1, .page-title-row p{
+  overflow-wrap:anywhere;
+}
+
+/* ---------- Sidebar burger: hidden on desktop, appears at tablet/mobile ---------- */
+.sidebar-burger{
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:transparent;
+  border:none;
+  cursor:pointer;
+  padding:6px;
+  border-radius:8px;
+  flex-shrink:0;
+}
+.sidebar-burger:hover{ background:rgba(0,0,0,0.05); }
+
+.sidebar-backdrop{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(15,15,20,0.45);
+  z-index:35;
+  opacity:0;
+  transition:opacity .2s ease;
+}
+.sidebar-backdrop.is-visible{ display:block; opacity:1; }
+
+/* =========================================================
+   TABLET (≤ 1024px): icon-rail sidebar, 2-col job grid
+   ========================================================= */
+@media (max-width: 1024px){
+  .app-sidebar{
+    flex:0 0 76px;
+    width:76px;
+    max-width:76px;
+  }
+  .app-sidebar .sidebar-logo{
+    justify-content:center;
+    padding-left:0;
+    padding-right:0;
+    white-space:nowrap;
+    overflow:hidden;
+  }
+  .app-sidebar .sidebar-link{
+    justify-content:center;
+    gap:0;
+    padding:10px 6px;
+    white-space:nowrap;
+    overflow:hidden;
+  }
+  .app-sidebar .sidebar-link span:not(.icon){ display:none; }
+  .app-sidebar .sidebar-section-title{ display:none; }
+  .app-sidebar .sidebar-user .info{ display:none; }
+  .app-sidebar .sidebar-user{ justify-content:center; }
+
+  .grid-3{ grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+/* =========================================================
+   MOBILE (≤ 640px): off-canvas drawer sidebar, 1-col grid
+   ========================================================= */
+@media (max-width: 640px){
+  .sidebar-burger{ display:flex; }
+
+  .app-sidebar{
+    position:fixed;
+    top:0;
+    left:0;
+    height:100vh;
+    width:240px;
+    max-width:80vw;
+    flex:0 0 auto;
+    transform:translateX(-100%);
+    box-shadow:2px 0 24px rgba(0,0,0,0.18);
+  }
+  .app-sidebar.is-open{ transform:translateX(0); }
+
+  .app-sidebar .sidebar-logo{ justify-content:flex-start; }
+  .app-sidebar .sidebar-link{ justify-content:flex-start; gap:10px; }
+  .app-sidebar .sidebar-link span:not(.icon){ display:inline; }
+  .app-sidebar .sidebar-section-title{ display:block; }
+  .app-sidebar .sidebar-user .info{ display:block; }
+  .app-sidebar .sidebar-user{ justify-content:flex-start; }
+
+  .app-main{ width:100%; }
+  .app-content{ padding: 14px; }
+
+  .page-title-row{ flex-direction:column; align-items:stretch; }
+  .page-title-row .btn{ width:100%; text-align:center; }
+
+  .topbar-search{ flex-basis:100%; order:3; max-width:none; }
+  .app-topbar{ row-gap:10px; }
+
+  .grid-3{ grid-template-columns: 1fr !important; }
+
+  .search-bar input[type="text"], .search-bar select, .search-bar .btn{ flex-basis:100%; }
+
+  .ws-side{ position:static; }
+  .ws-header-left{ flex-wrap:wrap; }
+  .ws-session-timer{ font-size:26px; }
+  .ws-answer-box, .ws-lock-note, .ws-approved-answer{ margin-left:0; }
+}
 </style>
 </head>
 <body>
 <div class="app-body">
-  <aside class="app-sidebar">
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <aside class="app-sidebar" id="appSidebar">
     <a href="../index.html" class="sidebar-logo"><span class="logo-mark">MS</span> Marketsphare</a>
     <nav class="sidebar-nav">
       <div class="sidebar-section-title">Main</div>
-      <a href="index.html" class="sidebar-link "><span class="icon">🏠</span> Overview</a>
-      <a href="profile.html" class="sidebar-link "><span class="icon">👤</span> My Profile</a>
-      <a href="jobs.html" class="sidebar-link active"><span class="icon">💼</span> Jobs <span class="count">24</span></a>
-      <a href="applications.html" class="sidebar-link "><span class="icon">📄</span> Applications</a>
+      <a href="index.html" class="sidebar-link "><span class="icon">🏠</span> <span>Overview</span></a>
+      <a href="profile.html" class="sidebar-link "><span class="icon">👤</span> <span>My Profile</span></a>
+      <a href="jobs.html" class="sidebar-link active"><span class="icon">💼</span> <span>Jobs</span> <span class="count">24</span></a>
+      <a href="applications.html" class="sidebar-link "><span class="icon">📄</span> <span>Applications</span></a>
       <div class="sidebar-section-title">Finance</div>
-      <a href="earnings.html" class="sidebar-link "><span class="icon">💰</span> Earnings</a>
+      <a href="earnings.html" class="sidebar-link "><span class="icon">💰</span> <span>Earnings</span></a>
       <div class="sidebar-section-title">Communication</div>
-      <a href="messages.html" class="sidebar-link "><span class="icon">💬</span> Messages <span class="count">3</span></a>
+      <a href="messages.html" class="sidebar-link "><span class="icon">💬</span> <span>Messages</span> <span class="count">3</span></a>
       <div class="sidebar-section-title">Account</div>
-      <a href="settings.html" class="sidebar-link "><span class="icon">⚙️</span> Settings</a>
-      <a href="#" data-logout class="sidebar-link"><span class="icon">🚪</span> Log Out</a>
+      <a href="settings.html" class="sidebar-link "><span class="icon">⚙️</span> <span>Settings</span></a>
+      <a href="#" data-logout class="sidebar-link"><span class="icon">🚪</span> <span>Log Out</span></a>
     </nav>
     <div class="sidebar-footer">
       <a href="profile.html" class="sidebar-user">
@@ -153,7 +370,7 @@
   <div class="app-main">
     <header class="app-topbar">
       <div class="flex items-center gap-2">
-        <button class="sidebar-burger" aria-label="Toggle sidebar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg></button>
+        <button class="sidebar-burger" id="sidebarBurger" aria-label="Toggle sidebar" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg></button>
         <div class="topbar-search">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
           <input type="text" placeholder="Search jobs, messages, files...">
@@ -280,6 +497,45 @@
 <script src="../assets/js/dashboard-auth.js"></script>
 <script src="../assets/js/marketsphare-shared.js"></script>
 <script src="../assets/js/dashboard.js"></script>
+
+<script>
+/* ==========================================================================
+   Responsive sidebar drawer (mobile off-canvas toggle).
+   Self-contained: only touches the classes/elements defined in this file,
+   so it won't conflict with whatever app.js already does.
+   ========================================================================== */
+(function(){
+  const burger   = document.getElementById("sidebarBurger");
+  const sidebar  = document.getElementById("appSidebar");
+  const backdrop = document.getElementById("sidebarBackdrop");
+  if(!burger || !sidebar || !backdrop) return;
+
+  function openSidebar(){
+    sidebar.classList.add("is-open");
+    backdrop.classList.add("is-visible");
+    burger.setAttribute("aria-expanded", "true");
+  }
+  function closeSidebar(){
+    sidebar.classList.remove("is-open");
+    backdrop.classList.remove("is-visible");
+    burger.setAttribute("aria-expanded", "false");
+  }
+  function toggleSidebar(){
+    sidebar.classList.contains("is-open") ? closeSidebar() : openSidebar();
+  }
+
+  burger.addEventListener("click", toggleSidebar);
+  backdrop.addEventListener("click", closeSidebar);
+
+  sidebar.addEventListener("click", (e)=>{
+    if(e.target.closest("a")) closeSidebar();
+  });
+
+  window.addEventListener("resize", ()=>{
+    if(window.innerWidth > 640) closeSidebar();
+  });
+})();
+</script>
 
 <script>
 window.Marketsphare.authReady.then(function () {
