@@ -1,6 +1,13 @@
 /* ==========================================================================
    auth.js — Authentication forms (login, register, forgot/reset, verify)
-   Now backed by Firebase Authentication (see firebase-config.js).
+   Backed by Firebase Authentication (see firebase-config.js).
+
+   Integration note: this file now also talks to window.MarketsphareProfile
+   (assets/js/user-profile.js) so that a registered/logged-in user's name +
+   email are recorded in the same per-uid profile store that
+   profile.html / settings.html / dashboard-auth.js read from. Every call
+   into MarketsphareProfile is guarded with a typeof check so this file
+   still works fine on any page that doesn't happen to load user-profile.js.
    ========================================================================== */
 
 (function () {
@@ -43,8 +50,21 @@
       'auth/too-many-requests': 'Too many attempts. Please wait a moment and try again.',
       'auth/network-request-failed': 'Network error — check your connection and try again.',
       'auth/unauthorized-domain': 'This domain is not authorized in Firebase. Add it under Authentication → Settings → Authorized domains.',
+      'auth/popup-closed-by-user': 'Sign-in was cancelled.',
     };
     return map[err.code] || err.message || 'Something went wrong. Please try again.';
+  }
+
+  /** Make sure a MarketsphareProfile record exists for this Firebase user
+   *  and has at least a name/email on it. Safe no-op if user-profile.js
+   *  isn't loaded on this page, or if a profile already has data. */
+  function ensureProfileRecord(user, extra) {
+    if (!window.MarketsphareProfile || !user) return;
+    const existing = window.MarketsphareProfile.getProfile(user);
+    const patch = Object.assign({}, extra || {});
+    if (!existing.fullName && user.displayName) patch.fullName = user.displayName;
+    if (!existing.email && user.email) patch.email = user.email;
+    if (Object.keys(patch).length) window.MarketsphareProfile.saveProfile(user, patch);
   }
 
   /* ---------------- Password visibility toggle ---------------- */
@@ -96,6 +116,11 @@
           return;
         }
 
+        // Legacy accounts created before the profile store existed won't
+        // have a record yet — make sure one exists so profile.html /
+        // settings.html / the sidebar all have something to show.
+        ensureProfileRecord(cred.user);
+
         toast('Welcome back! Redirecting…');
         setTimeout(() => (window.location.href = '../dashboard/index.html'), 500);
       } catch (err) {
@@ -142,6 +167,13 @@
         // Keep the chosen role until this is backed by Firestore/a real DB.
         localStorage.setItem('ms_role_' + cred.user.uid, role);
 
+        // Also record it (plus name/email) in the shared profile store so
+        // profile.html / settings.html / the sidebar show real details
+        // immediately instead of a placeholder.
+        if (window.MarketsphareProfile) {
+          window.MarketsphareProfile.saveProfile(cred.user, { fullName, email, role });
+        }
+
         await cred.user.sendEmailVerification();
         toast('Account created! Check your email to verify.');
         setTimeout(() => (window.location.href = 'verify-email.html'), 700);
@@ -153,6 +185,36 @@
         setLoading(btn, false);
       }
     });
+  }
+
+  /* ---------------- Social sign-in (Google / Apple) ---------------- */
+  function initSocialAuth() {
+    const buttons = document.querySelectorAll('.social-auth .btn');
+    if (!buttons.length) return;
+    const form = document.getElementById('loginForm') || document.getElementById('registerForm');
+
+    if (buttons[0]) {
+      buttons[0].addEventListener('click', async () => {
+        try {
+          const provider = new firebase.auth.GoogleAuthProvider();
+          const cred = await auth.signInWithPopup(provider);
+          ensureProfileRecord(cred.user);
+          toast('Welcome! Redirecting…');
+          setTimeout(() => (window.location.href = '../dashboard/index.html'), 500);
+        } catch (err) {
+          const message = friendlyError(err);
+          if (form) showError(form, message);
+          toast(message, 'error');
+        }
+      });
+    }
+    if (buttons[1]) {
+      buttons[1].addEventListener('click', () => {
+        const message = "Apple sign-in isn't configured yet — please use email or Google for now.";
+        if (form) showError(form, message);
+        toast(message);
+      });
+    }
   }
 
   /* ---------------- Forgot password form ---------------- */
@@ -211,6 +273,7 @@
       if (emailSlot) emailSlot.textContent = user.email;
 
       if (user.emailVerified) {
+        ensureProfileRecord(user);
         window.location.href = '../dashboard/index.html';
         return;
       }
@@ -219,6 +282,7 @@
         await user.reload();
         if (user.emailVerified) {
           clearInterval(poll);
+          ensureProfileRecord(user);
           window.location.href = '../dashboard/index.html';
         }
       }, 4000);
@@ -255,8 +319,10 @@
     initRoleToggle();
     initLoginForm();
     initRegisterForm();
+    initSocialAuth();
     initForgotForm();
     initVerifyEmailPage();
     initLogout();
   });
 })();
+
