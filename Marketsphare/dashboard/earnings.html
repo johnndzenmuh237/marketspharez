@@ -19,6 +19,14 @@
     .stat-value.zero{opacity:.55;}
     #withdrawBtn:disabled{opacity:.5;cursor:not-allowed;}
 
+    /* ---- Rejected-withdrawal notice banner ---- */
+    .wd-rejected-banner{display:none;align-items:center;justify-content:space-between;gap:12px;background:#fdf1de;border:1px solid #f3d9ad;color:#8a5a12;border-radius:10px;padding:12px 14px;margin-bottom:16px;flex-wrap:wrap;}
+    .wd-rejected-banner.show{ display:flex; }
+    .wd-rb-text{display:flex;flex-direction:column;gap:2px;font-size:13px;min-width:0;overflow-wrap:anywhere;}
+    .wd-rb-text strong{ font-size:13.5px; }
+    .wd-rb-dismiss{background:#fff;border:1px solid #f0c987;color:#8a5a12;border-radius:7px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;}
+    .wd-rb-dismiss:hover{background:#fff7ec;}
+
     /* ---- Crypto withdraw modal ---- */
     .wd-overlay{display:none;position:fixed;inset:0;background:rgba(15,17,21,.5);z-index:999;align-items:center;justify-content:center;padding:20px;}
     .wd-overlay.show{display:flex;}
@@ -344,6 +352,9 @@
 
         <div class="apps-live-note"><span class="apps-live-dot"></span> Live — reflects every job you've applied to, task you've had approved, hour you've worked, and payout you've processed.</div>
 
+        <!-- Shown when an admin rejects a pending withdrawal request; carries their note. -->
+        <div class="wd-rejected-banner" id="wdRejectedBanner"></div>
+
         <div class="stat-grid">
           <div class="stat-card"><div class="stat-card-top"><div class="stat-icon" style="background:rgba(16,185,129,0.12);color:var(--color-success);">💰</div></div><div class="stat-value" id="statMonth">$0.00</div><div class="stat-label">This Month</div></div>
           <div class="stat-card"><div class="stat-card-top"><div class="stat-icon" style="background:rgba(79,70,229,0.12);color:var(--color-primary);">🏦</div></div><div class="stat-value" id="statLifetime">$0.00</div><div class="stat-label">Total Lifetime Earnings</div></div>
@@ -372,7 +383,7 @@
     <div class="wd-modal">
       <button class="wd-modal-close" id="wdClose" aria-label="Close">✕</button>
       <h2>Withdraw to Crypto Wallet</h2>
-      <p class="wd-modal-sub">Withdrawals are processed weekly, on Fridays only — same cycle as your job payouts.</p>
+      <p class="wd-modal-sub">Withdrawals are processed weekly, on Fridays only — same cycle as your job payouts. Every request is reviewed by an admin before funds are sent.</p>
 
       <div class="wd-friday-notice" id="wdFridayNotice"></div>
 
@@ -402,7 +413,7 @@
       <button class="wd-max-btn" type="button" id="wdMaxBtn">Use max available</button>
 
       <div class="wd-error" id="wdError"></div>
-      <button class="wd-submit-btn" id="wdSubmit" disabled>Confirm Withdrawal</button>
+      <button class="wd-submit-btn" id="wdSubmit" disabled>Submit for Review</button>
     </div>
   </div>
 
@@ -456,13 +467,13 @@
 
   <script>
   /* ----------------------------------------------------------------------
-     Live Earnings page + crypto withdrawal flow.
+     Live Earnings page + crypto withdrawal review flow.
 
      Stat cards & transaction history are derived from the exact same
      persisted workspace state jobs.html writes (window.Marketsphare /
      localStorage) — see comments further down for the per-card formulas.
 
-     Withdrawals:
+     Withdrawals now go through admin review:
        - Only allowed when it is actually Friday (device's real clock),
          mirroring the weekly Friday payout cycle used on the job
          workspace. The button and modal both re-check this live.
@@ -472,34 +483,42 @@
          with an offline fallback so the demo still works without
          network access).
        - The amount can never exceed "Available to Withdraw". Confirming
-         deducts it from that balance immediately and logs a row in
-         Transaction History — it never lets available go negative.
-       - Withdrawals are tracked in their own small localStorage ledger,
-         scoped to the signed-in user (same uid-namespacing as the job
-         engine), kept fully separate from Marketsphare's job/task/pay
-         engine so this page can never interfere with or break it.
+         does NOT send funds immediately — it creates a `pending` request
+         in a shared localStorage store (`marketsphare_withdrawal_requests_v1`)
+         that the Admin > Payments page reads and can Approve or Reject.
+       - Submitting a request immediately reserves the funds (so they can't
+         be requested twice) by recording which currency buckets they were
+         taken from. If an admin rejects the request, those funds are
+         automatically released back into "Available to Withdraw", and a
+         banner shows the admin's note until the user dismisses it.
   ---------------------------------------------------------------------- */
   window.Marketsphare.authReady.then(function () {
     const { jobs, loadState, computeStats, formatCurrencyMap, getNextFriday } = window.Marketsphare;
     let state = loadState();
 
-    function ledgerKey() {
-      const uid = window.Marketsphare.currentUser && window.Marketsphare.currentUser.uid;
-      return uid ? `marketsphare_earnings_ledger_v1:${uid}` : "marketsphare_earnings_ledger_v1";
-    }
+    const REQUESTS_KEY = "marketsphare_withdrawal_requests_v1";
 
-    function loadLedger() {
+    function currentUid() {
+      return (window.Marketsphare.currentUser && window.Marketsphare.currentUser.uid) || null;
+    }
+    function loadRequests() {
       try {
-        const raw = JSON.parse(localStorage.getItem(ledgerKey()) || "null");
-        if (raw && typeof raw === "object") return raw;
+        const raw = JSON.parse(localStorage.getItem(REQUESTS_KEY) || "[]");
+        if (Array.isArray(raw)) return raw;
       } catch (e) {}
-      return { withdrawn: {}, withdrawals: [] }; // withdrawn: {currency: amountWithdrawnSoFar}
+      return [];
     }
-    function saveLedger(ledger) {
-      try { localStorage.setItem(ledgerKey(), JSON.stringify(ledger)); } catch (e) {}
-      window.dispatchEvent(new CustomEvent("marketsphare-earnings:changed"));
+    function saveRequests(list) {
+      try { localStorage.setItem(REQUESTS_KEY, JSON.stringify(list)); } catch (e) {}
+      window.dispatchEvent(new CustomEvent("marketsphare-withdrawals:changed"));
     }
-    let ledger = loadLedger();
+    function myRequests() {
+      const uid = currentUid();
+      return loadRequests().filter((r) => r.uid === uid);
+    }
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+    }
 
     /* ---------------- Stat elements ---------------- */
     const elMonth = document.getElementById("statMonth");
@@ -508,6 +527,7 @@
     const elAvailable = document.getElementById("statAvailable");
     const elTbody = document.getElementById("txnTbody");
     const withdrawBtn = document.getElementById("withdrawBtn");
+    const rejectedBanner = document.getElementById("wdRejectedBanner");
 
     function fmt(map, key) {
       const s = formatCurrencyMap(map, key);
@@ -558,13 +578,30 @@
       return map;
     }
 
-    /* Available-to-withdraw per currency = lifetime paid minus already withdrawn. */
+    /* Funds currently reserved against a currency: the sum of `deductions`
+       on every one of this user's requests that is still pending OR was
+       approved (i.e. actually withdrawn). Rejected requests contribute
+       nothing here — their funds are released automatically. */
+    function reservedMap() {
+      const map = {};
+      myRequests().forEach((r) => {
+        if (r.status === "rejected") return;
+        Object.keys(r.deductions || {}).forEach((c) => {
+          map[c] = (map[c] || 0) + r.deductions[c];
+        });
+      });
+      return map;
+    }
+
+    /* Available-to-withdraw per currency = lifetime paid minus reserved
+       (pending + approved) withdrawal amounts. */
     function availableMap(stats) {
+      const reserved = reservedMap();
       const map = {};
       Object.keys(stats.byCurrency).forEach((c) => {
         const paid = stats.byCurrency[c].paid || 0;
-        const withdrawn = (ledger.withdrawn && ledger.withdrawn[c]) || 0;
-        map[c] = { avail: Math.max(0, paid - withdrawn) };
+        const held = reserved[c] || 0;
+        map[c] = { avail: Math.max(0, paid - held) };
       });
       return map;
     }
@@ -573,6 +610,29 @@
        purposes of crypto conversion (demo simplification — no live FX). */
     function totalAvailableUsd(aMap) {
       return Object.keys(aMap).reduce((sum, c) => sum + aMap[c].avail, 0);
+    }
+
+    function withdrawalRowFor(r) {
+      const walletShort = r.wallet ? `${r.wallet.slice(0, 6)}…${r.wallet.slice(-4)}` : "";
+      const base = {
+        description: `Withdrawal to ${r.coin} Wallet ${walletShort}`,
+        client: "—",
+        amountLabel: `-$${(r.usdAmount || 0).toFixed(2)} (${(r.cryptoAmount || 0).toFixed(6)} ${r.coin})`,
+        ts: r.requestedTs || 0
+      };
+      if (r.status === "pending") {
+        return { ...base, status: "Pending Review", statusClass: "pill-warning", dateLabel: "Awaiting admin review" };
+      }
+      if (r.status === "approved") {
+        return { ...base, status: "Completed", statusClass: "pill-primary", dateLabel: r.reviewedDateLabel || r.requestedDateLabel || "" };
+      }
+      // rejected
+      return {
+        ...base,
+        description: `${base.description} — Rejected`,
+        status: "Rejected", statusClass: "pill-danger",
+        dateLabel: r.reviewedDateLabel || r.requestedDateLabel || ""
+      };
     }
 
     function buildTransactions() {
@@ -607,22 +667,7 @@
         }
       });
 
-      (ledger.withdrawals || []).forEach((w) => {
-        const parsed = new Date(w.ts || w.date);
-        const ts = isNaN(parsed.getTime()) ? 0 : parsed.getTime();
-        const walletShort = w.wallet ? `${w.wallet.slice(0, 6)}…${w.wallet.slice(-4)}` : "";
-        txns.push({
-          description: w.coin
-            ? `Withdrawal to ${w.coin} Wallet ${walletShort}`
-            : "Withdrawal to Bank ****4521",
-          client: "—",
-          amountLabel: w.coin
-            ? `-$${w.usdAmount.toFixed(2)} (${w.cryptoAmount.toFixed(6)} ${w.coin})`
-            : `-$${w.usdAmount.toFixed(2)}`,
-          status: "Completed", statusClass: "pill-primary",
-          dateLabel: w.date, ts
-        });
-      });
+      myRequests().forEach((r) => txns.push(withdrawalRowFor(r)));
 
       txns.sort((a, b) => b.ts - a.ts);
       return txns;
@@ -633,6 +678,37 @@
     function nextFridayLabel() {
       const base = isFridayToday() ? new Date(Date.now() + 86400000) : new Date();
       return window.Marketsphare.formatDate(getNextFriday(base));
+    }
+
+    /* ---------------- Rejection banner ---------------- */
+    function renderRejectedBanner() {
+      const target = myRequests()
+        .filter((r) => r.status === "rejected" && !r.acknowledged)
+        .sort((a, b) => (b.reviewedTs || 0) - (a.reviewedTs || 0))[0];
+
+      if (!target) {
+        rejectedBanner.classList.remove("show");
+        rejectedBanner.innerHTML = "";
+        return;
+      }
+
+      rejectedBanner.classList.add("show");
+      rejectedBanner.innerHTML = `
+        <div class="wd-rb-text">
+          <strong>Withdrawal request rejected</strong>
+          <span>Your request for $${(target.usdAmount || 0).toFixed(2)} (${escapeHtml(target.coin || "")}) was rejected${target.note ? ": " + escapeHtml(target.note) : "."} The funds have been returned to your available balance.</span>
+        </div>
+        <button class="wd-rb-dismiss" type="button">Dismiss</button>
+      `;
+      rejectedBanner.querySelector(".wd-rb-dismiss").addEventListener("click", () => {
+        const list = loadRequests();
+        const idx = list.findIndex((r) => r.id === target.id);
+        if (idx > -1) {
+          list[idx].acknowledged = true;
+          saveRequests(list);
+        }
+        renderRejectedBanner();
+      });
     }
 
     function render() {
@@ -654,14 +730,19 @@
 
       const hasFunds = !isZeroMap(aMap, "avail");
       const fridayOk = isFridayToday();
-      withdrawBtn.disabled = !(hasFunds && fridayOk);
-      if (!hasFunds) {
+      const hasPendingRequest = myRequests().some((r) => r.status === "pending");
+      withdrawBtn.disabled = !(hasFunds && fridayOk) || hasPendingRequest;
+      if (hasPendingRequest) {
+        withdrawBtn.textContent = "Withdrawal Pending Review";
+      } else if (!hasFunds) {
         withdrawBtn.textContent = "Withdraw Funds";
       } else if (!fridayOk) {
         withdrawBtn.textContent = `Withdraw Funds — opens ${nextFridayLabel()}`;
       } else {
         withdrawBtn.textContent = `Withdraw Funds (${fmt(aMap, "avail")})`;
       }
+
+      renderRejectedBanner();
 
       const txns = buildTransactions();
       elTbody.innerHTML = txns.length
@@ -778,6 +859,8 @@
 
       if (!isFridayToday()) {
         msg = `Withdrawals only process on Fridays. Next window: ${nextFridayLabel()}.`;
+      } else if (myRequests().some((r) => r.status === "pending")) {
+        msg = "You already have a withdrawal request awaiting admin review.";
       } else if (!wallet || wallet.length < 8) {
         msg = usd > 0 ? "Enter a valid wallet address." : "";
       } else if (usd <= 0) {
@@ -787,7 +870,9 @@
       }
 
       wdError.textContent = msg;
-      const ready = isFridayToday() && wallet.length >= 8 && usd > 0 && usd <= avail + 0.0001;
+      const ready = isFridayToday()
+        && !myRequests().some((r) => r.status === "pending")
+        && wallet.length >= 8 && usd > 0 && usd <= avail + 0.0001;
       wdSubmit.disabled = !ready;
       return ready;
     }
@@ -865,44 +950,54 @@
       if (usd > avail + 0.0001) { validate(); return; }
 
       const ok = confirm(
-        `Withdraw ${crypto.toFixed(6)} ${coin} (≈ $${usd.toFixed(2)}) to:\n${wallet}\n\nThis cannot be undone. Continue?`
+        `Submit withdrawal request for ${crypto.toFixed(6)} ${coin} (≈ $${usd.toFixed(2)}) to:\n${wallet}\n\nThis will be reviewed by an admin before funds are sent. Continue?`
       );
       if (!ok) return;
 
-      // Deduct from available, currency by currency, without ever going negative.
-      ledger.withdrawn = ledger.withdrawn || {};
+      // Reserve funds across currencies (same greedy allocation the old
+      // code used to actually deduct), so this exact amount can't be
+      // requested twice while admin review is pending.
+      const deductions = {};
       let remaining = usd;
       Object.keys(aMap).forEach((c) => {
         if (remaining <= 0.0001) return;
         const take = Math.min(aMap[c].avail, remaining);
         if (take <= 0) return;
-        ledger.withdrawn[c] = (ledger.withdrawn[c] || 0) + take;
+        deductions[c] = take;
         remaining -= take;
       });
 
-      ledger.withdrawals = ledger.withdrawals || [];
-      ledger.withdrawals.unshift({
+      const user = window.Marketsphare.currentUser || {};
+      const requests = loadRequests();
+      requests.unshift({
+        id: `WD-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        uid: user.uid || null,
+        userName: user.displayName || user.email || "Unknown User",
         coin, wallet, cryptoAmount: crypto, usdAmount: usd,
         priceAtWithdrawal: currentPrice(),
-        date: new Date().toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }),
-        ts: Date.now()
+        deductions,
+        status: "pending",
+        note: "",
+        acknowledged: true,
+        requestedDateLabel: new Date().toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }),
+        requestedTs: Date.now()
       });
+      saveRequests(requests);
 
-      saveLedger(ledger);
       closeModal();
       render();
+      alert("Your withdrawal request has been submitted and is pending admin review. You'll see an update here once it's processed.");
     });
 
     /* ---------------- Live sync ---------------- */
     function refreshFromStorage() {
       state = loadState();
-      ledger = loadLedger();
       render();
     }
     window.addEventListener("marketsphare:state-changed", refreshFromStorage);
-    window.addEventListener("marketsphare-earnings:changed", refreshFromStorage);
+    window.addEventListener("marketsphare-withdrawals:changed", refreshFromStorage);
     window.addEventListener("storage", (e) => {
-      if (e.key === window.Marketsphare.getStorageKey() || e.key === ledgerKey()) refreshFromStorage();
+      if (e.key === window.Marketsphare.getStorageKey() || e.key === REQUESTS_KEY) refreshFromStorage();
     });
     document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshFromStorage(); });
 
