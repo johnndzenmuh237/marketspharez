@@ -16,25 +16,223 @@
       100%{box-shadow:0 0 0 0 rgba(26,158,107,0);}
     }
     .apps-live-note{display:flex;align-items:center;font-size:12px;color:#6b7280;margin:-4px 0 12px;}
+
+    /* =========================================================
+       Local, self-contained responsiveness layer.
+       Mirrors the layer used on the Overview page so every
+       dashboard screen behaves consistently across breakpoints,
+       regardless of any fixed widths already in style.css /
+       responsive.css / dashboard.css.
+       ========================================================= */
+
+    html, body { max-width: 100%; overflow-x: hidden; }
+    .app-body{
+      display:flex !important;
+      min-height:100vh;
+      width:100%;
+      position:relative;
+    }
+    .app-sidebar{
+      flex:0 0 240px;
+      width:240px;
+      max-width:240px;
+      box-sizing:border-box;
+      transition:width .2s ease, flex-basis .2s ease, transform .25s ease;
+      overflow-y:auto;
+      z-index:40;
+    }
+    .app-main{
+      flex:1 1 auto;
+      width:100%;
+      min-width:0;
+      box-sizing:border-box;
+      overflow-x:hidden;
+    }
+    .app-content{
+      width:100%;
+      box-sizing:border-box;
+      padding: var(--space-content, 24px);
+    }
+
+    .panel{
+      min-width:0;
+      box-sizing:border-box;
+      width:100%;
+    }
+
+    /* ---------- Tables: never break the page, scroll horizontally instead ---------- */
+    .table-wrap{
+      width:100%;
+      overflow-x:auto;
+      -webkit-overflow-scrolling:touch;
+    }
+    .data-table{
+      width:100%;
+      min-width:560px;
+      border-collapse:collapse;
+    }
+
+    /* ---------- Tabs: scroll horizontally instead of wrapping/crushing ---------- */
+    .tabs{
+      display:flex;
+      gap:8px;
+      overflow-x:auto;
+      -webkit-overflow-scrolling:touch;
+      white-space:nowrap;
+      padding-bottom:2px;
+    }
+    .tabs .tab-link{ flex-shrink:0; }
+
+    /* ---------- Topbar: wraps gracefully, search shrinks before it breaks ---------- */
+    .app-topbar{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:12px;
+      width:100%;
+      box-sizing:border-box;
+    }
+    .topbar-search{
+      flex:1 1 160px;
+      min-width:0;
+      max-width:420px;
+    }
+    .topbar-search input{
+      width:100%;
+      box-sizing:border-box;
+    }
+    .topbar-actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-shrink:0;
+      margin-left:auto;
+    }
+
+    .page-title-row{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      width:100%;
+    }
+    .page-title-row > div{ min-width:0; }
+    .page-title-row h1, .page-title-row p{
+      overflow-wrap:anywhere;
+    }
+
+    /* ---------- Sidebar burger: hidden on desktop, appears at tablet/mobile ---------- */
+    .sidebar-burger{
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background:transparent;
+      border:none;
+      cursor:pointer;
+      padding:6px;
+      border-radius:8px;
+      flex-shrink:0;
+    }
+    .sidebar-burger:hover{ background:rgba(0,0,0,0.05); }
+
+    .sidebar-backdrop{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(15,15,20,0.45);
+      z-index:35;
+      opacity:0;
+      transition:opacity .2s ease;
+    }
+    .sidebar-backdrop.is-visible{ display:block; opacity:1; }
+
+    /* =========================================================
+       TABLET (≤ 1024px): icon-rail sidebar
+       ========================================================= */
+    @media (max-width: 1024px){
+      .app-sidebar{
+        flex:0 0 76px;
+        width:76px;
+        max-width:76px;
+      }
+      .app-sidebar .sidebar-logo{
+        justify-content:center;
+        padding-left:0;
+        padding-right:0;
+        white-space:nowrap;
+        overflow:hidden;
+      }
+      .app-sidebar .sidebar-link{
+        justify-content:center;
+        gap:0;
+        padding:10px 6px;
+        white-space:nowrap;
+        overflow:hidden;
+      }
+      .app-sidebar .sidebar-link span:not(.icon){ display:none; }
+      .app-sidebar .sidebar-section-title{ display:none; }
+      .app-sidebar .sidebar-user .info{ display:none; }
+      .app-sidebar .sidebar-user{ justify-content:center; }
+    }
+
+    /* =========================================================
+       MOBILE (≤ 640px): off-canvas drawer sidebar
+       ========================================================= */
+    @media (max-width: 640px){
+      .sidebar-burger{ display:flex; }
+
+      .app-sidebar{
+        position:fixed;
+        top:0;
+        left:0;
+        height:100vh;
+        width:240px;
+        max-width:80vw;
+        flex:0 0 auto;
+        transform:translateX(-100%);
+        box-shadow:2px 0 24px rgba(0,0,0,0.18);
+      }
+      .app-sidebar.is-open{ transform:translateX(0); }
+
+      .app-sidebar .sidebar-logo{ justify-content:flex-start; }
+      .app-sidebar .sidebar-link{ justify-content:flex-start; gap:10px; }
+      .app-sidebar .sidebar-link span:not(.icon){ display:inline; }
+      .app-sidebar .sidebar-section-title{ display:block; }
+      .app-sidebar .sidebar-user .info{ display:block; }
+      .app-sidebar .sidebar-user{ justify-content:flex-start; }
+
+      .app-main{ width:100%; }
+      .app-content{ padding: 14px; }
+
+      .page-title-row{ flex-direction:column; align-items:stretch; }
+
+      .topbar-search{ flex-basis:100%; order:3; max-width:none; }
+      .app-topbar{ row-gap:10px; }
+
+      .apps-live-note{ font-size:11.5px; }
+    }
   </style>
 </head>
 <body>
   <div class="app-body">
-    <aside class="app-sidebar">
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <aside class="app-sidebar" id="appSidebar">
       <a href="../index.html" class="sidebar-logo"><span class="logo-mark">MS</span> Marketsphare</a>
       <nav class="sidebar-nav">
         <div class="sidebar-section-title">Main</div>
-        <a href="index.html" class="sidebar-link "><span class="icon">🏠</span> Overview</a>
-        <a href="profile.html" class="sidebar-link "><span class="icon">👤</span> My Profile</a>
-        <a href="jobs.html" class="sidebar-link "><span class="icon">💼</span> Jobs <span class="count">24</span></a>
-        <a href="applications.html" class="sidebar-link active"><span class="icon">📄</span> Applications</a>
+        <a href="index.html" class="sidebar-link "><span class="icon">🏠</span> <span>Overview</span></a>
+        <a href="profile.html" class="sidebar-link "><span class="icon">👤</span> <span>My Profile</span></a>
+        <a href="jobs.html" class="sidebar-link "><span class="icon">💼</span> <span>Jobs</span> <span class="count">24</span></a>
+        <a href="applications.html" class="sidebar-link active"><span class="icon">📄</span> <span>Applications</span></a>
         <div class="sidebar-section-title">Finance</div>
-        <a href="earnings.html" class="sidebar-link "><span class="icon">💰</span> Earnings</a>
+        <a href="earnings.html" class="sidebar-link "><span class="icon">💰</span> <span>Earnings</span></a>
         <div class="sidebar-section-title">Communication</div>
-        <a href="messages.html" class="sidebar-link "><span class="icon">💬</span> Messages <span class="count">3</span></a>
+        <a href="messages.html" class="sidebar-link "><span class="icon">💬</span> <span>Messages</span> <span class="count">3</span></a>
         <div class="sidebar-section-title">Account</div>
-        <a href="settings.html" class="sidebar-link "><span class="icon">⚙️</span> Settings</a>
-        <a href="#" data-logout class="sidebar-link"><span class="icon">🚪</span> Log Out</a>
+        <a href="settings.html" class="sidebar-link "><span class="icon">⚙️</span> <span>Settings</span></a>
+        <a href="#" data-logout class="sidebar-link"><span class="icon">🚪</span> <span>Log Out</span></a>
       </nav>
       <div class="sidebar-footer">
         <a href="profile.html" class="sidebar-user">
@@ -47,7 +245,7 @@
     <div class="app-main">
       <header class="app-topbar">
         <div class="flex items-center gap-2">
-          <button class="sidebar-burger" aria-label="Toggle sidebar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg></button>
+          <button class="sidebar-burger" id="sidebarBurger" aria-label="Toggle sidebar" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg></button>
           <div class="topbar-search">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
             <input type="text" placeholder="Search jobs, messages, files...">
@@ -99,6 +297,45 @@
   <script src="../assets/js/dashboard-auth.js"></script>
   <script src="../assets/js/marketsphare-shared.js"></script>
   <script src="../assets/js/dashboard.js"></script>
+
+  <script>
+  /* ==========================================================================
+     Responsive sidebar drawer (mobile off-canvas toggle).
+     Self-contained: only touches the classes/elements defined in this file,
+     so it won't conflict with whatever app.js already does.
+     ========================================================================== */
+  (function(){
+    const burger   = document.getElementById("sidebarBurger");
+    const sidebar  = document.getElementById("appSidebar");
+    const backdrop = document.getElementById("sidebarBackdrop");
+    if(!burger || !sidebar || !backdrop) return;
+
+    function openSidebar(){
+      sidebar.classList.add("is-open");
+      backdrop.classList.add("is-visible");
+      burger.setAttribute("aria-expanded", "true");
+    }
+    function closeSidebar(){
+      sidebar.classList.remove("is-open");
+      backdrop.classList.remove("is-visible");
+      burger.setAttribute("aria-expanded", "false");
+    }
+    function toggleSidebar(){
+      sidebar.classList.contains("is-open") ? closeSidebar() : openSidebar();
+    }
+
+    burger.addEventListener("click", toggleSidebar);
+    backdrop.addEventListener("click", closeSidebar);
+
+    sidebar.addEventListener("click", (e)=>{
+      if(e.target.closest("a")) closeSidebar();
+    });
+
+    window.addEventListener("resize", ()=>{
+      if(window.innerWidth > 640) closeSidebar();
+    });
+  })();
+  </script>
 
   <script>
   /* ----------------------------------------------------------------------
