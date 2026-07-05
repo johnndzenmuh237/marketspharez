@@ -1,7 +1,7 @@
 /* ==========================================================================
    Marketsphare — shared job data + persisted, LIVE workspace engine.
-   Loaded by BOTH jobs.html and index.html so both pages read/write the
-   exact same data via localStorage.
+   Loaded by BOTH jobs.html and index.html (and every other dashboard page)
+   so they all read/write the exact same data via localStorage.
 
    HOW THIS ENGINE WORKS
    ----------------------
@@ -29,12 +29,25 @@
           that only accrues while a work session is running AND the tab
           is open. Hiding the tab or closing/refreshing auto-pauses and
           banks whatever was earned so far.
+
+   ACCOUNT SCOPING
+   ----------------
+   Workspace progress is stored per signed-in user (keyed by Firebase uid),
+   so two different accounts on the same browser never see each other's
+   applications, tasks, or earnings. Pages that use this file should wait
+   for window.Marketsphare.authReady to resolve before calling loadState()/
+   saveState(), so the correct uid is already known.
    ========================================================================== */
 (function (window) {
   "use strict";
 
   const STORAGE_KEY = "marketsphare_workspace_state_v1";
   const DAY_MS = 24 * 60 * 60 * 1000;
+
+  function getStorageKey() {
+    const uid = window.Marketsphare && window.Marketsphare.currentUser && window.Marketsphare.currentUser.uid;
+    return uid ? `${STORAGE_KEY}:${uid}` : STORAGE_KEY;
+  }
 
   function T(prompt, groups, minWords) {
     return { prompt, groups, minWords: minWords || 10 };
@@ -382,13 +395,14 @@
     return state;
   }
 
-  /** Load state from localStorage, reconciled against the current job list
-   *  (so adding/removing jobs or tasks later doesn't break old saves). */
+  /** Load state from localStorage (scoped to the current signed-in user),
+   *  reconciled against the current job list so adding/removing jobs or
+   *  tasks later doesn't break old saves. */
   function loadState() {
     const base = defaultState();
     let raw;
     try {
-      raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+      raw = JSON.parse(localStorage.getItem(getStorageKey()) || "null");
     } catch (e) {
       raw = null;
     }
@@ -429,8 +443,9 @@
     return base;
   }
 
-  /** Persist state to localStorage and notify listeners in this tab (the
-   *  native 'storage' event only fires in OTHER tabs). */
+  /** Persist state to localStorage (scoped to the current signed-in user)
+   *  and notify listeners in this tab (the native 'storage' event only
+   *  fires in OTHER tabs). */
   function saveState(state) {
     const serializable = {};
     Object.keys(state).forEach((id) => {
@@ -457,7 +472,7 @@
       };
     });
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(serializable));
+      localStorage.setItem(getStorageKey(), JSON.stringify(serializable));
     } catch (e) {
       console.error("Marketsphare: failed to save state", e);
     }
@@ -507,7 +522,11 @@
     return parts.length ? parts.join(" · ") : null;
   }
 
-  window.Marketsphare = {
+  // IMPORTANT: merge into window.Marketsphare rather than replacing it —
+  // dashboard-auth.js (loaded first) already put authReady/currentUser/
+  // currentProfile on this object, and we must not wipe those out.
+  window.Marketsphare = window.Marketsphare || {};
+  Object.assign(window.Marketsphare, {
     STORAGE_KEY,
     DAY_MS,
     jobs,
@@ -525,6 +544,7 @@
     loadState,
     saveState,
     computeStats,
-    formatCurrencyMap
-  };
+    formatCurrencyMap,
+    getStorageKey
+  });
 })(window);
