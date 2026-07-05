@@ -1,5 +1,10 @@
 /* ==========================================================================
    dashboard.js — User dashboard interactivity
+
+   Note: user name/initial/avatar rendering is now owned entirely by
+   dashboard-auth.js (driven by the signed-in Firebase user + their saved
+   Marketsphare profile), so this file no longer touches [data-user-name]
+   or [data-user-initial].
    ========================================================================== */
 
 (function () {
@@ -14,17 +19,6 @@
       if (window.innerWidth <= 960 && sidebar.classList.contains('open') && !sidebar.contains(e.target) && !burger.contains(e.target)) {
         sidebar.classList.remove('open');
       }
-    });
-  }
-
-  function initUserBadge() {
-    const user = JSON.parse(localStorage.getItem('ms_user') || 'null');
-    document.querySelectorAll('[data-user-name]').forEach((el) => {
-      el.textContent = (user && user.fullName) || 'Alex Johnson';
-    });
-    document.querySelectorAll('[data-user-initial]').forEach((el) => {
-      const name = (user && user.fullName) || 'Alex Johnson';
-      el.textContent = name.charAt(0).toUpperCase();
     });
   }
 
@@ -44,6 +38,23 @@
             if (panel) panel.classList.add('active');
           }
         });
+      });
+    });
+  }
+
+  /* ---------------- Settings sub-nav (settings.html) ---------------- */
+  function initSettingsNav() {
+    const nav = document.querySelector('.settings-nav');
+    if (!nav) return;
+    const links = nav.querySelectorAll('a[data-settings-target]');
+    links.forEach((link) => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        links.forEach((l) => l.classList.remove('active'));
+        link.classList.add('active');
+        document.querySelectorAll('.settings-panel').forEach((p) => (p.style.display = 'none'));
+        const panel = document.getElementById(link.dataset.settingsTarget);
+        if (panel) panel.style.display = 'block';
       });
     });
   }
@@ -85,7 +96,7 @@
     if (input) input.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
   }
 
-  /* ---------------- Resume upload (profile.html) ---------------- */
+  /* ---------------- Resume / work-sample upload (profile.html) ---------------- */
   function initUploadZone() {
     document.querySelectorAll('.upload-zone').forEach((zone) => {
       const fileInput = zone.querySelector('input[type="file"]');
@@ -115,14 +126,7 @@
       return el;
     })();
     label.textContent = `Selected: ${file.name}`;
-    window.MS.toast('File ready to upload', 'success');
-  }
-
-  /* ---------------- Logout buttons ---------------- */
-  function initLogout() {
-    document.querySelectorAll('[data-logout]').forEach((btn) => {
-      btn.addEventListener('click', () => window.MS.logout());
-    });
+    if (window.MS && window.MS.toast) window.MS.toast('File ready to upload', 'success');
   }
 
   /* ---------------- Notification dropdown ---------------- */
@@ -141,11 +145,11 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     initSidebarToggle();
-    initUserBadge();
     initTabs();
+    initSettingsNav();
     initChat();
     initUploadZone();
-    initLogout();
     initNotifDropdown();
+    // Logout buttons are wired in dashboard-auth.js (window.MS.logout).
   });
 })();
