@@ -5,8 +5,9 @@
 
    HOW THIS ENGINE WORKS
    ----------------------
-   1. Apply-gating: a job's workspace is locked until the user clicks
-      "Apply" on the card. Applying immediately marks it applied, stamps
+   1. Apply-gating: a job's workspace is locked until the user passes a
+      short "quick check" (a couple of comprehension questions about the
+      role) and applies. Applying immediately marks it applied, stamps
       appliedAt, and generates "today's" task batch. The Apply button
       never appears again for that job once applied is true.
 
@@ -30,6 +31,16 @@
           is open. Hiding the tab or closing/refreshing auto-pauses and
           banks whatever was earned so far.
 
+   4. User-submitted job postings: any signed-in user can submit a job
+      posting through a form (job type, description, pay, contact info).
+      Postings are stored with status "pending" in a shared registry and
+      are visible to their author under "My Postings" with that status.
+      A reviewer can approve or reject a posting and attach a note; the
+      decision + note is what the author sees next to their listing.
+      This is a self-contained client-side simulation (localStorage only)
+      — there is no real backend, payment processor, or human reviewer
+      behind it.
+
    ACCOUNT SCOPING
    ----------------
    Workspace progress is stored per signed-in user (keyed by Firebase uid),
@@ -42,6 +53,7 @@
   "use strict";
 
   const STORAGE_KEY = "marketsphare_workspace_state_v1";
+  const POSTINGS_KEY = "marketsphare_job_postings_v1";
   const DAY_MS = 24 * 60 * 60 * 1000;
 
   function getStorageKey() {
@@ -60,6 +72,15 @@
       payType: "monthly", payAmount: 3200, currency: "$",
       client: "BrightWave", industry: "B2B SaaS — project management software",
       brief: "BrightWave sells project management software to small teams. Your job is to grow organic traffic to three key landing pages: <b>/pricing</b>, <b>/features</b>, and <b>/integrations</b>. Every answer should reference these pages by name so the work is auditable.",
+      applyQuestions: [
+        { q: "Which three landing pages is this role focused on growing organic traffic to?", options: ["/blog, /about, /careers", "/pricing, /features, /integrations", "/login, /signup, /dashboard"], correct: 1 },
+        { q: "What is BrightWave's core product?", options: ["A skincare line", "Project management software", "A fitness app"], correct: 1 }
+      ],
+      taskTopics: [
+        "Keyword Research", "Keyword Research", "Keyword Research",
+        "On-Page SEO", "Technical SEO", "On-Page SEO", "On-Page SEO",
+        "Competitor Analysis", "Content Planning", "Reporting"
+      ],
       tasks: [
         T("Run keyword research for the /pricing landing page. List your primary keyword and 2 secondary keywords, and explain the search intent behind them.", [["keyword", "primary keyword"], ["intent", "search intent", "buyer intent", "commercial intent"]], 12),
         T("Run keyword research for the /features landing page. List your primary keyword and 2 secondary keywords, and note the estimated monthly search volume for each.", [["keyword"], ["volume", "search volume", "monthly searches"]], 12),
@@ -79,6 +100,17 @@
       payType: "hourly", payAmount: 45, currency: "$",
       client: "Cobalt Co.", industry: "DTC skincare — launching a new hydrating serum",
       brief: "Cobalt Co. is a direct-to-consumer skincare brand launching a new <b>hydrating serum</b>. You're running the paid launch across <b>Meta Ads</b> and <b>TikTok Ads</b>, from setup through optimization and reporting.",
+      applyQuestions: [
+        { q: "Which two ad platforms will this role run campaigns on?", options: ["Google Ads and Bing Ads", "Meta Ads and TikTok Ads", "LinkedIn Ads and Twitter Ads"], correct: 1 },
+        { q: "What product is Cobalt Co. launching?", options: ["A hydrating serum", "A running shoe", "A meal kit"], correct: 0 }
+      ],
+      taskTopics: [
+        "Campaign Setup", "Campaign Setup", "Audience Targeting", "Ad Creative", "Audience Targeting",
+        "Campaign Setup", "Tracking & Pixels", "Campaign Setup", "Ad Creative", "Audience Targeting",
+        "Tracking & Pixels", "Ad Creative", "Ad Creative", "A/B Testing", "A/B Testing",
+        "Performance Review", "Performance Review", "Optimization", "Optimization", "Retargeting",
+        "Retargeting", "Reporting", "Optimization", "Optimization", "Reporting"
+      ],
       tasks: [
         T("Define the campaign objective for the hydrating serum launch on Meta Ads (conversions, traffic, or awareness) and explain why.", [["objective", "conversion", "traffic", "awareness"], ["why", "because", "reason"]]),
         T("Set up the Meta Ads Manager campaign structure: name your campaign, ad set, and ad naming convention.", [["campaign"], ["ad set"]]),
@@ -113,6 +145,16 @@
       payType: "monthly", payAmount: 2100, currency: "$",
       client: "Vertex Labs", industry: 'Eco-friendly subscription box — "EcoBox"',
       brief: 'Vertex Labs runs <b>EcoBox</b>, a sustainable-products subscription box. You own lifecycle email in Klaviyo — welcome flows, cart recovery, segmentation, and reporting.',
+      applyQuestions: [
+        { q: "What email platform does this role use?", options: ["Mailchimp", "Klaviyo", "HubSpot"], correct: 1 },
+        { q: "What kind of product is EcoBox?", options: ["A sustainable-products subscription box", "A ride-sharing app", "A B2B invoicing tool"], correct: 0 }
+      ],
+      taskTopics: [
+        "Welcome Flow", "Welcome Flow", "Cart Recovery", "Cart Recovery",
+        "Segmentation", "Segmentation", "Win-Back Campaigns", "A/B Testing",
+        "Campaigns", "Automation Flows", "Automation Flows", "Performance Review",
+        "Performance Review", "List Hygiene", "Reporting"
+      ],
       tasks: [
         T("Build the welcome email automation flow for new EcoBox subscribers — describe the trigger and the first email's content.", [["welcome"], ["trigger", "signup", "automation"]]),
         T("Design email #2 of the welcome flow, sent 2 days later, introducing the EcoBox brand story.", [["email 2", "second email", "follow up"], ["story", "brand"]]),
@@ -137,6 +179,17 @@
       payType: "monthly", payAmount: 3800, currency: "€",
       client: "Hatchway", industry: "B2B fintech — invoicing software for freelancers",
       brief: "Hatchway builds invoicing and payments software for freelancers. You lead content strategy end-to-end: planning, briefing writers, publishing, and reporting.",
+      applyQuestions: [
+        { q: "Who is Hatchway's invoicing software built for?", options: ["Freelancers", "Hospitals", "Airlines"], correct: 0 },
+        { q: "This role covers content strategy end-to-end. Which of these is part of that scope?", options: ["Running paid social ads", "Briefing writers and publishing", "Managing customer support tickets"], correct: 1 }
+      ],
+      taskTopics: [
+        "Content Strategy", "Content Briefs", "Content Briefs", "Editing & QA",
+        "On-Page SEO", "Publishing", "Content Briefs", "Content Briefs",
+        "Content Briefs", "Content Briefs", "Distribution", "Distribution",
+        "Performance Review", "Content Strategy", "Distribution", "Content Strategy",
+        "Content Briefs", "Content Briefs", "Reporting", "Reporting"
+      ],
       tasks: [
         T("Define the content strategy pillar topics for Hatchway aligned with Q3 growth goals.", [["pillar", "topic", "strategy"], ["q3", "growth"]]),
         T("Write a content brief for a blog post targeting freelancers about invoicing tips.", [["brief"], ["invoicing", "freelancer"]]),
@@ -166,6 +219,17 @@
       payType: "hourly", payAmount: 60, currency: "$",
       client: "Lumio", industry: "Fitness app — workout tracking with a paid subscription",
       brief: "Lumio is a fitness app with a free-to-paid subscription model. You're running growth experiments across the funnel — signup, onboarding, pricing, and retention.",
+      applyQuestions: [
+        { q: "What kind of app is Lumio?", options: ["A fitness / workout tracking app", "A recipe app", "A travel booking app"], correct: 0 },
+        { q: "Which parts of the funnel does this role focus on?", options: ["Only paid advertising", "Signup, onboarding, pricing, and retention", "Only customer support"], correct: 1 }
+      ],
+      taskTopics: [
+        "Funnel Analysis", "Funnel Analysis", "A/B Testing", "A/B Testing",
+        "User Research", "User Research", "A/B Testing", "A/B Testing",
+        "Growth Experiments", "Growth Experiments", "Growth Experiments", "Growth Experiments",
+        "Retention Analysis", "Retention Analysis", "Growth Experiments", "Performance Review",
+        "Retention Analysis", "Growth Experiments", "Prioritization", "Reporting"
+      ],
       tasks: [
         T("Audit the Lumio signup funnel and identify the step with the highest drop-off.", [["funnel", "signup"], ["drop-off", "dropoff", "drop off"]]),
         T("Propose a hypothesis for why users are dropping off at that step.", [["hypothesis"], ["because", "reason", "drop"]]),
@@ -195,6 +259,17 @@
       payType: "monthly", payAmount: 2800, currency: "$",
       client: "NorthPeak", industry: "Outdoor gear brand — hiking & camping equipment",
       brief: "NorthPeak sells hiking and camping gear. You manage Instagram content and community — planning, captions, Reels, and engagement reporting — for the summer hiking collection launch.",
+      applyQuestions: [
+        { q: "What does NorthPeak sell?", options: ["Hiking and camping gear", "Office furniture", "Pet food"], correct: 0 },
+        { q: "Which platform is the primary focus of this role?", options: ["Instagram", "LinkedIn", "Snapchat"], correct: 0 }
+      ],
+      taskTopics: [
+        "Content Planning", "Content Creation", "Content Creation", "Content Creation",
+        "Content Creation", "Community Management", "Community Management", "Content Planning",
+        "Content Creation", "Campaigns", "Campaigns", "Influencer Outreach",
+        "Influencer Outreach", "Content Planning", "Content Creation", "Performance Review",
+        "Performance Review", "Community Management", "Content Planning", "Reporting"
+      ],
       tasks: [
         T("Plan the 30-day Instagram content calendar theme for NorthPeak's summer hiking collection.", [["content calendar", "calendar"], ["summer", "hiking"]]),
         T("Write the caption for an Instagram post announcing the new hiking boots.", [["caption"], ["hiking boot", "boots"]]),
@@ -305,7 +380,9 @@
   }
 
   /** Mark a job as applied, stamp the time, and generate its first day's
-   *  task batch immediately (no reload needed). No-op if already applied. */
+   *  task batch immediately (no reload needed). No-op if already applied.
+   *  Callers are expected to have already run the applicant through the
+   *  job's quick-check questions (see applyQuestions) before calling this. */
   function applyToJob(job, s) {
     if (s.applied) return false;
     s.applied = true;
@@ -522,12 +599,93 @@
     return parts.length ? parts.join(" · ") : null;
   }
 
+  /* ==========================================================================
+     User-submitted job postings
+     --------------------------------------------------------------------------
+     A simple, honestly-labeled moderation queue: anyone signed in can submit
+     a posting describing a role or gig they're looking to fill. It starts as
+     "pending", is visible only to its author (marked Pending Review) until a
+     reviewer approves or rejects it with a note, at which point the decision
+     and note become visible to the author. This is entirely client-side
+     (localStorage) — there is no real backend or payment flow behind it.
+     ========================================================================== */
+
+  function loadPostings() {
+    let raw;
+    try {
+      raw = JSON.parse(localStorage.getItem(POSTINGS_KEY) || "[]");
+    } catch (e) {
+      raw = [];
+    }
+    return Array.isArray(raw) ? raw : [];
+  }
+
+  function savePostings(list) {
+    try {
+      localStorage.setItem(POSTINGS_KEY, JSON.stringify(list));
+    } catch (e) {
+      console.error("Marketsphare: failed to save postings", e);
+    }
+    window.dispatchEvent(new CustomEvent("marketsphare:postings-changed", { detail: list }));
+  }
+
+  /** Create and store a new posting. `data` should contain the form fields;
+   *  ownerUid/ownerName are stamped from the current user automatically. */
+  function createPosting(data) {
+    const user = window.Marketsphare && window.Marketsphare.currentUser;
+    const profile = window.Marketsphare && window.Marketsphare.currentProfile;
+    const posting = {
+      id: "posting-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8),
+      ownerUid: user ? user.uid : null,
+      ownerName: (profile && profile.name) || (user && user.email) || "Anonymous",
+      title: data.title,
+      jobType: data.jobType,
+      category: data.category,
+      description: data.description,
+      payType: data.payType,
+      payAmount: data.payAmount,
+      currency: data.currency || "$",
+      location: data.location,
+      contactName: data.contactName,
+      contactEmail: data.contactEmail,
+      contactPhone: data.contactPhone || "",
+      status: "pending",       // "pending" | "approved" | "rejected"
+      reviewNote: "",
+      createdAt: Date.now(),
+      reviewedAt: null
+    };
+    const list = loadPostings();
+    list.unshift(posting);
+    savePostings(list);
+    return posting;
+  }
+
+  function listPostingsByUser(uid) {
+    return loadPostings().filter((p) => p.ownerUid === uid).sort((a, b) => b.createdAt - a.createdAt);
+  }
+
+  function listAllPostings() {
+    return loadPostings().sort((a, b) => b.createdAt - a.createdAt);
+  }
+
+  function reviewPosting(id, status, note) {
+    const list = loadPostings();
+    const p = list.find((x) => x.id === id);
+    if (!p) return null;
+    p.status = status;
+    p.reviewNote = note || "";
+    p.reviewedAt = Date.now();
+    savePostings(list);
+    return p;
+  }
+
   // IMPORTANT: merge into window.Marketsphare rather than replacing it —
   // dashboard-auth.js (loaded first) already put authReady/currentUser/
   // currentProfile on this object, and we must not wipe those out.
   window.Marketsphare = window.Marketsphare || {};
   Object.assign(window.Marketsphare, {
     STORAGE_KEY,
+    POSTINGS_KEY,
     DAY_MS,
     jobs,
     getNextFriday,
@@ -545,6 +703,12 @@
     saveState,
     computeStats,
     formatCurrencyMap,
-    getStorageKey
+    getStorageKey,
+    loadPostings,
+    savePostings,
+    createPosting,
+    listPostingsByUser,
+    listAllPostings,
+    reviewPosting
   });
 })(window);
