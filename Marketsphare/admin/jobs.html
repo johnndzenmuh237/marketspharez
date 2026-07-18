@@ -8,6 +8,38 @@
   <link rel="stylesheet" href="../assets/css/responsive.css">
   <link rel="stylesheet" href="../assets/css/dashboard.css">
   <link rel="stylesheet" href="../assets/css/admin.css">
+  <style>
+    /* ---------- Scoped additions for the posted-job moderation queue ---------- */
+    .user-posted-tag{
+      display:inline-block; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.03em;
+      color:#2f6feb; background:#eaf1ff; border-radius:999px; padding:1px 7px; margin-left:6px; vertical-align:middle;
+    }
+    .adm-modal-overlay{
+      display:none; position:fixed; inset:0; background:rgba(15,17,21,.5); z-index:999;
+      align-items:center; justify-content:center; padding:20px;
+    }
+    .adm-modal-overlay.show{ display:flex; }
+    .adm-modal{
+      background:#fff; border-radius:14px; padding:26px; max-width:480px; width:100%;
+      box-shadow:0 20px 60px rgba(0,0,0,.25); box-sizing:border-box; text-align:left;
+    }
+    .adm-modal h2{ font-size:18px; margin:0 0 4px; }
+    .adm-modal .adm-sub{ font-size:12.5px; color:#6b7280; margin:0 0 16px; line-height:1.5; }
+    .adm-modal dl{ margin:0 0 16px; }
+    .adm-modal dt{ font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; color:#6b7280; margin-top:10px; }
+    .adm-modal dd{ margin:2px 0 0; font-size:13.5px; line-height:1.5; }
+    .adm-modal textarea{
+      width:100%; min-height:70px; border:1px solid #e6e8eb; border-radius:8px; padding:9px 11px;
+      font-size:13.5px; font-family:inherit; resize:vertical; box-sizing:border-box; margin-top:4px;
+    }
+    .adm-modal textarea:focus{ outline:none; border-color:#2f6feb; }
+    .adm-modal-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:18px; }
+    .adm-btn-primary{ background:#2f6feb; color:#fff; border:none; border-radius:9px; padding:9px 16px; font-size:13.5px; font-weight:700; cursor:pointer; }
+    .adm-btn-primary:hover{ opacity:.92; }
+    .adm-btn-secondary{ background:#f7f8fa; color:#16181c; border:1px solid #e6e8eb; border-radius:9px; padding:9px 16px; font-size:13.5px; font-weight:700; cursor:pointer; }
+    .adm-btn-secondary:hover{ background:#eef0f3; }
+    .adm-empty-row td{ text-align:center; color:#6b7280; font-style:italic; padding:24px 12px; }
+  </style>
 </head>
 <body>
   <div class="app-body">
@@ -58,24 +90,25 @@
       <main class="app-content">
         <div class="page-title-row"><div><h1>Jobs</h1><p>Moderate and manage job postings across the platform.</p></div></div>
 
-        <div class="filters-row">
-          <button class="filter-chip active">All (6,204)</button>
-          <button class="filter-chip">Pending Review</button>
-          <button class="filter-chip">Published</button>
-          <button class="filter-chip">Flagged</button>
-          <button class="filter-chip">Closed</button>
+        <div class="filters-row" id="jobsFilterRow">
+          <button class="filter-chip active" data-filter="all">All <span id="countAll">(6,204)</span></button>
+          <button class="filter-chip" data-filter="pending">Pending Review <span id="countPending"></span></button>
+          <button class="filter-chip" data-filter="published">Published</button>
+          <button class="filter-chip" data-filter="flagged">Flagged</button>
+          <button class="filter-chip" data-filter="closed">Closed</button>
         </div>
 
         <div class="panel">
           <div class="table-wrap">
             <table class="data-table">
               <thead><tr><th>Job Title</th><th>Company</th><th>Type</th><th>Status</th><th>Posted</th><th>Actions</th></tr></thead>
-              <tbody>
-                <tr><td>SEO Strategist</td><td>BrightWave</td><td>Full-time</td><td><span class="pill pill-success">Published</span></td><td>Jun 25, 2026</td><td class="action-row"><button title="View">👁️</button><button title="Edit">✏️</button><button class="danger" title="Remove" data-confirm-delete>🗑️</button></td></tr>
-                <tr><td>Paid Social Specialist</td><td>Cobalt Co.</td><td>Contract</td><td><span class="pill pill-success">Published</span></td><td>Jun 23, 2026</td><td class="action-row"><button title="View">👁️</button><button title="Edit">✏️</button><button class="danger" title="Remove" data-confirm-delete>🗑️</button></td></tr>
-                <tr><td>"Quick Cash Marketing Gig"</td><td>Unverified Co.</td><td>Freelance</td><td><span class="pill pill-danger">Flagged</span></td><td>Jun 22, 2026</td><td class="action-row"><button title="View">👁️</button><button title="Approve">✅</button><button class="danger" title="Remove" data-confirm-delete>🗑️</button></td></tr>
-                <tr><td>Content Marketing Lead</td><td>Hatchway</td><td>Full-time</td><td><span class="pill pill-warning">Pending Review</span></td><td>Jun 21, 2026</td><td class="action-row"><button title="View">👁️</button><button title="Approve">✅</button><button class="danger" title="Reject" data-confirm-delete>❌</button></td></tr>
-                <tr><td>Email Marketing Manager</td><td>Vertex Labs</td><td>Part-time</td><td><span class="pill">Closed</span></td><td>May 30, 2026</td><td class="action-row"><button title="View">👁️</button><button title="Edit">✏️</button><button class="danger" title="Remove" data-confirm-delete>🗑️</button></td></tr>
+              <tbody id="jobsTableBody">
+                <tr data-status="published"><td>SEO Strategist</td><td>BrightWave</td><td>Full-time</td><td><span class="pill pill-success">Published</span></td><td>Jun 25, 2026</td><td class="action-row"><button title="View">👁️</button><button title="Edit">✏️</button><button class="danger" title="Remove" data-confirm-delete>🗑️</button></td></tr>
+                <tr data-status="published"><td>Paid Social Specialist</td><td>Cobalt Co.</td><td>Contract</td><td><span class="pill pill-success">Published</span></td><td>Jun 23, 2026</td><td class="action-row"><button title="View">👁️</button><button title="Edit">✏️</button><button class="danger" title="Remove" data-confirm-delete>🗑️</button></td></tr>
+                <tr data-status="flagged"><td>"Quick Cash Marketing Gig"</td><td>Unverified Co.</td><td>Freelance</td><td><span class="pill pill-danger">Flagged</span></td><td>Jun 22, 2026</td><td class="action-row"><button title="View">👁️</button><button title="Approve">✅</button><button class="danger" title="Remove" data-confirm-delete>🗑️</button></td></tr>
+                <tr data-status="pending"><td>Content Marketing Lead</td><td>Hatchway</td><td>Full-time</td><td><span class="pill pill-warning">Pending Review</span></td><td>Jun 21, 2026</td><td class="action-row"><button title="View">👁️</button><button title="Approve">✅</button><button class="danger" title="Reject" data-confirm-delete>❌</button></td></tr>
+                <tr data-status="closed"><td>Email Marketing Manager</td><td>Vertex Labs</td><td>Part-time</td><td><span class="pill">Closed</span></td><td>May 30, 2026</td><td class="action-row"><button title="View">👁️</button><button title="Edit">✏️</button><button class="danger" title="Remove" data-confirm-delete>🗑️</button></td></tr>
+                <!-- User-submitted postings (from Post a Job) render here dynamically -->
               </tbody>
             </table>
           </div>
@@ -85,8 +118,221 @@
     </div>
   </div>
 
+  <!-- View posting modal -->
+  <div class="adm-modal-overlay" id="admViewModal">
+    <div class="adm-modal">
+      <h2 id="admViewTitle">Job posting</h2>
+      <p class="adm-sub">Submitted through the "Post a Job" form.</p>
+      <dl id="admViewBody"></dl>
+      <div class="adm-modal-actions">
+        <button class="adm-btn-secondary" id="admViewClose">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Approve with note modal -->
+  <div class="adm-modal-overlay" id="admApproveModal">
+    <div class="adm-modal">
+      <h2>Approve posting</h2>
+      <p class="adm-sub" id="admApproveSub">Approving this job posting will mark it as published and send your note back to the poster.</p>
+      <label style="font-size:12.5px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.03em;">Note to poster</label>
+      <textarea id="admApproveNote" placeholder="e.g. Looks good — this is now live. Reach out if you need to edit anything."></textarea>
+      <div class="adm-modal-actions">
+        <button class="adm-btn-secondary" id="admApproveCancel">Cancel</button>
+        <button class="adm-btn-primary" id="admApproveConfirm">Approve &amp; Send Note</button>
+      </div>
+    </div>
+  </div>
+
   <script src="../assets/js/app.js"></script>
   <script src="../assets/js/dashboard.js"></script>
   <script src="../assets/js/admin.js"></script>
+  <script src="../assets/js/marketsphare-shared.js"></script>
+
+  <script>
+  /* ==========================================================================
+     Posted-job moderation queue.
+     Pulls postings submitted through "Post a Job" (jobs.html) out of shared
+     local storage and renders them as extra rows in this same table, so
+     admins review everything — the platform's own listings and
+     user-submitted postings — in one place.
+
+     NOTE: like the rest of this prototype, this reads/writes local storage
+     directly rather than a real backend. Approving here updates the same
+     record the poster's "My Posted Jobs" list reads from, so the status +
+     note show up there without a page reload on their end (via the
+     storage / marketsphare:posted-jobs-changed events).
+     ========================================================================== */
+  (function(){
+    const tbody = document.getElementById("jobsTableBody");
+    const filterRow = document.getElementById("jobsFilterRow");
+    const countPendingEl = document.getElementById("countPending");
+
+    let activeFilter = "all";
+    let pendingApproveId = null;
+
+    function escapeHtml(str){
+      return String(str || "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    }
+
+    function fmtDate(ts){
+      return new Date(ts).toLocaleDateString(undefined, { year:"numeric", month:"short", day:"numeric" });
+    }
+
+    function postedRowsHtml(){
+      const posted = window.Marketsphare.loadPostedJobs();
+      return posted.map(j=>{
+        const statusKey = j.status === "approved" ? "published" : "pending";
+        const pillHtml = j.status === "approved"
+          ? `<span class="pill pill-success">Published</span>`
+          : `<span class="pill pill-warning">Pending Review</span>`;
+        const actions = j.status === "approved"
+          ? `<button title="View" data-view-posted="${j.id}">👁️</button>
+             <button title="Edit" data-edit-posted="${j.id}">✏️</button>
+             <button class="danger" title="Remove" data-remove-posted="${j.id}">🗑️</button>`
+          : `<button title="View" data-view-posted="${j.id}">👁️</button>
+             <button title="Approve" data-approve-posted="${j.id}">✅</button>
+             <button class="danger" title="Reject" data-remove-posted="${j.id}">❌</button>`;
+        return `
+          <tr data-status="${statusKey}" data-posted-row="${j.id}">
+            <td>${escapeHtml(j.title)}</td>
+            <td>${escapeHtml(j.contactName || "—")}<span class="user-posted-tag">User Posted</span></td>
+            <td>${escapeHtml(j.type || "—")}</td>
+            <td>${pillHtml}</td>
+            <td>${fmtDate(j.submittedAt)}</td>
+            <td class="action-row">${actions}</td>
+          </tr>`;
+      }).join("");
+    }
+
+    function applyFilter(){
+      const rows = tbody.querySelectorAll("tr[data-status]");
+      let visibleCount = 0;
+      rows.forEach(tr=>{
+        const show = activeFilter === "all" || tr.dataset.status === activeFilter;
+        tr.style.display = show ? "" : "none";
+        if(show) visibleCount++;
+      });
+      const emptyRow = tbody.querySelector(".adm-empty-row");
+      if(visibleCount === 0){
+        if(!emptyRow){
+          tbody.insertAdjacentHTML("beforeend", `<tr class="adm-empty-row"><td colspan="6">No jobs match this filter.</td></tr>`);
+        }
+      } else if(emptyRow){
+        emptyRow.remove();
+      }
+    }
+
+    function renderPostedRows(){
+      tbody.querySelectorAll("[data-posted-row]").forEach(tr => tr.remove());
+      tbody.querySelectorAll(".adm-empty-row").forEach(tr => tr.remove());
+      tbody.insertAdjacentHTML("beforeend", postedRowsHtml());
+
+      const pendingCount = window.Marketsphare.loadPostedJobs().filter(j => j.status !== "approved").length;
+      countPendingEl.textContent = pendingCount ? `(${pendingCount})` : "";
+
+      applyFilter();
+    }
+    renderPostedRows();
+
+    filterRow.addEventListener("click", (e)=>{
+      const chip = e.target.closest("[data-filter]");
+      if(!chip) return;
+      filterRow.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
+      chip.classList.add("active");
+      activeFilter = chip.dataset.filter;
+      applyFilter();
+    });
+
+    /* ---------------- View modal ---------------- */
+    const viewModal = document.getElementById("admViewModal");
+    const viewTitle = document.getElementById("admViewTitle");
+    const viewBody = document.getElementById("admViewBody");
+
+    function openView(job){
+      viewTitle.textContent = job.title;
+      viewBody.innerHTML = `
+        <dt>Category</dt><dd>${escapeHtml(job.category || "—")}</dd>
+        <dt>Job Type</dt><dd>${escapeHtml(job.type || "—")}</dd>
+        <dt>Budget</dt><dd>${escapeHtml(job.budget || "—")}</dd>
+        <dt>Location</dt><dd>${escapeHtml(job.location || "—")}</dd>
+        <dt>Description</dt><dd>${escapeHtml(job.description || "—")}</dd>
+        <dt>Contact</dt><dd>${escapeHtml(job.contactName || "—")} · ${escapeHtml(job.contactEmail || "—")}${job.contactPhone ? " · " + escapeHtml(job.contactPhone) : ""}</dd>
+        <dt>Submitted</dt><dd>${fmtDate(job.submittedAt)}</dd>
+        ${job.status === "approved" ? `<dt>Admin note</dt><dd>${escapeHtml(job.adminNote || "—")}</dd>` : ""}
+      `;
+      viewModal.classList.add("show");
+    }
+    document.getElementById("admViewClose").addEventListener("click", ()=> viewModal.classList.remove("show"));
+
+    /* ---------------- Approve modal ---------------- */
+    const approveModal = document.getElementById("admApproveModal");
+    const approveNote = document.getElementById("admApproveNote");
+
+    function openApprove(job){
+      pendingApproveId = job.id;
+      approveNote.value = "";
+      approveModal.classList.add("show");
+    }
+    document.getElementById("admApproveCancel").addEventListener("click", ()=>{
+      approveModal.classList.remove("show");
+      pendingApproveId = null;
+    });
+    document.getElementById("admApproveConfirm").addEventListener("click", ()=>{
+      if(!pendingApproveId) return;
+      const list = window.Marketsphare.loadPostedJobs();
+      const job = list.find(j => j.id === pendingApproveId);
+      if(job){
+        job.status = "approved";
+        job.adminNote = approveNote.value.trim() || "Approved — this posting is now live.";
+        window.Marketsphare.savePostedJobs(list);
+      }
+      approveModal.classList.remove("show");
+      pendingApproveId = null;
+      renderPostedRows();
+    });
+
+    /* ---------------- Row action clicks ---------------- */
+    tbody.addEventListener("click", (e)=>{
+      const list = window.Marketsphare.loadPostedJobs();
+
+      const viewBtn = e.target.closest("[data-view-posted]");
+      if(viewBtn){
+        const job = list.find(j => j.id === viewBtn.dataset.viewPosted);
+        if(job) openView(job);
+        return;
+      }
+
+      const approveBtn = e.target.closest("[data-approve-posted]");
+      if(approveBtn){
+        const job = list.find(j => j.id === approveBtn.dataset.approvePosted);
+        if(job) openApprove(job);
+        return;
+      }
+
+      const editBtn = e.target.closest("[data-edit-posted]");
+      if(editBtn){
+        alert("Editing published postings isn't available in this demo yet.");
+        return;
+      }
+
+      const removeBtn = e.target.closest("[data-remove-posted]");
+      if(removeBtn){
+        const job = list.find(j => j.id === removeBtn.dataset.removePosted);
+        if(!job) return;
+        const verb = job.status === "approved" ? "remove" : "reject";
+        if(!confirm(`Are you sure you want to ${verb} "${job.title}"? This can't be undone.`)) return;
+        const next = list.filter(j => j.id !== job.id);
+        window.Marketsphare.savePostedJobs(next);
+        renderPostedRows();
+      }
+    });
+
+    // Stay in sync if another tab (e.g. a poster's jobs.html) changes the queue.
+    window.addEventListener("storage", (e)=>{
+      if(e.key === window.Marketsphare.POSTED_JOBS_KEY) renderPostedRows();
+    });
+  })();
+  </script>
 </body>
 </html>
