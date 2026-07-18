@@ -124,6 +124,61 @@
 .ws-modal-btn-secondary{background:var(--ws-surface);color:var(--ws-ink);border:1px solid var(--ws-line);border-radius:9px;padding:10px 18px;font-size:13.5px;font-weight:700;cursor:pointer;}
 .ws-modal-btn-secondary:hover{background:#eef0f3;}
 
+/* ---------- Screening modal (pre-apply questions) ---------- */
+.screen-modal{max-width:560px;text-align:left;}
+.screen-modal h2{font-size:18px;margin:0 0 4px;color:var(--ws-ink);}
+.screen-modal .screen-sub{font-size:13px;color:var(--ws-muted);margin:0 0 18px;line-height:1.5;}
+.screen-q{margin-bottom:16px;}
+.screen-q label{display:block;font-size:13.5px;font-weight:600;color:var(--ws-ink);margin-bottom:6px;line-height:1.5;}
+.screen-q textarea{width:100%;min-height:70px;border:1px solid var(--ws-line);border-radius:8px;padding:10px 12px;font-size:13.5px;font-family:inherit;resize:vertical;box-sizing:border-box;}
+.screen-q textarea:focus{outline:none;border-color:var(--ws-accent);}
+.screen-q .screen-feedback{font-size:12.5px;margin-top:6px;min-height:16px;}
+.screen-q .screen-feedback.error{color:var(--ws-danger);}
+.screen-q .screen-feedback.success{color:var(--ws-success);}
+.screen-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:6px;}
+
+/* ---------- Under-review overlay ---------- */
+.review-modal{max-width:380px;}
+.review-spinner{width:52px;height:52px;border-radius:50%;border:4px solid var(--ws-line);border-top-color:var(--ws-accent);margin:4px auto 18px;animation:review-spin 0.9s linear infinite;}
+@keyframes review-spin{to{transform:rotate(360deg);}}
+.review-dontclose{font-size:12px;color:var(--ws-warn);background:var(--ws-warn-bg);border-radius:8px;padding:8px 10px;margin-top:4px;font-weight:600;}
+
+/* ---------- Post a Job modal ---------- */
+.postjob-modal{max-width:540px;text-align:left;max-height:88vh;overflow-y:auto;}
+.postjob-modal h2{font-size:19px;margin:0 0 4px;}
+.postjob-modal .screen-sub{font-size:13px;color:var(--ws-muted);margin:0 0 18px;}
+.pj-field{margin-bottom:14px;}
+.pj-field label{display:block;font-size:12.5px;font-weight:700;color:var(--ws-ink);margin-bottom:5px;text-transform:uppercase;letter-spacing:.02em;}
+.pj-field input, .pj-field select, .pj-field textarea{width:100%;border:1px solid var(--ws-line);border-radius:8px;padding:9px 11px;font-size:13.5px;font-family:inherit;box-sizing:border-box;}
+.pj-field textarea{min-height:80px;resize:vertical;}
+.pj-field input:focus, .pj-field select:focus, .pj-field textarea:focus{outline:none;border-color:var(--ws-accent);}
+.pj-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media (max-width:480px){.pj-row2{grid-template-columns:1fr;}}
+.pj-error{font-size:12.5px;color:var(--ws-danger);margin:-4px 0 12px;display:none;}
+.pj-error.show{display:block;}
+
+/* ---------- My Posted Jobs ---------- */
+.posted-section{margin-top:28px;}
+.posted-list{display:flex;flex-direction:column;gap:10px;}
+.posted-card{border:1px solid var(--ws-line);border-radius:10px;padding:14px 16px;background:var(--ws-surface);}
+.posted-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;}
+.posted-title{font-size:14.5px;font-weight:700;color:var(--ws-ink);}
+.posted-meta{font-size:12px;color:var(--ws-muted);margin-top:2px;}
+.posted-desc{font-size:13px;color:var(--ws-ink);margin-top:8px;line-height:1.5;}
+.posted-status{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;}
+.posted-status.pending{background:var(--ws-warn-bg);color:var(--ws-warn);}
+.posted-status.approved{background:var(--ws-success-bg);color:var(--ws-success);}
+.posted-note{margin-top:10px;font-size:12.5px;background:#fff;border:1px dashed #c7ecdc;border-radius:8px;padding:8px 10px;color:var(--ws-ink);}
+.posted-note b{color:var(--ws-success);}
+.posted-empty{font-size:13px;color:var(--ws-muted);font-style:italic;}
+
+/* ---------- Client card + task topic tag (workspace) ---------- */
+.ws-client-card{display:flex;align-items:center;gap:12px;background:var(--ws-surface);border:1px solid var(--ws-line);border-radius:10px;padding:12px 14px;margin-bottom:14px;}
+.ws-client-avatar{width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0;background:#e2e5e9;}
+.ws-client-name{font-size:13.5px;font-weight:700;color:var(--ws-ink);}
+.ws-client-title{font-size:12px;color:var(--ws-muted);}
+.ws-task-topic{display:inline-block;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--ws-accent);background:#eaf1ff;padding:2px 8px;border-radius:999px;margin-bottom:6px;}
+
 /* =========================================================
    Local, self-contained responsiveness layer.
    Mirrors the layer used on Overview / Applications / Profile
@@ -336,6 +391,8 @@ html, body { max-width: 100%; overflow-x: hidden; }
   .ws-header-left{ flex-wrap:wrap; }
   .ws-session-timer{ font-size:26px; }
   .ws-answer-box, .ws-lock-note, .ws-approved-answer{ margin-left:0; }
+  .pj-row2{ grid-template-columns:1fr; }
+  .screen-modal, .postjob-modal{ max-width:100%; }
 }
 </style>
 </head>
@@ -391,7 +448,7 @@ html, body { max-width: 100%; overflow-x: hidden; }
     <main class="app-content">
 
       <div class="view active" id="view-jobs">
-        <div class="page-title-row"><div><h1>Jobs</h1><p>Browse opportunities or post a new role.</p></div><button class="btn btn-primary">+ Post a Job</button></div>
+        <div class="page-title-row"><div><h1>Jobs</h1><p>Browse opportunities or post a new role.</p></div><button class="btn btn-primary" id="postJobBtn">+ Post a Job</button></div>
         <div class="search-bar mb-3">
           <input type="text" placeholder="Search jobs...">
           <div class="divider"></div>
@@ -406,6 +463,11 @@ html, body { max-width: 100%; overflow-x: hidden; }
           <button class="filter-chip">Contract</button>
         </div>
         <div class="grid-3" id="jobsGrid"></div>
+
+        <div class="posted-section">
+          <p class="ws-section-title">My Posted Jobs</p>
+          <div class="posted-list" id="postedJobsList"><div class="posted-empty">You haven't posted any jobs yet.</div></div>
+        </div>
       </div>
 
       <div class="view" id="view-workspace">
@@ -421,6 +483,7 @@ html, body { max-width: 100%; overflow-x: hidden; }
           </div>
         </div>
 
+        <div class="ws-client-card" id="wsClientCard" style="display:none;"></div>
         <div class="ws-brief" id="wsBrief"></div>
         <div class="ws-complete-banner" id="wsCompleteBanner">🎉 Contract complete — you finished all 7 days of tasks. Your full contract value has been credited across the week.</div>
 
@@ -485,6 +548,96 @@ html, body { max-width: 100%; overflow-x: hidden; }
     <div class="ws-modal-actions">
       <button class="ws-modal-btn-secondary" id="approvalModalClose">Maybe later</button>
       <button class="ws-modal-btn-primary" id="approvalModalGo">Start Working →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Screening questions modal (shown before an application is submitted) -->
+<div class="ws-modal-overlay" id="screeningModal">
+  <div class="ws-modal screen-modal">
+    <h2 id="screenTitle">Quick screening questions</h2>
+    <p class="screen-sub" id="screenSub">Answer these to show the client you understand the role. You can revise and resubmit if an answer needs more detail.</p>
+    <div id="screenQuestions"></div>
+    <div class="screen-actions">
+      <button class="ws-modal-btn-secondary" id="screeningCancel">Cancel</button>
+      <button class="ws-modal-btn-primary" id="screeningSubmit">Submit Answers</button>
+    </div>
+  </div>
+</div>
+
+<!-- Under-review overlay (simulated processing delay before approval) -->
+<div class="ws-modal-overlay" id="reviewModal">
+  <div class="ws-modal review-modal">
+    <div class="review-spinner"></div>
+    <h2>Application under review</h2>
+    <p>We're reviewing your answers against this role's requirements.</p>
+    <div class="review-dontclose">⚠ Please don't close this page while your application is being reviewed.</div>
+  </div>
+</div>
+
+<!-- Post a Job modal -->
+<div class="ws-modal-overlay" id="postJobModal">
+  <div class="ws-modal postjob-modal">
+    <h2>Post a Job</h2>
+    <p class="screen-sub">Tell us what you're looking for. Every posting is reviewed before it goes live.</p>
+    <div class="pj-field">
+      <label for="pjTitle">Job Title</label>
+      <input type="text" id="pjTitle" placeholder="e.g. Instagram Content Manager">
+    </div>
+    <div class="pj-row2">
+      <div class="pj-field">
+        <label for="pjCategory">Category</label>
+        <select id="pjCategory">
+          <option>SEO</option>
+          <option>Paid Ads</option>
+          <option>Social Media</option>
+          <option>Content Marketing</option>
+          <option>Email Marketing</option>
+          <option>Growth / CRO</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="pj-field">
+        <label for="pjType">Job Type</label>
+        <select id="pjType">
+          <option>One-time project</option>
+          <option>Monthly retainer</option>
+          <option>Hourly</option>
+        </select>
+      </div>
+    </div>
+    <div class="pj-row2">
+      <div class="pj-field">
+        <label for="pjBudget">Budget</label>
+        <input type="text" id="pjBudget" placeholder="e.g. $1,500/mo or $40/hr">
+      </div>
+      <div class="pj-field">
+        <label for="pjLocation">Location</label>
+        <input type="text" id="pjLocation" placeholder="e.g. Remote">
+      </div>
+    </div>
+    <div class="pj-field">
+      <label for="pjDescription">What are you looking for?</label>
+      <textarea id="pjDescription" placeholder="Describe the work, deliverables, and what a great applicant looks like..."></textarea>
+    </div>
+    <div class="pj-row2">
+      <div class="pj-field">
+        <label for="pjContactName">Contact Name</label>
+        <input type="text" id="pjContactName" placeholder="Your name">
+      </div>
+      <div class="pj-field">
+        <label for="pjContactEmail">Contact Email</label>
+        <input type="email" id="pjContactEmail" placeholder="you@company.com">
+      </div>
+    </div>
+    <div class="pj-field">
+      <label for="pjContactPhone">Contact Phone (optional)</label>
+      <input type="tel" id="pjContactPhone" placeholder="+1 555 000 0000">
+    </div>
+    <div class="pj-error" id="pjError">Please fill in the required fields.</div>
+    <div class="screen-actions">
+      <button class="ws-modal-btn-secondary" id="postJobCancel">Cancel</button>
+      <button class="ws-modal-btn-primary" id="postJobSubmit">Post Job</button>
     </div>
   </div>
 </div>
@@ -617,11 +770,77 @@ grid.addEventListener("click", e=>{
   const wsBtn = e.target.closest("[data-workspace]");
   if(wsBtn){ showWorkspaceView(wsBtn.dataset.workspace); return; }
   const applyBtn = e.target.closest("[data-apply]");
-  if(applyBtn){ applyToJob(applyBtn.dataset.apply); }
+  if(applyBtn){ openScreeningModal(applyBtn.dataset.apply); }
 });
 
-/* ---------------- Apply flow ---------------- */
-function applyToJob(jobId){
+/* ---------------- Screening questions (shown before an application is submitted) ---------------- */
+const screeningModal = document.getElementById("screeningModal");
+const screenQuestionsEl = document.getElementById("screenQuestions");
+const screenTitleEl = document.getElementById("screenTitle");
+let screeningJobId = null;
+
+function openScreeningModal(jobId){
+  const job = jobs.find(j=>j.id===jobId);
+  const s = state[jobId];
+  if(!job || s.applied) return;
+  screeningJobId = jobId;
+  screenTitleEl.textContent = `Apply — ${job.title} at ${job.company}`;
+
+  const questions = (job.screening && job.screening.length) ? job.screening : [];
+  screenQuestionsEl.innerHTML = questions.map((q, i) => `
+    <div class="screen-q" data-qidx="${i}">
+      <label>${i+1}. ${q.prompt}</label>
+      <textarea data-screen-answer="${i}" placeholder="Your answer..."></textarea>
+      <div class="screen-feedback" id="screenFeedback-${i}"></div>
+    </div>
+  `).join("");
+
+  screeningModal.classList.add("show");
+}
+
+document.getElementById("screeningCancel").addEventListener("click", ()=>{
+  screeningModal.classList.remove("show");
+  screeningJobId = null;
+});
+
+document.getElementById("screeningSubmit").addEventListener("click", ()=>{
+  if(!screeningJobId) return;
+  const job = jobs.find(j=>j.id===screeningJobId);
+  const questions = job.screening || [];
+  let allOk = true;
+
+  questions.forEach((q, i)=>{
+    const ta = screenQuestionsEl.querySelector(`[data-screen-answer="${i}"]`);
+    const feedbackEl = document.getElementById(`screenFeedback-${i}`);
+    const result = checkAnswer(ta.value, q);
+    if(!result.ok){
+      allOk = false;
+      feedbackEl.textContent = "✗ " + result.msg;
+      feedbackEl.className = "screen-feedback error";
+    } else {
+      feedbackEl.textContent = "✓ Looks good.";
+      feedbackEl.className = "screen-feedback success";
+    }
+  });
+
+  if(!allOk) return; // let the user revise and resubmit — no limit on attempts
+
+  screeningModal.classList.remove("show");
+  runUnderReview(screeningJobId);
+});
+
+/* ---------------- Under-review delay, then finalize the application ---------------- */
+const reviewModal = document.getElementById("reviewModal");
+
+function runUnderReview(jobId){
+  reviewModal.classList.add("show");
+  setTimeout(()=>{
+    reviewModal.classList.remove("show");
+    finalizeApplication(jobId);
+  }, 25000);
+}
+
+function finalizeApplication(jobId){
   const job = jobs.find(j=>j.id===jobId);
   const s = state[jobId];
   if(s.applied) return;
@@ -647,12 +866,92 @@ document.getElementById("approvalModalClose").addEventListener("click", ()=>{
   approvalModal.classList.remove("show");
 });
 
+/* ---------------- Post a Job ---------------- */
+const postJobModal = document.getElementById("postJobModal");
+const postedJobsList = document.getElementById("postedJobsList");
+
+document.getElementById("postJobBtn").addEventListener("click", ()=>{
+  ["pjTitle","pjBudget","pjLocation","pjDescription","pjContactName","pjContactEmail","pjContactPhone"].forEach(id=>{
+    document.getElementById(id).value = "";
+  });
+  document.getElementById("pjError").classList.remove("show");
+  postJobModal.classList.add("show");
+});
+document.getElementById("postJobCancel").addEventListener("click", ()=>{
+  postJobModal.classList.remove("show");
+});
+document.getElementById("postJobSubmit").addEventListener("click", ()=>{
+  const title = document.getElementById("pjTitle").value.trim();
+  const category = document.getElementById("pjCategory").value;
+  const type = document.getElementById("pjType").value;
+  const budget = document.getElementById("pjBudget").value.trim();
+  const location = document.getElementById("pjLocation").value.trim();
+  const description = document.getElementById("pjDescription").value.trim();
+  const contactName = document.getElementById("pjContactName").value.trim();
+  const contactEmail = document.getElementById("pjContactEmail").value.trim();
+  const contactPhone = document.getElementById("pjContactPhone").value.trim();
+
+  const errEl = document.getElementById("pjError");
+  if(!title || !description || !contactName || !contactEmail){
+    errEl.textContent = "Please fill in the job title, description, contact name, and contact email.";
+    errEl.classList.add("show");
+    return;
+  }
+  errEl.classList.remove("show");
+
+  window.Marketsphare.submitPostedJob({
+    title, category, type, budget, location, description,
+    contactName, contactEmail, contactPhone
+  });
+
+  postJobModal.classList.remove("show");
+  renderPostedJobs();
+});
+
+function renderPostedJobs(){
+  const uid = (window.Marketsphare.currentUser && window.Marketsphare.currentUser.uid) || null;
+  const all = window.Marketsphare.loadPostedJobs();
+  const mine = all.filter(j => j.submittedByUid === uid);
+
+  if(!mine.length){
+    postedJobsList.innerHTML = `<div class="posted-empty">You haven't posted any jobs yet.</div>`;
+    return;
+  }
+
+  postedJobsList.innerHTML = mine.map(j=>{
+    const statusLabel = j.status === "approved" ? "Approved" : "Pending Review";
+    const noteHtml = j.status === "approved" && j.adminNote
+      ? `<div class="posted-note"><b>Admin note:</b> ${j.adminNote}</div>`
+      : (j.status === "pending" ? `<div class="posted-note">Awaiting admin review — you'll see a note here once it's approved.</div>` : "");
+    return `
+      <div class="posted-card">
+        <div class="posted-top">
+          <div>
+            <div class="posted-title">${j.title}</div>
+            <div class="posted-meta">${j.category} · ${j.type}${j.budget ? " · " + j.budget : ""}${j.location ? " · " + j.location : ""}</div>
+          </div>
+          <span class="posted-status ${j.status}">${statusLabel}</span>
+        </div>
+        <div class="posted-desc">${j.description}</div>
+        ${noteHtml}
+      </div>`;
+  }).join("");
+}
+renderPostedJobs();
+
+// Pick up admin approvals made from admin.html (same browser, other tab) live.
+window.addEventListener("storage", (e)=>{
+  if(e.key === window.Marketsphare.POSTED_JOBS_KEY) renderPostedJobs();
+});
+window.addEventListener("marketsphare:posted-jobs-changed", renderPostedJobs);
+
 /* ---------------- Workspace ---------------- */
 const elLogo = document.getElementById("wsLogo");
 const elTitle = document.getElementById("wsTitle");
 const elMeta = document.getElementById("wsMeta");
 const elDayCounter = document.getElementById("wsDayCounter");
 const elBrief = document.getElementById("wsBrief");
+const elClientCard = document.getElementById("wsClientCard");
 const elCountdown = document.getElementById("wsCountdown");
 const elTaskList = document.getElementById("wsTaskList");
 const elProgressFill = document.getElementById("wsProgressFill");
@@ -683,6 +982,18 @@ function loadWorkspace(jobId){
   elTitle.textContent = job.title;
   elMeta.textContent = `${job.company} · ${job.location} · ${job.payType==="hourly" ? job.currency+job.payAmount+"/hr" : job.currency+job.payAmount.toLocaleString()+"/mo"}`;
   elBrief.innerHTML = `<strong>Client:</strong> ${job.client} — ${job.industry}<br>${job.brief}`;
+
+  if(job.clientContact){
+    elClientCard.innerHTML = `
+      <img class="ws-client-avatar" src="${job.clientContact.avatar}" alt="${job.clientContact.name}">
+      <div>
+        <div class="ws-client-name">${job.clientContact.name}</div>
+        <div class="ws-client-title">${job.clientContact.title}</div>
+      </div>`;
+    elClientCard.style.display = "flex";
+  } else {
+    elClientCard.style.display = "none";
+  }
 
   if(job.payType === "monthly"){
     elDayCounter.style.display = "inline-block";
@@ -724,10 +1035,13 @@ function renderTasks(job){
       ? `<span class="ws-task-reward">+${job.currency}${window.Marketsphare.monthlyPayPerTask(job, s).toFixed(2)}</span>`
       : `<span class="ws-task-reward muted">Paid hourly</span>`;
 
+    const topic = (job.taskTopics && job.taskTopics[origIdx]) || null;
+    const topicHtml = topic ? `<span class="ws-task-topic">${topic}</span><br>` : "";
+
     let inner = `
       <div class="ws-task-top">
         <div class="ws-task-num">${isDone ? "✓" : i+1}</div>
-        <div class="ws-task-prompt">${task.prompt} ${rewardBadge}</div>
+        <div class="ws-task-prompt">${topicHtml}${task.prompt} ${rewardBadge}</div>
       </div>`;
 
     if(isDone){
