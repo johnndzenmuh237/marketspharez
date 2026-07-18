@@ -265,6 +265,12 @@
     }
     document.getElementById("admViewClose").addEventListener("click", ()=> viewModal.classList.remove("show"));
 
+    function toast(msg, type){
+      if (window.MS && typeof window.MS.toast === "function") {
+        window.MS.toast(msg, type || "success");
+      }
+    }
+
     /* ---------------- Approve modal ---------------- */
     const approveModal = document.getElementById("admApproveModal");
     const approveNote = document.getElementById("admApproveNote");
@@ -286,6 +292,7 @@
         job.status = "approved";
         job.adminNote = approveNote.value.trim() || "Approved — this posting is now live.";
         window.Marketsphare.savePostedJobs(list);
+        toast(`"${job.title}" approved and published`, "success");
       }
       approveModal.classList.remove("show");
       pendingApproveId = null;
@@ -312,7 +319,7 @@
 
       const editBtn = e.target.closest("[data-edit-posted]");
       if(editBtn){
-        alert("Editing published postings isn't available in this demo yet.");
+        toast("Editing published postings isn't available in this demo yet.", "info");
         return;
       }
 
@@ -324,6 +331,7 @@
         if(!confirm(`Are you sure you want to ${verb} "${job.title}"? This can't be undone.`)) return;
         const next = list.filter(j => j.id !== job.id);
         window.Marketsphare.savePostedJobs(next);
+        toast(`"${job.title}" ${verb === "remove" ? "removed" : "rejected"}`, "success");
         renderPostedRows();
       }
     });
