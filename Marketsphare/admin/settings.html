@@ -7,7 +7,16 @@
   <link rel="stylesheet" href="../assets/css/style.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
   <link rel="stylesheet" href="../assets/css/dashboard.css">
+  <link rel="stylesheet" href="../assets/css/icons.css">
   <link rel="stylesheet" href="../assets/css/admin.css">
+<style id="ms-hide">body{visibility:hidden}</style>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="../assets/js/firebase-config.js"></script>
+  <script>window.MS_ADMIN_PAGE=true;</script>
+  <script src="../assets/js/api-config.js"></script>
+  <script src="../assets/js/marketsphare-shared.js"></script>
+  <script src="../assets/js/admin-auth.js"></script>
 </head>
 <body>
   <div class="app-body">
@@ -15,16 +24,17 @@
       <a href="../index.html" class="sidebar-logo"><span class="logo-mark">MS</span> Admin<span class="admin-badge">PRO</span></a>
       <nav class="sidebar-nav">
         <div class="sidebar-section-title">Overview</div>
-        <a href="dashboard.html" class="sidebar-link "><span class="icon">📊</span> Dashboard</a>
-        <a href="analytics.html" class="sidebar-link "><span class="icon">📈</span> Analytics</a>
+        <a href="dashboard.html" class="sidebar-link "><span class="icon"><i class=mi-chart></i></span> Dashboard</a>
+        <a href="analytics.html" class="sidebar-link "><span class="icon"><i class=mi-trend></i></span> Analytics</a>
         <div class="sidebar-section-title">Management</div>
-        <a href="users.html" class="sidebar-link "><span class="icon">👥</span> Users <span class="count">1.2k</span></a>
-        <a href="jobs.html" class="sidebar-link "><span class="icon">💼</span> Jobs</a>
-        <a href="payments.html" class="sidebar-link "><span class="icon">💳</span> Payments</a>
-        <a href="reports.html" class="sidebar-link "><span class="icon">🚩</span> Reports <span class="count">7</span></a>
+        <a href="users.html" class="sidebar-link "><span class="icon"><i class=mi-users></i></span> Users <span class="count">1.2k</span></a>
+        <a href="jobs.html" class="sidebar-link "><span class="icon"><i class=mi-job></i></span> Jobs</a>
+        <a href="payments.html" class="sidebar-link "><span class="icon"><i class=mi-card></i></span> Payments</a>
+        <a href="requests.html" class="sidebar-link"><span class="icon"><i class=mi-shield></i></span> Requests</a>
+        <a href="reports.html" class="sidebar-link "><span class="icon"><i class=mi-flag></i></span> Reports <span class="count">7</span></a>
         <div class="sidebar-section-title">System</div>
-        <a href="settings.html" class="sidebar-link active"><span class="icon">⚙️</span> Settings</a>
-        <a href="../index.html" class="sidebar-link"><span class="icon">↩️</span> Back to Site</a>
+        <a href="settings.html" class="sidebar-link active"><span class="icon"><i class=mi-cog></i></span> Settings</a>
+        <a href="../index.html" class="sidebar-link"><span class="icon"><i class=mi-back></i></span> Back to Site</a>
       </nav>
       <div class="sidebar-footer">
         <div class="sidebar-user">
@@ -99,8 +109,8 @@
                 <table class="data-table">
                   <thead><tr><th>Name</th><th>Role</th><th>Last Active</th><th></th></tr></thead>
                   <tbody>
-                    <tr><td>Sara Lin</td><td><span class="pill pill-danger">Super Admin</span></td><td>Now</td><td class="action-row"><button>✏️</button></td></tr>
-                    <tr><td>David Mensah</td><td><span class="pill pill-primary">Admin</span></td><td>2 hrs ago</td><td class="action-row"><button>✏️</button></td></tr>
+                    <tr><td>Sara Lin</td><td><span class="pill pill-danger">Super Admin</span></td><td>Now</td><td class="action-row"><button><i class=mi-edit></i></button></td></tr>
+                    <tr><td>David Mensah</td><td><span class="pill pill-primary">Admin</span></td><td>2 hrs ago</td><td class="action-row"><button><i class=mi-edit></i></button></td></tr>
                   </tbody>
                 </table>
               </div>

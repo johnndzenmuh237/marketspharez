@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="../assets/css/style.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
   <link rel="stylesheet" href="../assets/css/dashboard.css">
+  <link rel="stylesheet" href="../assets/css/icons.css">
   <link rel="stylesheet" href="../assets/css/admin.css">
   <style>
     /* ---------- Scoped additions for the posted-job moderation queue ---------- */
@@ -40,6 +41,14 @@
     .adm-btn-secondary:hover{ background:#eef0f3; }
     .adm-empty-row td{ text-align:center; color:#6b7280; font-style:italic; padding:24px 12px; }
   </style>
+<style id="ms-hide">body{visibility:hidden}</style>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="../assets/js/firebase-config.js"></script>
+  <script>window.MS_ADMIN_PAGE=true;</script>
+  <script src="../assets/js/api-config.js"></script>
+  <script src="../assets/js/marketsphare-shared.js"></script>
+  <script src="../assets/js/admin-auth.js"></script>
 </head>
 <body>
   <div class="app-body">
@@ -47,16 +56,17 @@
       <a href="../index.html" class="sidebar-logo"><span class="logo-mark">MS</span> Admin<span class="admin-badge">PRO</span></a>
       <nav class="sidebar-nav">
         <div class="sidebar-section-title">Overview</div>
-        <a href="dashboard.html" class="sidebar-link "><span class="icon">📊</span> Dashboard</a>
-        <a href="analytics.html" class="sidebar-link "><span class="icon">📈</span> Analytics</a>
+        <a href="dashboard.html" class="sidebar-link "><span class="icon"><i class=mi-chart></i></span> Dashboard</a>
+        <a href="analytics.html" class="sidebar-link "><span class="icon"><i class=mi-trend></i></span> Analytics</a>
         <div class="sidebar-section-title">Management</div>
-        <a href="users.html" class="sidebar-link "><span class="icon">👥</span> Users <span class="count">1.2k</span></a>
-        <a href="jobs.html" class="sidebar-link active"><span class="icon">💼</span> Jobs</a>
-        <a href="payments.html" class="sidebar-link "><span class="icon">💳</span> Payments</a>
-        <a href="reports.html" class="sidebar-link "><span class="icon">🚩</span> Reports <span class="count">7</span></a>
+        <a href="users.html" class="sidebar-link "><span class="icon"><i class=mi-users></i></span> Users <span class="count">1.2k</span></a>
+        <a href="jobs.html" class="sidebar-link active"><span class="icon"><i class=mi-job></i></span> Jobs</a>
+        <a href="payments.html" class="sidebar-link "><span class="icon"><i class=mi-card></i></span> Payments</a>
+        <a href="requests.html" class="sidebar-link"><span class="icon"><i class=mi-shield></i></span> Requests</a>
+        <a href="reports.html" class="sidebar-link "><span class="icon"><i class=mi-flag></i></span> Reports <span class="count">7</span></a>
         <div class="sidebar-section-title">System</div>
-        <a href="settings.html" class="sidebar-link "><span class="icon">⚙️</span> Settings</a>
-        <a href="../index.html" class="sidebar-link"><span class="icon">↩️</span> Back to Site</a>
+        <a href="settings.html" class="sidebar-link "><span class="icon"><i class=mi-cog></i></span> Settings</a>
+        <a href="../index.html" class="sidebar-link"><span class="icon"><i class=mi-back></i></span> Back to Site</a>
       </nav>
       <div class="sidebar-footer">
         <div class="sidebar-user">
@@ -103,11 +113,11 @@
             <table class="data-table">
               <thead><tr><th>Job Title</th><th>Company</th><th>Type</th><th>Status</th><th>Posted</th><th>Actions</th></tr></thead>
               <tbody id="jobsTableBody">
-                <tr data-status="published"><td>SEO Strategist</td><td>BrightWave</td><td>Full-time</td><td><span class="pill pill-success">Published</span></td><td>Jun 25, 2026</td><td class="action-row"><button title="View">👁️</button><button title="Edit">✏️</button><button class="danger" title="Remove" data-confirm-delete>🗑️</button></td></tr>
-                <tr data-status="published"><td>Paid Social Specialist</td><td>Cobalt Co.</td><td>Contract</td><td><span class="pill pill-success">Published</span></td><td>Jun 23, 2026</td><td class="action-row"><button title="View">👁️</button><button title="Edit">✏️</button><button class="danger" title="Remove" data-confirm-delete>🗑️</button></td></tr>
-                <tr data-status="flagged"><td>"Quick Cash Marketing Gig"</td><td>Unverified Co.</td><td>Freelance</td><td><span class="pill pill-danger">Flagged</span></td><td>Jun 22, 2026</td><td class="action-row"><button title="View">👁️</button><button title="Approve">✅</button><button class="danger" title="Remove" data-confirm-delete>🗑️</button></td></tr>
-                <tr data-status="pending"><td>Content Marketing Lead</td><td>Hatchway</td><td>Full-time</td><td><span class="pill pill-warning">Pending Review</span></td><td>Jun 21, 2026</td><td class="action-row"><button title="View">👁️</button><button title="Approve">✅</button><button class="danger" title="Reject" data-confirm-delete>❌</button></td></tr>
-                <tr data-status="closed"><td>Email Marketing Manager</td><td>Vertex Labs</td><td>Part-time</td><td><span class="pill">Closed</span></td><td>May 30, 2026</td><td class="action-row"><button title="View">👁️</button><button title="Edit">✏️</button><button class="danger" title="Remove" data-confirm-delete>🗑️</button></td></tr>
+                <tr data-status="published"><td>SEO Strategist</td><td>BrightWave</td><td>Full-time</td><td><span class="pill pill-success">Published</span></td><td>Jun 25, 2026</td><td class="action-row"><button title="View"><i class=mi-eye></i></button><button title="Edit"><i class=mi-edit></i></button><button class="danger" title="Remove" data-confirm-delete><i class=mi-trash></i></button></td></tr>
+                <tr data-status="published"><td>Paid Social Specialist</td><td>Cobalt Co.</td><td>Contract</td><td><span class="pill pill-success">Published</span></td><td>Jun 23, 2026</td><td class="action-row"><button title="View"><i class=mi-eye></i></button><button title="Edit"><i class=mi-edit></i></button><button class="danger" title="Remove" data-confirm-delete><i class=mi-trash></i></button></td></tr>
+                <tr data-status="flagged"><td>"Quick Cash Marketing Gig"</td><td>Unverified Co.</td><td>Freelance</td><td><span class="pill pill-danger">Flagged</span></td><td>Jun 22, 2026</td><td class="action-row"><button title="View"><i class=mi-eye></i></button><button title="Approve"><i class=mi-okc></i></button><button class="danger" title="Remove" data-confirm-delete><i class=mi-trash></i></button></td></tr>
+                <tr data-status="pending"><td>Content Marketing Lead</td><td>Hatchway</td><td>Full-time</td><td><span class="pill pill-warning">Pending Review</span></td><td>Jun 21, 2026</td><td class="action-row"><button title="View"><i class=mi-eye></i></button><button title="Approve"><i class=mi-okc></i></button><button class="danger" title="Reject" data-confirm-delete><i class=mi-xc></i></button></td></tr>
+                <tr data-status="closed"><td>Email Marketing Manager</td><td>Vertex Labs</td><td>Part-time</td><td><span class="pill">Closed</span></td><td>May 30, 2026</td><td class="action-row"><button title="View"><i class=mi-eye></i></button><button title="Edit"><i class=mi-edit></i></button><button class="danger" title="Remove" data-confirm-delete><i class=mi-trash></i></button></td></tr>
                 <!-- User-submitted postings (from Post a Job) render here dynamically -->
               </tbody>
             </table>
@@ -147,7 +157,6 @@
   <script src="../assets/js/app.js"></script>
   <script src="../assets/js/dashboard.js"></script>
   <script src="../assets/js/admin.js"></script>
-  <script src="../assets/js/marketsphare-shared.js"></script>
 
   <script>
   /* ==========================================================================
@@ -187,12 +196,12 @@
           ? `<span class="pill pill-success">Published</span>`
           : `<span class="pill pill-warning">Pending Review</span>`;
         const actions = j.status === "approved"
-          ? `<button title="View" data-view-posted="${j.id}">👁️</button>
-             <button title="Edit" data-edit-posted="${j.id}">✏️</button>
-             <button class="danger" title="Remove" data-remove-posted="${j.id}">🗑️</button>`
-          : `<button title="View" data-view-posted="${j.id}">👁️</button>
-             <button title="Approve" data-approve-posted="${j.id}">✅</button>
-             <button class="danger" title="Reject" data-remove-posted="${j.id}">❌</button>`;
+          ? `<button title="View" data-view-posted="${j.id}"><i class=mi-eye></i></button>
+             <button title="Edit" data-edit-posted="${j.id}"><i class=mi-edit></i></button>
+             <button class="danger" title="Remove" data-remove-posted="${j.id}"><i class=mi-trash></i></button>`
+          : `<button title="View" data-view-posted="${j.id}"><i class=mi-eye></i></button>
+             <button title="Approve" data-approve-posted="${j.id}"><i class=mi-okc></i></button>
+             <button class="danger" title="Reject" data-remove-posted="${j.id}"><i class=mi-xc></i></button>`;
         return `
           <tr data-status="${statusKey}" data-posted-row="${j.id}">
             <td>${escapeHtml(j.title)}</td>

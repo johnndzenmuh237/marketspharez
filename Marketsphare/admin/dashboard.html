@@ -7,7 +7,16 @@
   <link rel="stylesheet" href="../assets/css/style.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
   <link rel="stylesheet" href="../assets/css/dashboard.css">
+  <link rel="stylesheet" href="../assets/css/icons.css">
   <link rel="stylesheet" href="../assets/css/admin.css">
+<style id="ms-hide">body{visibility:hidden}</style>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="../assets/js/firebase-config.js"></script>
+  <script>window.MS_ADMIN_PAGE=true;</script>
+  <script src="../assets/js/api-config.js"></script>
+  <script src="../assets/js/marketsphare-shared.js"></script>
+  <script src="../assets/js/admin-auth.js"></script>
 </head>
 <body>
   <div class="app-body">
@@ -15,16 +24,17 @@
       <a href="../index.html" class="sidebar-logo"><span class="logo-mark">MS</span> Admin<span class="admin-badge">PRO</span></a>
       <nav class="sidebar-nav">
         <div class="sidebar-section-title">Overview</div>
-        <a href="dashboard.html" class="sidebar-link active"><span class="icon">📊</span> Dashboard</a>
-        <a href="analytics.html" class="sidebar-link "><span class="icon">📈</span> Analytics</a>
+        <a href="dashboard.html" class="sidebar-link active"><span class="icon"><i class=mi-chart></i></span> Dashboard</a>
+        <a href="analytics.html" class="sidebar-link "><span class="icon"><i class=mi-trend></i></span> Analytics</a>
         <div class="sidebar-section-title">Management</div>
-        <a href="users.html" class="sidebar-link "><span class="icon">👥</span> Users <span class="count">1.2k</span></a>
-        <a href="jobs.html" class="sidebar-link "><span class="icon">💼</span> Jobs</a>
-        <a href="payments.html" class="sidebar-link "><span class="icon">💳</span> Payments</a>
-        <a href="reports.html" class="sidebar-link "><span class="icon">🚩</span> Reports <span class="count">7</span></a>
+        <a href="users.html" class="sidebar-link "><span class="icon"><i class=mi-users></i></span> Users <span class="count">1.2k</span></a>
+        <a href="jobs.html" class="sidebar-link "><span class="icon"><i class=mi-job></i></span> Jobs</a>
+        <a href="payments.html" class="sidebar-link "><span class="icon"><i class=mi-card></i></span> Payments</a>
+        <a href="requests.html" class="sidebar-link"><span class="icon"><i class=mi-shield></i></span> Requests</a>
+        <a href="reports.html" class="sidebar-link "><span class="icon"><i class=mi-flag></i></span> Reports <span class="count">7</span></a>
         <div class="sidebar-section-title">System</div>
-        <a href="settings.html" class="sidebar-link "><span class="icon">⚙️</span> Settings</a>
-        <a href="../index.html" class="sidebar-link"><span class="icon">↩️</span> Back to Site</a>
+        <a href="settings.html" class="sidebar-link "><span class="icon"><i class=mi-cog></i></span> Settings</a>
+        <a href="../index.html" class="sidebar-link"><span class="icon"><i class=mi-back></i></span> Back to Site</a>
       </nav>
       <div class="sidebar-footer">
         <div class="sidebar-user">
@@ -59,10 +69,10 @@
         <div class="page-title-row"><div><h1>Admin Dashboard</h1><p>Platform overview and key metrics.</p></div><span class="pill pill-success">All Systems Operational</span></div>
 
         <div class="stat-grid">
-          <div class="stat-card"><div class="stat-card-top"><div class="stat-icon" style="background:rgba(79,70,229,0.12);color:var(--color-primary);">👥</div><span class="stat-trend up">↑ 6.2%</span></div><div class="stat-value">18,492</div><div class="stat-label">Total Users</div></div>
-          <div class="stat-card"><div class="stat-card-top"><div class="stat-icon" style="background:rgba(6,182,212,0.12);color:var(--color-accent);">💼</div><span class="stat-trend up">↑ 3.1%</span></div><div class="stat-value">6,204</div><div class="stat-label">Active Jobs</div></div>
-          <div class="stat-card"><div class="stat-card-top"><div class="stat-icon" style="background:rgba(16,185,129,0.12);color:var(--color-success);">💳</div><span class="stat-trend up">↑ 11%</span></div><div class="stat-value">$284,920</div><div class="stat-label">Monthly Volume</div></div>
-          <div class="stat-card"><div class="stat-card-top"><div class="stat-icon" style="background:rgba(239,68,68,0.12);color:var(--color-danger);">🚩</div><span class="stat-trend down">↓ 2</span></div><div class="stat-value">7</div><div class="stat-label">Open Reports</div></div>
+          <div class="stat-card"><div class="stat-card-top"><div class="stat-icon" style="background:rgba(79,70,229,0.12);color:var(--color-primary);"><i class=mi-users></i></div><span class="stat-trend up">↑ 6.2%</span></div><div class="stat-value">18,492</div><div class="stat-label">Total Users</div></div>
+          <div class="stat-card"><div class="stat-card-top"><div class="stat-icon" style="background:rgba(6,182,212,0.12);color:var(--color-accent);"><i class=mi-job></i></div><span class="stat-trend up">↑ 3.1%</span></div><div class="stat-value">6,204</div><div class="stat-label">Active Jobs</div></div>
+          <div class="stat-card"><div class="stat-card-top"><div class="stat-icon" style="background:rgba(16,185,129,0.12);color:var(--color-success);"><i class=mi-card></i></div><span class="stat-trend up">↑ 11%</span></div><div class="stat-value">$284,920</div><div class="stat-label">Monthly Volume</div></div>
+          <div class="stat-card"><div class="stat-card-top"><div class="stat-icon" style="background:rgba(239,68,68,0.12);color:var(--color-danger);"><i class=mi-flag></i></div><span class="stat-trend down">↓ 2</span></div><div class="stat-value">7</div><div class="stat-label">Open Reports</div></div>
         </div>
 
         <div class="panel-grid-2">
