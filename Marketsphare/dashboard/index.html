@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="../assets/css/style.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
   <link rel="stylesheet" href="../assets/css/dashboard.css">
+  <link rel="stylesheet" href="../assets/css/icons.css">
   <style>
     /* =========================================================
        Local, self-contained responsiveness layer.
@@ -253,17 +254,19 @@
       <a href="../index.html" class="sidebar-logo"><span class="logo-mark">MS</span> Marketsphare</a>
       <nav class="sidebar-nav">
         <div class="sidebar-section-title">Main</div>
-        <a href="index.html" class="sidebar-link active"><span class="icon">🏠</span> <span>Overview</span></a>
-        <a href="profile.html" class="sidebar-link "><span class="icon">👤</span> <span>My Profile</span></a>
-        <a href="jobs.html" class="sidebar-link "><span class="icon">💼</span> <span>Jobs</span> <span class="count">24</span></a>
-        <a href="applications.html" class="sidebar-link "><span class="icon">📄</span> <span>Applications</span></a>
+        <a href="index.html" class="sidebar-link active"><span class="icon"><i class=mi-home></i></span> <span>Overview</span></a>
+        <a href="profile.html" class="sidebar-link "><span class="icon"><i class=mi-user></i></span> <span>My Profile</span></a>
+        <a href="jobs.html" class="sidebar-link "><span class="icon"><i class=mi-job></i></span> <span>Jobs</span> <span class="count">24</span></a>
+        <a href="applications.html" class="sidebar-link "><span class="icon"><i class=mi-file></i></span> <span>Applications</span></a>
         <div class="sidebar-section-title">Finance</div>
-        <a href="earnings.html" class="sidebar-link "><span class="icon">💰</span> <span>Earnings</span></a>
+        <a href="earnings.html" class="sidebar-link "><span class="icon"><i class=mi-cash></i></span> <span>Earnings</span></a>
         <div class="sidebar-section-title">Communication</div>
-        <a href="messages.html" class="sidebar-link "><span class="icon">💬</span> <span>Messages</span> <span class="count">3</span></a>
+        <a href="messages.html" class="sidebar-link "><span class="icon"><i class=mi-msg></i></span> <span>Messages</span> <span class="count">3</span></a>
         <div class="sidebar-section-title">Account</div>
-        <a href="settings.html" class="sidebar-link "><span class="icon">⚙️</span> <span>Settings</span></a>
-        <a href="#" data-logout class="sidebar-link"><span class="icon">🚪</span> <span>Log Out</span></a>
+        <a href="kyc.html" class="sidebar-link"><span class="icon"><i class=mi-shield></i></span> <span>KYC Verification</span></a>
+        <a href="upgrade.html" class="sidebar-link"><span class="icon"><i class=mi-up></i></span> <span>Upgrade</span></a>
+        <a href="settings.html" class="sidebar-link "><span class="icon"><i class=mi-cog></i></span> <span>Settings</span></a>
+        <a href="#" data-logout class="sidebar-link"><span class="icon"><i class=mi-out></i></span> <span>Log Out</span></a>
       </nav>
       <div class="sidebar-footer">
         <a href="profile.html" class="sidebar-user">
@@ -296,26 +299,26 @@
 
       <main class="app-content">
         <div class="page-title-row">
-          <div><h1>Welcome back, <span data-user-name>...</span> 👋</h1><p>Here's what's happening with your account today.</p></div>
+          <div><h1>Welcome back, <span data-user-name>...</span></h1><p>Here's what's happening with your account today.</p></div>
           <a href="jobs.html" class="btn btn-primary">Browse Jobs</a>
         </div>
 
         <div class="stat-grid" id="statGrid">
           <div class="stat-card">
-            <div class="stat-card-top"><div class="stat-icon" style="background:rgba(79,70,229,0.12);color:var(--color-primary);">💼</div><span class="stat-trend up" id="statActiveTrend">—</span></div>
+            <div class="stat-card-top"><div class="stat-icon" style="background:rgba(79,70,229,0.12);color:var(--color-primary);"><i class=mi-job></i></div><span class="stat-trend up" id="statActiveTrend">—</span></div>
             <div class="stat-value" id="statActiveValue">0</div><div class="stat-label">Active Workspaces</div>
           </div>
           <div class="stat-card">
-            <div class="stat-card-top"><div class="stat-icon" style="background:rgba(16,185,129,0.12);color:var(--color-success);">💰</div><span class="stat-trend up" id="statEarningsTrend">Paid to date</span></div>
+            <div class="stat-card-top"><div class="stat-icon" style="background:rgba(16,185,129,0.12);color:var(--color-success);"><i class=mi-cash></i></div><span class="stat-trend up" id="statEarningsTrend">Paid to date</span></div>
             <div class="stat-value" id="statEarningsValue">$0.00</div><div class="stat-label">Total Earnings (paid)</div>
           </div>
           <div class="stat-card">
-            <div class="stat-card-top"><div class="stat-icon" style="background:rgba(6,182,212,0.12);color:var(--color-accent);">✅</div><span class="stat-trend up" id="statCompletedTrend">—</span></div>
-            <div class="stat-value" id="statCompletedValue">0</div><div class="stat-label">Completed Contracts</div>
+            <div class="stat-card-top"><div class="stat-icon" style="background:rgba(6,182,212,0.12);color:var(--color-accent);"><i class=mi-okc></i></div><span class="stat-trend up" id="statCompletedTrend">—</span></div>
+            <div class="stat-value" id="statCompletedValue">0</div><div class="stat-label">Full Days Completed</div>
           </div>
           <div class="stat-card">
-            <div class="stat-card-top"><div class="stat-icon" style="background:rgba(245,158,11,0.12);color:var(--color-warning);">⏳</div><span class="stat-trend up" id="statPendingTrend">Awaiting Friday</span></div>
-            <div class="stat-value" id="statPendingValue">$0.00</div><div class="stat-label">Pending Payout</div>
+            <div class="stat-card-top"><div class="stat-icon" style="background:rgba(245,158,11,0.12);color:var(--color-warning);"><i class=mi-clock></i></div><span class="stat-trend up" id="statPendingTrend">Unlocks after 7 days</span></div>
+            <div class="stat-value" id="statPendingValue">$0.00</div><div class="stat-label">Available to Withdraw</div>
           </div>
         </div>
 
@@ -324,7 +327,7 @@
             <div class="panel-header"><h3>Job Activity</h3><a href="jobs.html" style="font-size:13px;color:var(--color-primary);">View all jobs</a></div>
             <div class="table-wrap">
               <table class="data-table">
-                <thead><tr><th>Job</th><th>Company</th><th>Progress</th><th>Status</th><th>Pending</th><th>Paid</th></tr></thead>
+                <thead><tr><th>Job</th><th>Company</th><th>Progress</th><th>Status</th><th>Today</th><th>Balance</th></tr></thead>
                 <tbody id="activityTableBody">
                   <!-- rendered live from shared state -->
                 </tbody>
@@ -356,6 +359,7 @@
   <script src="../assets/js/user-profile.js"></script>
   <script src="../assets/js/app.js"></script>
   <script src="../assets/js/dashboard-auth.js"></script>
+  <script src="../assets/js/api-config.js"></script>
   <script src="../assets/js/marketsphare-shared.js"></script>
   <script src="../assets/js/dashboard.js"></script>
 
@@ -406,7 +410,7 @@
      storage key in marketsphare-shared.js is correct) before rendering.
      ========================================================================== */
   (function(){
-    window.Marketsphare.authReady.then((user) => {
+    window.Marketsphare.stateReady.then(() => { const user = window.Marketsphare.currentUser;
       const { jobs, loadState, computeStats, formatCurrencyMap } = window.Marketsphare;
 
       const els = {
@@ -427,7 +431,7 @@
 
       function statusPill(status){
         if(status === "completed") return `<span class="pill pill-success">Completed</span>`;
-        if(status === "in-progress") return `<span class="pill pill-warning">In progress</span>`;
+        if(status === "in-progress" || status === "active") return `<span class="pill pill-warning">In progress</span>`;
         return `<span class="pill">Not started</span>`;
       }
 
@@ -454,12 +458,12 @@
         const paidStr = formatCurrencyMap(stats.byCurrency, "paid");
         els.earningsValue.textContent = paidStr || "$0.00";
 
-        els.completedValue.textContent = stats.completedCount;
-        els.completedTrend.textContent = `of ${jobs.length} contracts`;
+        els.completedValue.textContent = stats.daysCompletedTotal;
+        els.completedTrend.textContent = "days with all tasks done";
 
-        const pendingStr = formatCurrencyMap(stats.byCurrency, "pending");
+        const av = window.Marketsphare.availableBalance(state); const pendingStr = av > 0 ? "$" + av.toFixed(2) : null;
         els.pendingValue.textContent = pendingStr || "$0.00";
-        els.pendingTrend.textContent = stats.totalHistoryEntries ? `${stats.totalHistoryEntries} payouts so far` : "Awaiting first approval";
+        const lk = window.Marketsphare.withdrawLock(state); els.pendingTrend.textContent = lk.open ? "Withdrawals open" : (lk.unlockAt ? "Opens " + new Date(lk.unlockAt).toLocaleDateString() : "Apply to a job");
 
         const active = stats.perJob.filter(p => p.done > 0).sort((a,b) => b.pct - a.pct);
 
@@ -477,7 +481,7 @@
                 </div>
               </td>
               <td>${statusPill(p.status)}</td>
-              <td>${p.job.currency}${p.state.pending.toFixed(2)}</td>
+              <td>${p.done}/${p.total}</td>
               <td>${p.job.currency}${p.state.paid.toFixed(2)}</td>
             </tr>
           `).join("");
@@ -487,7 +491,7 @@
 
         els.recommendedGrid.innerHTML = recommended.length
           ? recommended.map(p => {
-              const priceLabel = p.job.payType === "hourly" ? `${p.job.currency}${p.job.payAmount}/hr` : `${p.job.currency}${p.job.payAmount.toLocaleString()}/mo`;
+              const priceLabel = "$" + p.job.pmin + (p.job.pmax > p.job.pmin ? "–$" + p.job.pmax : "") + " / task";
               return `
                 <div class="listing-card activity-row-link" data-job="${p.job.id}">
                   <div class="listing-top">

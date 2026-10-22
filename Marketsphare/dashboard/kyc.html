@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KYC Verification — Marketsphare</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+  <link rel="stylesheet" href="../assets/css/dashboard.css">
+  <link rel="stylesheet" href="../assets/css/icons.css">
+  <style>
+    .apps-empty-row td{ text-align:center; padding:28px 12px; color:#6b7280; font-size:13.5px; }
+    .apps-live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#1a9e6b;margin-right:6px;box-shadow:0 0 0 0 rgba(26,158,107,.5);animation:apps-pulse 1.6s infinite;}
+    @keyframes apps-pulse{
+      0%{box-shadow:0 0 0 0 rgba(26,158,107,.45);}
+      70%{box-shadow:0 0 0 6px rgba(26,158,107,0);}
+      100%{box-shadow:0 0 0 0 rgba(26,158,107,0);}
+    }
+    .apps-live-note{display:flex;align-items:center;font-size:12px;color:#6b7280;margin:-4px 0 12px;flex-wrap:wrap;}
+    .stat-value.zero{opacity:.55;}
+    #withdrawBtn:disabled{opacity:.5;cursor:not-allowed;}
+
+    /* ---- Rejected-withdrawal notice banner ---- */
+    .wd-rejected-banner{display:none;align-items:center;justify-content:space-between;gap:12px;background:#fdf1de;border:1px solid #f3d9ad;color:#8a5a12;border-radius:10px;padding:12px 14px;margin-bottom:16px;flex-wrap:wrap;}
+    .wd-rejected-banner.show{ display:flex; }
+    .wd-rb-text{display:flex;flex-direction:column;gap:2px;font-size:13px;min-width:0;overflow-wrap:anywhere;}
+    .wd-rb-text strong{ font-size:13.5px; }
+    .wd-rb-dismiss{background:#fff;border:1px solid #f0c987;color:#8a5a12;border-radius:7px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;}
+    .wd-rb-dismiss:hover{background:#fff7ec;}
+
+    /* ---- Crypto withdraw modal ---- */
+    .wd-overlay{display:none;position:fixed;inset:0;background:rgba(15,17,21,.5);z-index:999;align-items:center;justify-content:center;padding:20px;}
+    .wd-overlay.show{display:flex;}
+    .wd-modal{background:#fff;border-radius:14px;padding:26px 26px 22px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25);position:relative;max-height:90vh;overflow-y:auto;box-sizing:border-box;}
+    .wd-modal h2{font-size:18px;margin:0 0 4px;overflow-wrap:anywhere;}
+    .wd-modal-sub{font-size:12.5px;color:#6b7280;margin:0 0 16px;}
+    .wd-modal-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:16px;cursor:pointer;color:#6b7280;line-height:1;}
+    .wd-modal-close:hover{color:#16181c;}
+    .wd-friday-notice{font-size:12.5px;font-weight:600;padding:8px 10px;border-radius:8px;margin-bottom:14px;overflow-wrap:anywhere;}
+    .wd-friday-notice.ok{background:#e7f8f0;color:#1a9e6b;}
+    .wd-friday-notice.blocked{background:#fdf1de;color:#b9770e;}
+    .wd-field{margin-bottom:12px;min-width:0;}
+    .wd-field label{display:block;font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.03em;margin-bottom:5px;}
+    .wd-field select, .wd-field input{width:100%;box-sizing:border-box;border:1px solid #e6e8eb;border-radius:8px;padding:9px 11px;font-size:13.5px;font-family:inherit;}
+    .wd-field select:focus, .wd-field input:focus{outline:none;border-color:#2f6feb;}
+    .wd-amount-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;}
+    .wd-price-line{font-size:12px;color:#6b7280;margin:2px 0 10px;overflow-wrap:anywhere;}
+    .wd-available-line{font-size:12.5px;color:#16181c;background:#f7f8fa;border:1px solid #e6e8eb;border-radius:8px;padding:8px 10px;margin-bottom:10px;overflow-wrap:anywhere;}
+    .wd-available-line b{color:#2f6feb;}
+    .wd-max-btn{background:none;border:1px solid #e6e8eb;border-radius:7px;padding:5px 10px;font-size:11.5px;font-weight:700;cursor:pointer;color:#2f6feb;margin-bottom:12px;}
+    .wd-max-btn:hover{background:#eaf1ff;}
+    .wd-error{font-size:12.5px;color:#c23b3b;min-height:16px;margin-bottom:8px;overflow-wrap:anywhere;}
+    .wd-submit-btn{background:#2f6feb;color:#fff;border:none;border-radius:9px;padding:11px;font-size:13.5px;font-weight:700;width:100%;cursor:pointer;}
+    .wd-submit-btn:hover:not(:disabled){opacity:.92;}
+    .wd-submit-btn:disabled{background:#b9c8ec;cursor:not-allowed;}
+
+    /* =========================================================
+       Local, self-contained responsiveness layer.
+       Mirrors the layer used on Profile / Overview / Applications
+       so every dashboard screen behaves consistently across
+       breakpoints, regardless of any fixed widths already in
+       style.css / responsive.css / dashboard.css.
+       ========================================================= */
+
+    *{ box-sizing:border-box; }
+    html, body { max-width: 100%; overflow-x: hidden; }
+    .app-body{
+      display:flex !important;
+      min-height:100vh;
+      width:100%;
+      max-width:100%;
+      position:relative;
+      overflow-x:hidden;
+    }
+    .app-sidebar{
+      flex:0 0 240px;
+      width:240px;
+      max-width:240px;
+      box-sizing:border-box;
+      transition:width .2s ease, flex-basis .2s ease, transform .25s ease;
+      overflow-y:auto;
+      z-index:40;
+    }
+    .app-main{
+      flex:1 1 auto;
+      width:100%;
+      min-width:0;
+      max-width:100%;
+      box-sizing:border-box;
+      overflow-x:hidden;
+    }
+    .app-content{
+      width:100%;
+      max-width:100%;
+      box-sizing:border-box;
+      padding: var(--space-content, 24px);
+    }
+    .panel{
+      min-width:0;
+      box-sizing:border-box;
+      width:100%;
+      max-width:100%;
+    }
+
+    /* ---------- Stat cards: responsive grid, never overflow ---------- */
+    .stat-grid{
+      display:grid;
+      grid-template-columns:repeat(4, 1fr);
+      gap:16px;
+      width:100%;
+      max-width:100%;
+    }
+    .stat-card{ min-width:0; box-sizing:border-box; }
+    .stat-value{ overflow-wrap:anywhere; }
+
+    /* ---------- Panel header: wraps instead of crowding the button ---------- */
+    .panel-header{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      width:100%;
+    }
+    .panel-header h3{ min-width:0; overflow-wrap:anywhere; }
+
+    /* ---------- Table: its own contained horizontal scroll only ---------- */
+    .table-wrap{
+      width:100%;
+      max-width:100%;
+      overflow-x:auto;
+      -webkit-overflow-scrolling:touch;
+      box-sizing:border-box;
+    }
+    .data-table{ min-width:600px; }
+
+    /* ---------- Topbar: wraps gracefully, search shrinks before it breaks ---------- */
+    .app-topbar{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:12px;
+      width:100%;
+      max-width:100%;
+      box-sizing:border-box;
+    }
+    .topbar-left{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      flex:1 1 200px;
+      min-width:0;
+    }
+    .topbar-search{
+      flex:1 1 160px;
+      min-width:0;
+      max-width:420px;
+    }
+    .topbar-search input{
+      width:100%;
+      box-sizing:border-box;
+    }
+    .topbar-actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-shrink:0;
+      margin-left:auto;
+    }
+
+    .page-title-row{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      width:100%;
+      max-width:100%;
+    }
+    .page-title-row > div{ min-width:0; max-width:100%; }
+    .page-title-row h1, .page-title-row p{
+      overflow-wrap:anywhere;
+    }
+    .page-title-row #withdrawBtn{ flex-shrink:0; }
+
+    /* ---------- Sidebar burger: hidden on desktop, appears at tablet/mobile ---------- */
+    .sidebar-burger{
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background:transparent;
+      border:none;
+      cursor:pointer;
+      padding:6px;
+      border-radius:8px;
+      flex-shrink:0;
+    }
+    .sidebar-burger:hover{ background:rgba(0,0,0,0.05); }
+
+    .sidebar-backdrop{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(15,15,20,0.45);
+      z-index:35;
+      opacity:0;
+      transition:opacity .2s ease;
+    }
+    .sidebar-backdrop.is-visible{ display:block; opacity:1; }
+
+    /* =========================================================
+       TABLET (≤ 1024px): icon-rail sidebar + 2-up stat grid
+       ========================================================= */
+    @media (max-width: 1024px){
+      .app-sidebar{
+        flex:0 0 76px;
+        width:76px;
+        max-width:76px;
+      }
+      .app-sidebar .sidebar-logo{
+        justify-content:center;
+        padding-left:0;
+        padding-right:0;
+        white-space:nowrap;
+        overflow:hidden;
+      }
+      .app-sidebar .sidebar-link{
+        justify-content:center;
+        gap:0;
+        padding:10px 6px;
+        white-space:nowrap;
+        overflow:hidden;
+      }
+      .app-sidebar .sidebar-link span:not(.icon){ display:none; }
+      .app-sidebar .sidebar-section-title{ display:none; }
+      .app-sidebar .sidebar-user .info{ display:none; }
+      .app-sidebar .sidebar-user{ justify-content:center; }
+
+      .stat-grid{ grid-template-columns:repeat(2, 1fr); }
+    }
+
+    /* =========================================================
+       MOBILE (≤ 640px): off-canvas drawer sidebar, fully stacked
+       vertical layout, zero horizontal page movement anywhere.
+       ========================================================= */
+    @media (max-width: 640px){
+      .sidebar-burger{ display:flex; }
+
+      .app-sidebar{
+        position:fixed;
+        top:0;
+        left:0;
+        height:100vh;
+        width:240px;
+        max-width:80vw;
+        flex:0 0 auto;
+        transform:translateX(-100%);
+        box-shadow:2px 0 24px rgba(0,0,0,0.18);
+      }
+      .app-sidebar.is-open{ transform:translateX(0); }
+
+      .app-sidebar .sidebar-logo{ justify-content:flex-start; }
+      .app-sidebar .sidebar-link{ justify-content:flex-start; gap:10px; }
+      .app-sidebar .sidebar-link span:not(.icon){ display:inline; }
+      .app-sidebar .sidebar-section-title{ display:block; }
+      .app-sidebar .sidebar-user .info{ display:block; }
+      .app-sidebar .sidebar-user{ justify-content:flex-start; }
+
+      .app-main{ width:100%; }
+      .app-content{ padding: 14px; }
+
+      .page-title-row{ flex-direction:column; align-items:stretch; }
+      .page-title-row #withdrawBtn{ width:100%; }
+
+      /* Topbar: burger + bell/theme/avatar row on top, full-width search below */
+      .app-topbar{ row-gap:10px; }
+      .topbar-left{ flex:1 1 auto; }
+      .topbar-search{ order:3; flex-basis:100%; max-width:none; width:100%; }
+
+      .stat-grid{ grid-template-columns:1fr; gap:12px; }
+
+      .panel-header{ flex-direction:column; align-items:stretch; }
+      .panel-header #exportCsvBtn{ width:100%; }
+
+      /* Withdraw modal: single column amount fields, tighter padding */
+      .wd-modal{ padding:20px 16px 18px; }
+      .wd-amount-row{ grid-template-columns:1fr; }
+    }
+
+    /* =========================================================
+       VERY SMALL PHONE (≤ 380px): extra breathing room
+       ========================================================= */
+    @media (max-width: 380px){
+      .app-content{ padding: 10px; }
+      .topbar-actions{ gap:6px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-body">
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <aside class="app-sidebar" id="appSidebar">
+      <a href="../index.html" class="sidebar-logo"><span class="logo-mark">MS</span> Marketsphare</a>
+      <nav class="sidebar-nav">
+        <div class="sidebar-section-title">Main</div>
+        <a href="index.html" class="sidebar-link "><span class="icon"><i class=mi-home></i></span> <span>Overview</span></a>
+        <a href="profile.html" class="sidebar-link "><span class="icon"><i class=mi-user></i></span> <span>My Profile</span></a>
+        <a href="jobs.html" class="sidebar-link "><span class="icon"><i class=mi-job></i></span> <span>Jobs</span> <span class="count">24</span></a>
+        <a href="applications.html" class="sidebar-link "><span class="icon"><i class=mi-file></i></span> <span>Applications</span></a>
+        <div class="sidebar-section-title">Finance</div>
+        <a href="earnings.html" class="sidebar-link"><span class="icon"><i class=mi-cash></i></span> <span>Earnings</span></a>
+        <div class="sidebar-section-title">Communication</div>
+        <a href="messages.html" class="sidebar-link "><span class="icon"><i class=mi-msg></i></span> <span>Messages</span> <span class="count">3</span></a>
+        <div class="sidebar-section-title">Account</div>
+        <a href="kyc.html" class="sidebar-link active"><span class="icon"><i class=mi-shield></i></span> <span>KYC Verification</span></a>
+        <a href="upgrade.html" class="sidebar-link"><span class="icon"><i class=mi-up></i></span> <span>Upgrade</span></a>
+        <a href="settings.html" class="sidebar-link "><span class="icon"><i class=mi-cog></i></span> <span>Settings</span></a>
+        <a href="#" data-logout class="sidebar-link"><span class="icon"><i class=mi-out></i></span> <span>Log Out</span></a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="profile.html" class="sidebar-user">
+          <div class="avatar-fallback" data-user-initial>·</div>
+          <div class="info"><strong data-user-name>Loading...</strong><span data-user-title>Worker Account</span></div>
+        </a>
+      </div>
+    </aside>
+
+    <div class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-left">
+          <button class="sidebar-burger" id="sidebarBurger" aria-label="Toggle sidebar" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg></button>
+          <div class="topbar-search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
+            <input type="text" placeholder="Search jobs, messages, files...">
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <button class="theme-toggle" aria-label="Toggle dark mode">
+            <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
+            <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+          </button>
+          <button class="btn-icon notif-bell badge-notification" data-count="3" aria-label="Notifications">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          </button>
+          <div class="avatar-fallback" data-user-initial style="width:38px;height:38px;">·</div>
+        </div>
+      </header>
+
+      <main class="app-content">
+<div class="page-title-row"><div><h1>KYC Verification</h1><p>Verify your identity so an admin can confirm your account.</p></div></div>
+<div id="kStatus"></div>
+<div class="panel" id="kForm">
+  <div class="ms-banner info"><i class=mi-alert></i><div>Demo mode: use sample images only. Files are kept in this browser's storage and shown to the admin demo page.</div></div>
+  <div class="ms-f"><label>Full name (as on your ID)</label><input id="kName" autocomplete="name"></div>
+  <div class="ms-f"><label>Document type</label><select id="kType"><option>National ID card</option><option>Passport</option><option>Driver's licence</option></select></div>
+  <div class="ms-grid">
+    <div class="ms-f"><label><i class=mi-cam></i> Selfie</label><input type="file" accept="image/*" capture="user" data-k="selfie"><img id="p_selfie" style="max-width:100%;max-height:150px;margin-top:6px;border-radius:8px;display:none"></div>
+    <div class="ms-f"><label><i class=mi-id></i> ID — front</label><input type="file" accept="image/*" data-k="idFront"><img id="p_idFront" style="max-width:100%;max-height:150px;margin-top:6px;border-radius:8px;display:none"></div>
+    <div class="ms-f"><label><i class=mi-id></i> ID — back</label><input type="file" accept="image/*" data-k="idBack"><img id="p_idBack" style="max-width:100%;max-height:150px;margin-top:6px;border-radius:8px;display:none"></div>
+  </div>
+  <div class="ms-err" id="kErr"></div>
+  <button class="ms-b" id="kGo"><i class=mi-shield></i>Submit for review</button>
+</div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="../assets/js/firebase-config.js"></script>
+  <script src="../assets/js/user-profile.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/dashboard-auth.js"></script>
+  <script src="../assets/js/api-config.js"></script>
+  <script src="../assets/js/marketsphare-shared.js"></script>
+  <script src="../assets/js/dashboard.js"></script>
+
+  <script>
+  /* ==========================================================================
+     Responsive sidebar drawer (mobile off-canvas toggle).
+     Self-contained: only touches the classes/elements defined in this file,
+     so it won't conflict with whatever app.js already does.
+     ========================================================================== */
+  (function(){
+    const burger   = document.getElementById("sidebarBurger");
+    const sidebar  = document.getElementById("appSidebar");
+    const backdrop = document.getElementById("sidebarBackdrop");
+    if(!burger || !sidebar || !backdrop) return;
+
+    function openSidebar(){
+      sidebar.classList.add("is-open");
+      backdrop.classList.add("is-visible");
+      burger.setAttribute("aria-expanded", "true");
+    }
+    function closeSidebar(){
+      sidebar.classList.remove("is-open");
+      backdrop.classList.remove("is-visible");
+      burger.setAttribute("aria-expanded", "false");
+    }
+    function toggleSidebar(){
+      sidebar.classList.contains("is-open") ? closeSidebar() : openSidebar();
+    }
+
+    burger.addEventListener("click", toggleSidebar);
+    backdrop.addEventListener("click", closeSidebar);
+
+    sidebar.addEventListener("click", (e)=>{
+      if(e.target.closest("a")) closeSidebar();
+    });
+
+    window.addEventListener("resize", ()=>{
+      if(window.innerWidth > 640) closeSidebar();
+    });
+  })();
+  </script>
+
+  <script>
+window.Marketsphare.stateReady.then(function () {
+  const M = Marketsphare, $ = (id) => document.getElementById(id), imgs = {};
+  const mi = (n) => `<i class=mi-${n}></i>`, esc = (s) => String(s).replace(/[&<>"]/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m]));
+  function render() {
+    const r = M.latestRequest("kyc"), verified = (r && r.status === "approved") || (!r && M.loadState()._meta.kyc === "verified");
+    let h = "", locked = false;
+    if (!r) h = `<div class="ms-banner warn">${mi("shield")}<div>Not verified yet. Submit the form below.</div></div>`;
+    else if (r.status === "pending") { locked = true; h = `<div class="ms-banner info">${mi("clock")}<div><b>Under review.</b> An admin will confirm or reject your documents shortly.</div></div>`; }
+    else if (r.status === "approved") { locked = true; h = `<div class="ms-banner good">${mi("okc")}<div><b>Verified.</b>${r.adminMessage ? " Admin message: " + esc(r.adminMessage) : ""}</div></div>`; }
+    else h = `<div class="ms-banner bad">${mi("xc")}<div><b>Rejected.</b> Admin message: ${esc(r.adminMessage || "—")}. You can fix this and submit again.</div></div>`;
+    $("kStatus").innerHTML = h; $("kForm").style.display = locked ? "none" : "";
+  }
+  document.querySelectorAll("[data-k]").forEach((inp) => (inp.onchange = () => {
+    const f = inp.files[0]; if (!f) return;
+    M.compressImage(f, 700).then((u) => { imgs[inp.dataset.k] = u; const p = $("p_" + inp.dataset.k); p.src = u; p.style.display = "block"; }, () => ($("kErr").textContent = "Could not read that image."));
+  }));
+  $("kGo").onclick = () => {
+    const name = $("kName").value.trim();
+    if (name.length < 3) return ($("kErr").textContent = "Enter your full name.");
+    if (!imgs.selfie || !imgs.idFront || !imgs.idBack) return ($("kErr").textContent = "Please add your selfie, ID front and ID back.");
+    $("kGo").disabled = true;
+    M.submitRequest("kyc", { fullName: name, docType: $("kType").value, selfie: imgs.selfie, idFront: imgs.idFront, idBack: imgs.idBack }).then((r) => { $("kGo").disabled = false; $("kErr").textContent = r.ok ? "" : r.msg; render(); });
+  };
+  ["marketsphare:state-changed"].forEach((e) => addEventListener(e, render)); setInterval(render, 5000); render();
+});
+
+</script>
+</body>
+</html>

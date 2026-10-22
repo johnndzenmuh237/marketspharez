@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="../assets/css/style.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
   <link rel="stylesheet" href="../assets/css/dashboard.css">
+  <link rel="stylesheet" href="../assets/css/icons.css">
   <style>
     /* =========================================================
        Local, self-contained responsiveness layer.
@@ -324,17 +325,19 @@
       <a href="../index.html" class="sidebar-logo"><span class="logo-mark">MS</span> Marketsphare</a>
       <nav class="sidebar-nav">
         <div class="sidebar-section-title">Main</div>
-        <a href="index.html" class="sidebar-link "><span class="icon">🏠</span> <span>Overview</span></a>
-        <a href="profile.html" class="sidebar-link "><span class="icon">👤</span> <span>My Profile</span></a>
-        <a href="jobs.html" class="sidebar-link "><span class="icon">💼</span> <span>Jobs</span> <span class="count">24</span></a>
-        <a href="applications.html" class="sidebar-link "><span class="icon">📄</span> <span>Applications</span></a>
+        <a href="index.html" class="sidebar-link "><span class="icon"><i class=mi-home></i></span> <span>Overview</span></a>
+        <a href="profile.html" class="sidebar-link "><span class="icon"><i class=mi-user></i></span> <span>My Profile</span></a>
+        <a href="jobs.html" class="sidebar-link "><span class="icon"><i class=mi-job></i></span> <span>Jobs</span> <span class="count">24</span></a>
+        <a href="applications.html" class="sidebar-link "><span class="icon"><i class=mi-file></i></span> <span>Applications</span></a>
         <div class="sidebar-section-title">Finance</div>
-        <a href="earnings.html" class="sidebar-link "><span class="icon">💰</span> <span>Earnings</span></a>
+        <a href="earnings.html" class="sidebar-link "><span class="icon"><i class=mi-cash></i></span> <span>Earnings</span></a>
         <div class="sidebar-section-title">Communication</div>
-        <a href="messages.html" class="sidebar-link active"><span class="icon">💬</span> <span>Messages</span> <span class="count">3</span></a>
+        <a href="messages.html" class="sidebar-link active"><span class="icon"><i class=mi-msg></i></span> <span>Messages</span> <span class="count">3</span></a>
         <div class="sidebar-section-title">Account</div>
-        <a href="settings.html" class="sidebar-link "><span class="icon">⚙️</span> <span>Settings</span></a>
-        <a href="#" data-logout class="sidebar-link"><span class="icon">🚪</span> <span>Log Out</span></a>
+        <a href="kyc.html" class="sidebar-link"><span class="icon"><i class=mi-shield></i></span> <span>KYC Verification</span></a>
+        <a href="upgrade.html" class="sidebar-link"><span class="icon"><i class=mi-up></i></span> <span>Upgrade</span></a>
+        <a href="settings.html" class="sidebar-link "><span class="icon"><i class=mi-cog></i></span> <span>Settings</span></a>
+        <a href="#" data-logout class="sidebar-link"><span class="icon"><i class=mi-out></i></span> <span>Log Out</span></a>
       </nav>
       <div class="sidebar-footer">
         <a href="profile.html" class="sidebar-user">
@@ -368,7 +371,8 @@
       <main class="app-content">
         <div class="page-title-row"><div><h1>Messages</h1><p>Chat with employers and collaborators.</p></div></div>
 
-        <div class="chat-shell" id="chatShell">
+        <div class="ms-tabs"><button class="on" data-pane="conv"><i class=mi-msg></i>Conversations</button><button data-pane="ai"><i class=mi-bot></i>AI Assistant</button></div>
+        <div id="paneConv" class="ms-view on"><div class="chat-shell" id="chatShell">
           <div class="chat-list" id="chatList">
             <div class="chat-list-item active">
               <div class="avatar-fallback">BW</div>
@@ -409,6 +413,12 @@
           </div>
         </div>
 
+      </div>
+        <div id="paneAI" class="ms-view">
+          <div class="ms-ai"><div class="ms-ai-msgs" id="aiMsgs"></div><div class="ms-qs" id="aiQs"></div>
+            <div class="ms-ai-in"><input id="aiIn" placeholder="Ask about tasks, pay, withdrawals, KYC…"><button class="ms-b" id="aiSend"><i class=mi-send></i>Send</button></div></div>
+          <div class="ms-banner info" style="margin-top:12px;align-items:center"><i class=mi-msg></i><div style="flex:1">Not satisfied with the assistant's answer? Reach our team directly.</div><a class="ms-b" id="aiMail"><i class=mi-mail></i>Email</a><a class="ms-b ok" id="aiWa" target="_blank" rel="noopener"><i class=mi-wa></i>WhatsApp</a></div>
+        </div>
       </main>
     </div>
   </div>
@@ -419,7 +429,9 @@
   <script src="../assets/js/user-profile.js"></script>
   <script src="../assets/js/app.js"></script>
   <script src="../assets/js/dashboard-auth.js"></script>
+  <script src="../assets/js/api-config.js"></script>
   <script src="../assets/js/marketsphare-shared.js"></script>
+  <script src="../assets/js/support-config.js"></script>
   <script src="../assets/js/dashboard.js"></script>
 
   <script>
@@ -504,5 +516,63 @@
     }
   });
   </script>
+<script>
+window.Marketsphare.stateReady.then(function () {
+  const M = Marketsphare, S = window.MS_SUPPORT || {}, $ = (id) => document.getElementById(id), mi = (n) => `<i class=mi-${n}></i>`;
+  const u = M.currentUser || {}, who = (M.currentProfile && M.currentProfile.fullName) || u.email || "a user";
+  let hist = [], fails = 0;
+  const esc = (s) => String(s).replace(/[&<>]/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[m]));
+  const mailHref = () => `mailto:${S.email}?subject=${encodeURIComponent("Marketsphare support request")}&body=${encodeURIComponent("Hi, my name is " + who + " (" + (u.email || "") + ").\n\nI need help with: ")}`;
+  const waHref = () => `https://wa.me/${S.whatsapp}?text=${encodeURIComponent("Hello Marketsphare support, I'm " + who + ". I need help with: ")}`;
+  $("aiMail").href = mailHref(); $("aiWa").href = waHref();
+  const contact = () => `Let me connect you with our team${S.hours ? " (" + S.hours + ")" : ""}:\n<a class="ms-b" href="${mailHref()}">${mi("mail")}Email us</a> <a class="ms-b ok" target="_blank" rel="noopener" href="${waHref()}">${mi("wa")}WhatsApp</a>`;
+  function answer(q) {
+    q = q.toLowerCase(); const st = M.loadState(), lock = M.withdrawLock(st), av = M.availableBalance(st);
+    const has = (re) => re.test(q);
+    if (has(/human|agent|support|complain|not satisfied|unsatisf|speak to|talk to|contact|whatsapp|e-?mail|manager/)) return { t: "__contact__", html: 1 };
+    if (has(/withdraw|cash ?out|payout|get paid|bank|crypto/)) return { t: "Withdrawals open 7 days after you start working, and you can withdraw to a crypto wallet or an international bank account. An admin reviews each request; if approved it's deducted from your job balance and Total Earnings and you get a receipt in Earnings, if rejected you get a message and the money stays available.\n" + (lock.open ? `Withdrawals are open for you. Available now: $${av.toFixed(2)}.` : lock.unlockAt ? `Yours open on ${new Date(lock.unlockAt).toLocaleDateString()}.` : "Apply to a job to start the 7-day countdown.") };
+    if (has(/kyc|verif|selfie|identity|passport/)) return { t: "Go to KYC Verification in the sidebar, enter your full name, and upload a selfie, the front of your ID and the back of your ID. An admin reviews it and sends you a confirmation or rejection message on that page." };
+    if (has(/upgrade|plan|premium|\bpro\b/)) return { t: "Open Upgrade in the sidebar and choose a plan. Your request goes to the admin, who confirms or rejects it and sends you a message there." };
+    if (has(/pay|earn|rate|how much|per (task|video)|price/)) return { t: "Pay per task:\n" + M.jobs.map((j) => `• ${j.title}: ${j.pmin === j.pmax ? "$" + j.pmin : "$" + j.pmin + "–$" + j.pmax}${j.video ? " per video" : ""} (${j.min}–${j.max} a day)`).join("\n") };
+    if (has(/balance|credit|missing|not (added|showing)|total|didn.?t get/)) return { t: "Your day's total is credited to the job balance and Total Earnings only after you complete every task in that day's batch (Advert Videos credit each video straight away). If you leave tasks unfinished when the 24 hours end, that batch is forfeited." };
+    if (has(/24|daily|new tasks|refresh|reset|tomorrow|forfeit|miss/)) return { t: "Every job gets a fresh set of tasks every 24 hours after you apply. The countdown is at the top of each workspace." };
+    if (has(/video|generate/)) return { t: "Open Advert Videos, activate a script, press Generate & Promote, wait for 'Generated', then press Promote now. Each video credits $4 right away." };
+    if (has(/apply|application|screening|approve/)) return { t: "Press Apply on any job card, answer the two short questions, and wait a few seconds for review. Once approved your tasks appear straight away." };
+    if (has(/how|start|begin|task|activate|promote|copy|work/)) return { t: "1) Apply to a job. 2) Open its workspace. 3) Press Activate on a task (only one at a time). 4) Copy the content and press Promote. 5) Repeat until every task is done to get the day's total." };
+    if (has(/reject|declin|denied/)) return { t: "If a withdrawal, KYC or upgrade is rejected, the admin's message is shown on that page. For rejected withdrawals your funds stay in your available balance. You can fix the issue and submit again." };
+    if (has(/^(hi|hello|hey|good (morning|afternoon|evening))|thank/)) return { t: "Hi! Ask me about tasks, pay, withdrawals, KYC or upgrades." };
+    return null;
+  }
+  const QS = ["How do I start?", "How much can I earn?", "How do withdrawals work?", "How do I get verified?"];
+  $("aiQs").innerHTML = QS.map((q) => `<button>${q}</button>`).join("");
+  function add(role, t, html) {
+    const body = t === "__contact__" ? contact() : html ? t : esc(t);
+    $("aiMsgs").insertAdjacentHTML("beforeend", `<div class="ms-ai-b ${role}">${body}</div>`); $("aiMsgs").scrollTop = $("aiMsgs").scrollHeight;
+  }
+  function persist() { M.saveChat(hist.slice(-60)); }
+  function say(role, t, html) { add(role, t, html); hist.push({ role, t, html: !!html }); persist(); }
+  function ask(q) {
+    q = q.trim(); if (!q) return; say("me", q);
+    const r = answer(q);
+    setTimeout(() => {
+      if (r) { fails = 0; say("bot", r.t, r.html); }
+      else { fails++; say("bot", "I'm not sure I understood that — I'm an automated assistant and can only answer questions about tasks, pay, withdrawals, KYC and upgrades." + (fails >= 2 ? "" : " Could you rephrase? Or tap Email / WhatsApp below to reach a person.")); if (fails >= 2) say("bot", "__contact__", true); }
+    }, 450);
+  }
+  M.getChat().then((h) => {
+    hist = h;
+    if (!hist.length) { hist = [{ role: "bot", t: "Hi, I'm Marketsphare's automated assistant. Ask me about tasks, pay, withdrawals, KYC or upgrades. If I can't help, you can email or WhatsApp our team." }]; persist(); }
+    hist.forEach((m) => add(m.role, m.t, m.html));
+  });
+  $("aiSend").onclick = () => { ask($("aiIn").value); $("aiIn").value = ""; };
+  $("aiIn").addEventListener("keydown", (e) => { if (e.key === "Enter") $("aiSend").click(); });
+  $("aiQs").onclick = (e) => { if (e.target.tagName === "BUTTON") ask(e.target.textContent); };
+  document.querySelectorAll("[data-pane]").forEach((b) => (b.onclick = () => {
+    document.querySelectorAll("[data-pane]").forEach((x) => x.classList.toggle("on", x === b));
+    $("paneConv").classList.toggle("on", b.dataset.pane === "conv"); $("paneAI").classList.toggle("on", b.dataset.pane === "ai");
+  }));
+});
+
+</script>
 </body>
 </html>

@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="../assets/css/style.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
   <link rel="stylesheet" href="../assets/css/dashboard.css">
+  <link rel="stylesheet" href="../assets/css/icons.css">
   <style>
     .apps-empty-row td{ text-align:center; padding:28px 12px; color:#6b7280; font-size:13.5px; }
     .apps-live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#1a9e6b;margin-right:6px;box-shadow:0 0 0 0 rgba(26,158,107,.5);animation:apps-pulse 1.6s infinite;}
@@ -222,17 +223,19 @@
       <a href="../index.html" class="sidebar-logo"><span class="logo-mark">MS</span> Marketsphare</a>
       <nav class="sidebar-nav">
         <div class="sidebar-section-title">Main</div>
-        <a href="index.html" class="sidebar-link "><span class="icon">🏠</span> <span>Overview</span></a>
-        <a href="profile.html" class="sidebar-link "><span class="icon">👤</span> <span>My Profile</span></a>
-        <a href="jobs.html" class="sidebar-link "><span class="icon">💼</span> <span>Jobs</span> <span class="count">24</span></a>
-        <a href="applications.html" class="sidebar-link active"><span class="icon">📄</span> <span>Applications</span></a>
+        <a href="index.html" class="sidebar-link "><span class="icon"><i class=mi-home></i></span> <span>Overview</span></a>
+        <a href="profile.html" class="sidebar-link "><span class="icon"><i class=mi-user></i></span> <span>My Profile</span></a>
+        <a href="jobs.html" class="sidebar-link "><span class="icon"><i class=mi-job></i></span> <span>Jobs</span> <span class="count">24</span></a>
+        <a href="applications.html" class="sidebar-link active"><span class="icon"><i class=mi-file></i></span> <span>Applications</span></a>
         <div class="sidebar-section-title">Finance</div>
-        <a href="earnings.html" class="sidebar-link "><span class="icon">💰</span> <span>Earnings</span></a>
+        <a href="earnings.html" class="sidebar-link "><span class="icon"><i class=mi-cash></i></span> <span>Earnings</span></a>
         <div class="sidebar-section-title">Communication</div>
-        <a href="messages.html" class="sidebar-link "><span class="icon">💬</span> <span>Messages</span> <span class="count">3</span></a>
+        <a href="messages.html" class="sidebar-link "><span class="icon"><i class=mi-msg></i></span> <span>Messages</span> <span class="count">3</span></a>
         <div class="sidebar-section-title">Account</div>
-        <a href="settings.html" class="sidebar-link "><span class="icon">⚙️</span> <span>Settings</span></a>
-        <a href="#" data-logout class="sidebar-link"><span class="icon">🚪</span> <span>Log Out</span></a>
+        <a href="kyc.html" class="sidebar-link"><span class="icon"><i class=mi-shield></i></span> <span>KYC Verification</span></a>
+        <a href="upgrade.html" class="sidebar-link"><span class="icon"><i class=mi-up></i></span> <span>Upgrade</span></a>
+        <a href="settings.html" class="sidebar-link "><span class="icon"><i class=mi-cog></i></span> <span>Settings</span></a>
+        <a href="#" data-logout class="sidebar-link"><span class="icon"><i class=mi-out></i></span> <span>Log Out</span></a>
       </nav>
       <div class="sidebar-footer">
         <a href="profile.html" class="sidebar-user">
@@ -295,6 +298,7 @@
   <script src="../assets/js/user-profile.js"></script>
   <script src="../assets/js/app.js"></script>
   <script src="../assets/js/dashboard-auth.js"></script>
+  <script src="../assets/js/api-config.js"></script>
   <script src="../assets/js/marketsphare-shared.js"></script>
   <script src="../assets/js/dashboard.js"></script>
 
@@ -353,7 +357,7 @@
      so those states aren't fabricated here — only real, live statuses
      the engine actually tracks are shown.
   ---------------------------------------------------------------------- */
-  window.Marketsphare.authReady.then(function () {
+  window.Marketsphare.stateReady.then(function () {
     const { jobs, loadState } = window.Marketsphare;
     let state = loadState();
     let currentFilter = "all";

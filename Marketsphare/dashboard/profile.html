@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="../assets/css/style.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
   <link rel="stylesheet" href="../assets/css/dashboard.css">
+  <link rel="stylesheet" href="../assets/css/icons.css">
   <style>
     .skill-pill-remove{margin-left:6px;cursor:pointer;opacity:.7;}
     .skill-pill-remove:hover{opacity:1;}
@@ -229,17 +230,19 @@
       <a href="../index.html" class="sidebar-logo"><span class="logo-mark">MS</span> Marketsphare</a>
       <nav class="sidebar-nav">
         <div class="sidebar-section-title">Main</div>
-        <a href="index.html" class="sidebar-link "><span class="icon">🏠</span> <span>Overview</span></a>
-        <a href="profile.html" class="sidebar-link active"><span class="icon">👤</span> <span>My Profile</span></a>
-        <a href="jobs.html" class="sidebar-link "><span class="icon">💼</span> <span>Jobs</span> <span class="count">24</span></a>
-        <a href="applications.html" class="sidebar-link "><span class="icon">📄</span> <span>Applications</span></a>
+        <a href="index.html" class="sidebar-link "><span class="icon"><i class=mi-home></i></span> <span>Overview</span></a>
+        <a href="profile.html" class="sidebar-link active"><span class="icon"><i class=mi-user></i></span> <span>My Profile</span></a>
+        <a href="jobs.html" class="sidebar-link "><span class="icon"><i class=mi-job></i></span> <span>Jobs</span> <span class="count">24</span></a>
+        <a href="applications.html" class="sidebar-link "><span class="icon"><i class=mi-file></i></span> <span>Applications</span></a>
         <div class="sidebar-section-title">Finance</div>
-        <a href="earnings.html" class="sidebar-link "><span class="icon">💰</span> <span>Earnings</span></a>
+        <a href="earnings.html" class="sidebar-link "><span class="icon"><i class=mi-cash></i></span> <span>Earnings</span></a>
         <div class="sidebar-section-title">Communication</div>
-        <a href="messages.html" class="sidebar-link "><span class="icon">💬</span> <span>Messages</span> <span class="count">3</span></a>
+        <a href="messages.html" class="sidebar-link "><span class="icon"><i class=mi-msg></i></span> <span>Messages</span> <span class="count">3</span></a>
         <div class="sidebar-section-title">Account</div>
-        <a href="settings.html" class="sidebar-link "><span class="icon">⚙️</span> <span>Settings</span></a>
-        <a href="#" data-logout class="sidebar-link"><span class="icon">🚪</span> <span>Log Out</span></a>
+        <a href="kyc.html" class="sidebar-link"><span class="icon"><i class=mi-shield></i></span> <span>KYC Verification</span></a>
+        <a href="upgrade.html" class="sidebar-link"><span class="icon"><i class=mi-up></i></span> <span>Upgrade</span></a>
+        <a href="settings.html" class="sidebar-link "><span class="icon"><i class=mi-cog></i></span> <span>Settings</span></a>
+        <a href="#" data-logout class="sidebar-link"><span class="icon"><i class=mi-out></i></span> <span>Log Out</span></a>
       </nav>
       <div class="sidebar-footer">
         <a href="profile.html" class="sidebar-user">
@@ -304,12 +307,12 @@
             <label style="font-weight:600;font-size:14px;display:block;margin-bottom:10px;">Resume (PDF or DOCX)</label>
             <div class="upload-zone mb-3">
               <input type="file" hidden accept=".pdf,.doc,.docx">
-              <p>📎 Drag &amp; drop your resume here, or click to browse</p>
+              <p><i class=mi-clip></i> Drag &amp; drop your resume here, or click to browse</p>
             </div>
             <label style="font-weight:600;font-size:14px;display:block;margin-bottom:10px;">Portfolio Link</label>
             <input type="text" id="fldPortfolio" class="form-control mb-3" placeholder="https://yourportfolio.com">
             <label style="font-weight:600;font-size:14px;display:block;margin-bottom:10px;">Work Samples</label>
-            <div class="upload-zone"><input type="file" hidden multiple><p>🖼️ Upload images, PDFs, or links to your best work</p></div>
+            <div class="upload-zone"><input type="file" hidden multiple><p><i class=mi-img></i> Upload images, PDFs, or links to your best work</p></div>
           </div>
 
           <div id="tabSkills" class="tab-panel panel" style="display:none;">
@@ -329,6 +332,7 @@
   <script src="../assets/js/user-profile.js"></script>
   <script src="../assets/js/app.js"></script>
   <script src="../assets/js/dashboard-auth.js"></script>
+  <script src="../assets/js/api-config.js"></script>
   <script src="../assets/js/marketsphare-shared.js"></script>
   <script src="../assets/js/dashboard.js"></script>
 
@@ -400,7 +404,7 @@
 
     function renderSkills() {
       els.skillsList.innerHTML = skills.map((s, i) => `
-        <span class="pill pill-primary">${s}<span class="skill-pill-remove" data-remove-skill="${i}">✕</span></span>
+        <span class="pill pill-primary">${s}<span class="skill-pill-remove" data-remove-skill="${i}"><i class=mi-x></i></span></span>
       `).join("") || `<span class="text-muted" style="font-size:13px;">No skills added yet.</span>`;
     }
 
@@ -469,3 +473,4 @@
   </script>
 </body>
 </html>
+
