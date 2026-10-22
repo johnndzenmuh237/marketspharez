@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="../assets/css/responsive.css">
   <link rel="stylesheet" href="../assets/css/dashboard.css">
   <link rel="stylesheet" href="../assets/css/icons.css">
+  <link rel="stylesheet" href="../assets/css/jobs-ui.css">
   <style>
     .apps-empty-row td{ text-align:center; padding:28px 12px; color:#6b7280; font-size:13.5px; }
     .apps-live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#1a9e6b;margin-right:6px;box-shadow:0 0 0 0 rgba(26,158,107,.5);animation:apps-pulse 1.6s infinite;}
@@ -349,17 +350,24 @@
 
       <main class="app-content">
 <div class="ms-view on" id="vJobs">
-  <div class="page-title-row"><div><h1>Jobs</h1><p>Your daily tasks are generated automatically every 24 hours. Apply, then copy, promote and earn.</p></div></div>
-  <div class="ms-grid" id="grid"></div>
+  <section class="jb-hero">
+    <div><span class="jb-eyebrow"><i class="jb-dot"></i>Live marketplace</span><h1>Jobs</h1><p>Choose a role, get approved in seconds and start working from a ready-made queue of professional marketing tasks.</p></div>
+    <div class="jb-hero-stats" id="heroStats"></div>
+  </section>
+  <div class="jb-grid" id="grid"></div>
 </div>
 <div class="ms-view" id="vWs">
   <button class="ms-b g" id="back"><i class=mi-back></i>Back to Jobs</button>
-  <div class="ms-row" style="margin-top:14px"><div><h1 id="wTitle" style="margin:0"></h1><div class="ms-muted" id="wSub"></div></div><div class="ms-muted" id="wCount"></div></div>
-  <div class="ms-grid" id="wStats"></div>
-  <ul class="ms-tl" id="tl"></ul>
+  <section class="jb-ws-head" id="wsHead"></section>
+  <div class="jb-stats" id="wStats"></div>
+  <section class="jb-run" id="run"></section>
+  <div class="jb-list-head"><h3>Task queue <span class="ms-muted" id="qInfo"></span></h3><div class="jb-filter" id="flt"><button data-f="all" class="on">All</button><button data-f="todo">To do</button><button data-f="done">Done</button></div></div>
+  <ul class="jb-list" id="tl"></ul>
 </div>
-<div class="ms-ov" id="scr"><div class="ms-md"><h2 id="sT"></h2><p class="ms-muted">Two quick, simple questions about this role.</p><div id="sQ"></div><div class="ms-err" id="sE"></div><div class="ms-row" style="justify-content:flex-end"><button class="ms-b g" id="sC">Cancel</button><button class="ms-b" id="sS">Submit</button></div></div></div>
-<div class="ms-ov" id="rev"><div class="ms-md" style="text-align:center"><span class="ms-sp"></span><p>Reviewing your application… please don't close this page.</p></div></div>
+<div class="jb-toasts" id="toasts"></div>
+<div class="ms-ov" id="scr"><div class="ms-md"><h2 id="sT"></h2><p class="ms-muted" style="margin:0 0 14px">Three quick questions — just tick the answer you think fits best.</p><div id="sQ"></div><div class="ms-err" id="sE"></div><div class="ms-row" style="justify-content:flex-end"><button class="ms-b g" id="sC">Cancel</button><button class="ms-b" id="sS"><i class=mi-ok></i>Continue</button></div></div></div>
+<div class="ms-ov" id="rev"><div class="ms-md jb-rv" id="revBox"></div></div>
+<div class="ms-ov" id="win"><div class="ms-md jb-rv" id="winBox"></div></div>
 
       </main>
     </div>
@@ -417,74 +425,195 @@
   <script>
 window.Marketsphare.stateReady.then(function () {
   const M = Marketsphare, jobs = M.jobs, $ = (id) => document.getElementById(id);
-  const mi = (n) => `<i class=mi-${n}></i>`, money = (n) => "$" + n.toFixed(2);
+  const mi = (n) => `<i class=mi-${n}></i>`, money = (n) => "$" + Number(n).toFixed(2);
   const esc = (s) => String(s).replace(/[&<>"]/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m]));
-  let st = M.loadState(), cur = null, busy = false, scrJob = null;
+  let st = M.loadState(), cur = null, busy = false, applying = false, scrJob = null, filter = "all";
   const J = (id) => jobs.find((j) => j.id === id);
 
+  /* ---- presentation data (logos are original marks for the demo companies) ---- */
+  const META = {
+    "seo-strategist": { c1: "#2563eb", c2: "#06b6d4", icon: "search", desc: "Publish search-optimised keywords across leading search engines to grow organic reach for growing brands.", skills: ["Keyword publishing", "On-page SEO", "Indexing"], glyph: '<path d="M6 20c6-8 12 8 18 0s12 8 18 0"/><path d="M6 32c6-8 12 8 18 0s12 8 18 0"/>' },
+    "email-marketing-manager": { c1: "#7c3aed", c2: "#ec4899", icon: "mail", desc: "Promote polished, ready-to-send email scripts that power welcome flows, campaigns and win-backs.", skills: ["Campaigns", "Copywriting", "Lifecycle"], glyph: '<path d="M10 12l14 26 14-26"/><circle cx="24" cy="38" r="1.6" fill="#fff"/>' },
+    "paid-social-specialist": { c1: "#0ea5e9", c2: "#6366f1", icon: "target", desc: "Launch conversion-focused ad creatives and promote them across the major social advertising networks.", skills: ["Ad creative", "Targeting", "Conversions"], glyph: '<circle cx="24" cy="24" r="15"/><circle cx="24" cy="24" r="5.5" fill="#fff"/>' },
+    "social-media-post": { c1: "#f43f5e", c2: "#f59e0b", icon: "send", desc: "Share scroll-stopping branded posts with on-trend captions and hashtags across your social channels.", skills: ["Captions", "Hashtags", "Engagement"], glyph: '<path d="M5 26h9l5-14 8 24 5-10h11"/>' },
+    "content-marketing-lead": { c1: "#0d9488", c2: "#22c55e", icon: "file", desc: "Distribute long-form articles and thought-leadership pieces to professional publishing platforms.", skills: ["Content strategy", "Publishing", "Distribution"], glyph: '<path d="M12 38V10M36 38V10M12 24h24"/>' },
+    "social-media-manager": { c1: "#ea580c", c2: "#f59e0b", icon: "users", desc: "Keep communities active with fresh captions and Reel concepts built to grow followers and engagement.", skills: ["Community", "Reels", "Growth"], glyph: '<path d="M5 38l14-24 8 12 5-7 11 19z"/>' },
+    "advert-videos": { c1: "#9333ea", c2: "#3b82f6", icon: "film", desc: "Turn marketing scripts into short-form advert videos, then promote them to the biggest video platforms.", skills: ["Video scripts", "Short-form", "Promotion"], glyph: '<circle cx="24" cy="24" r="16"/><path d="M20 17l12 7-12 7z" fill="#fff"/>' }
+  };
+  const logo = (id) => { const m = META[id]; return `<div class="jb-logo"><svg viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">${m.glyph}</svg></div>`; };
+  const col = (id) => `--c1:${META[id].c1};--c2:${META[id].c2}`;
+  const PL = { Google: ["#fff", "#4285F4", "G"], Bing: ["#008373", "#fff", "b"], YouTube: ["#FF0000", "#fff", "play"], Pinterest: ["#E60023", "#fff", "P"], Gmail: ["#fff", "#EA4335", "M"], Mailchimp: ["#FFE01B", "#241C15", "M"], Klaviyo: ["#232426", "#fff", "K"], Outlook: ["#0078D4", "#fff", "O"], "Meta Ads": ["#0866FF", "#fff", "M"], "TikTok Ads": ["#010101", "#25F4EE", "T"], TikTok: ["#010101", "#25F4EE", "T"], Snapchat: ["#FFFC00", "#111", "S"], Instagram: ["linear-gradient(45deg,#f09433,#dc2743,#bc1888)", "#fff", "IG"], "Instagram Reels": ["linear-gradient(45deg,#f09433,#dc2743,#bc1888)", "#fff", "R"], Facebook: ["#1877F2", "#fff", "f"], X: ["#000", "#fff", "X"], LinkedIn: ["#0A66C2", "#fff", "in"], Medium: ["#000", "#fff", "M"], Substack: ["#FF6719", "#fff", "S"], Blog: ["#6366f1", "#fff", "B"] };
+  const badge = (p) => { const b = PL[p] || ["#64748b", "#fff", p[0]]; return `<span class="jb-badge" style="background:${b[0]};color:${b[1]};${b[0] === "#fff" ? "border:1px solid var(--border-color)" : ""}">${b[2] === "play" ? mi("play") : b[2]}</span>`; };
+
+  /* ---- helpers: toasts, count-up, confetti ---- */
+  function toast(kind, title, msg) {
+    const t = document.createElement("div"); t.className = "jb-toast " + kind;
+    t.innerHTML = `<div class="tic">${mi(kind === "success" ? "okc" : kind === "warn" ? "alert" : "zap")}</div><div><b>${esc(title)}</b><span>${esc(msg || "")}</span></div>`;
+    $("toasts").appendChild(t); setTimeout(() => { t.classList.add("out"); setTimeout(() => t.remove(), 320); }, 3800);
+  }
+  const prev = {};
+  function nums(scope) {
+    (scope || document).querySelectorAll("[data-to]").forEach((el) => {
+      const k = el.dataset.k, to = +el.dataset.to, from = prev[k] == null ? 0 : prev[k], dec = +(el.dataset.dec || 0), pre = el.dataset.pre || "", suf = el.dataset.suf || "";
+      prev[k] = to; const t0 = performance.now(), D = from === to ? 0 : 700;
+      const f = (t) => { const p = D ? Math.min(1, (t - t0) / D) : 1, v = from + (to - from) * (1 - Math.pow(1 - p, 3)); el.textContent = pre + v.toFixed(dec) + suf; if (p < 1) requestAnimationFrame(f); };
+      requestAnimationFrame(f);
+    });
+  }
+  const num = (k, to, pre, dec, suf) => `<b data-k="${k}" data-to="${to}" data-pre="${pre || ""}" data-dec="${dec || 0}" data-suf="${suf || ""}">${(pre || "") + Number(to).toFixed(dec || 0) + (suf || "")}</b>`;
+  function confetti() {
+    const w = document.createElement("div"), C = ["#4f46e5", "#06b6d4", "#10b981", "#f59e0b", "#ec4899", "#ef4444"]; w.className = "jb-conf";
+    for (let i = 0; i < 46; i++) { const s = document.createElement("i"); s.style.cssText = `left:${Math.random() * 100}%;background:${C[i % 6]};animation-delay:${Math.random() * 0.6}s;animation-duration:${1.8 + Math.random() * 1.4}s`; w.appendChild(s); }
+    document.body.appendChild(w); setTimeout(() => w.remove(), 3600);
+  }
+
+  /* ---- job list ---- */
+  function hero() {
+    const s = M.computeStats(st), done = s.perJob.reduce((a, p) => a + p.done, 0), tile = (ic, l, v, c1, c2) => `<div class="jb-tile" style="--c1:${c1};--c2:${c2}"><span class="ti">${mi(ic)}</span><div><small>${l}</small>${v}</div></div>`;
+    $("heroStats").innerHTML = tile("job", "Active roles", num("h1", s.startedCount, "", 0, " / " + jobs.length), "#4f46e5", "#06b6d4") + tile("okc", "Tasks done today", num("h2", done), "#10b981", "#22c55e") + tile("trend", "Total earnings", num("h3", st._meta.totalEarned, "$", 2), "#f59e0b", "#ef4444");
+    nums($("heroStats"));
+  }
   function cards() {
-    $("grid").innerHTML = jobs.map((j) => {
-      const s = st[j.id], b = M.batchFor(j, s), d = Object.keys(s.done).length;
-      const rng = j.pmin === j.pmax ? "$" + j.pmin : "$" + j.pmin + "–$" + j.pmax;
-      return `<div class="ms-card"><div class="ms-row" style="justify-content:flex-start;gap:10px"><div class="company-logo">${j.logo}</div><div><h3>${j.title}</h3><span class="ms-muted">${j.company}</span></div></div>
-        <div class="ms-big">${s.applied ? b.count : j.min + "–" + j.max} <span class="ms-muted" style="font-weight:500">${j.unit}</span></div>
-        <div class="ms-muted">${rng} per ${j.video ? "video" : "task"}${s.applied ? " · " + d + "/" + b.count + " done today" : " · refreshed every 24h"}</div>
-        <div class="ms-row"><div><div class="ms-muted">Job balance</div><b>${money(s.paid)}</b></div>
-        ${s.applied ? `<button class="ms-b" data-open="${j.id}">${mi("job")}Open</button>` : `<button class="ms-b" data-apply="${j.id}">Apply</button>`}</div></div>`;
-    }).join("");
+    $("grid").innerHTML = jobs.map((j, k) => {
+      const s = st[j.id], b = M.batchFor(j, s), d = Object.keys(s.done || {}).length, m = META[j.id], pct = b.count ? Math.round((d / b.count) * 100) : 0;
+      const up = "$" + (Number.isInteger(j.pmax) ? j.pmax : j.pmax.toFixed(2));
+      return `<article class="jb-card" style="${col(j.id)};animation-delay:${k * 70}ms">
+        <div class="jb-banner"><span class="jb-ico">${mi(m.icon)}</span><span class="jb-hire"><i class="jb-dot"></i>${s.applied ? "Active" : "Hiring now"}</span></div>${logo(j.id)}
+        <div class="jb-body"><div><h3>${j.title}</h3><div class="jb-co">${j.company} ${mi("shield")}<span>Verified client</span></div></div>
+          <p class="jb-desc">${m.desc}</p><div class="jb-skills">${m.skills.map((x) => `<span>${x}</span>`).join("")}</div>
+          <div class="jb-meta"><div><small>Earn up to</small><b>${up} / ${j.video ? "video" : "task"}</b></div><div style="text-align:right"><small>Job balance</small><b>${money(s.paid)}</b></div></div>
+          ${s.applied ? `<div class="jb-queue">${mi("list")}<span>${b.count} ${j.unit}</span></div><div class="jb-prog"><i style="width:${pct}%"></i></div><div class="ms-muted">${d} of ${b.count} completed today</div>
+            <button class="jb-btn" data-open="${j.id}">${mi("zap")}Open workspace${mi("arrow")}</button>`
+            : `<div class="jb-queue">${mi("sparkle")}<span>Your work queue is ready</span></div><button class="jb-btn" data-apply="${j.id}">Apply now${mi("arrow")}</button>`}
+        </div></article>`;
+    }).join(""); hero();
   }
-  function openWs(id) { cur = id; $("vJobs").classList.remove("on"); $("vWs").classList.add("on"); ws(); scrollTo(0, 0); }
+
+  /* ---- workspace ---- */
+  function openWs(id) { cur = id; filter = "all"; document.querySelectorAll("#flt button").forEach((b) => b.classList.toggle("on", b.dataset.f === "all")); $("vJobs").classList.remove("on"); $("vWs").classList.add("on"); ws(); scrollTo(0, 0); }
   function ws() {
-    const j = J(cur), s = st[j.id]; M.ensureDay(j, s);
-    const b = M.batchFor(j, s), d = Object.keys(s.done).length, lock = M.withdrawLock(st);
-    $("wTitle").textContent = j.title; $("wSub").textContent = j.company + " · Day " + (s.dayIdx + 1);
-    const stat = (a, c) => `<div class="ms-card"><span class="ms-muted">${a}</span><b class="ms-big">${c}</b></div>`;
-    $("wStats").innerHTML = stat("Job balance", money(s.paid)) + stat("Today's tasks", d + " / " + b.count)
-      + stat(j.perTask ? "Earned per video" : "Today's total (credited when all done)", j.perTask ? money(j.pmin) : money(b.total))
-      + stat("Total earnings", money(st._meta.totalEarned)) + stat("Withdrawals", lock.open ? "Open" : "Opens " + (lock.unlockAt ? new Date(lock.unlockAt).toLocaleDateString() : "after 7 days"));
-    const anyActive = s.active !== null && s.active !== undefined;
-    $("tl").innerHTML = b.tasks.map((t) => {
-      const done = s.done[t.i], act = s.active === t.i, stg = s.stage[t.i]; let a = "";
-      if (done) a = `<span class="ms-muted">${mi("okc")} Done</span>`;
-      else if (act) a = `<button class="ms-b g" data-copy="1">${mi("copy")}Copy</button> ` + (j.video
-        ? (stg === "generated" ? `<button class="ms-b" data-prom="${t.i}">${mi("send")}Promote now</button>` : `<button class="ms-b" data-gen="${t.i}">${mi("vid")}Generate &amp; Promote</button>`)
-        : `<button class="ms-b" data-prom="${t.i}">${mi("send")}Promote</button>`);
-      else a = `<button class="ms-b g" data-act="${t.i}" ${anyActive ? "disabled" : ""}>${mi("play")}Activate</button>`;
-      return `<li class="ms-t ${done ? "done" : ""} ${act ? "act" : ""}"><div class="ms-row"><b>#${t.i + 1} ${esc(t.title)}</b><span class="ms-muted">${money(t.pay)}</span></div>
-        ${act ? `<pre id="txt">${esc(t.text)}</pre><div id="pop">${stg === "generated" ? `<span class="ms-chip">${mi("okc")}Generated</span>` : ""}</div>` : ""}<div style="margin-top:8px">${a}</div></li>`;
-    }).join("");
-    tick();
+    const j = J(cur), s = st[j.id], b = M.batchFor(j, s), d = Object.keys(s.done).length, lock = M.withdrawLock(st), pct = b.count ? Math.round((d / b.count) * 100) : 0;
+    const wrap = $("vWs"); wrap.style.cssText = col(j.id);
+    $("wsHead").innerHTML = `${logo(j.id)}<div><h1>${j.title}</h1><div class="sub">${j.company} · ${j.unit}</div><div class="jb-chips"><span class="jb-chip"><i class="jb-dot"></i>Live workspace</span><span class="jb-chip">${mi("clock")}Day ${s.dayIdx + 1}</span><span class="jb-chip">${mi("shield")}Verified client</span></div></div>
+      <div class="jb-ring"><svg viewBox="0 0 80 80"><circle class="bg" cx="40" cy="40" r="32"/><circle class="fg" cx="40" cy="40" r="32" stroke-dasharray="${(pct / 100) * 201} 201"/></svg><b>${pct}%</b></div>`;
+    const tile = (ic, l, v) => `<div class="jb-tile"><span class="ti">${mi(ic)}</span><div><small>${l}</small>${v}</div></div>`;
+    $("wStats").innerHTML = tile("wallet", "Job balance", num("w1", s.paid, "$", 2)) + tile("okc", "Tasks completed", num("w2", d, "", 0, " / " + b.count))
+      + tile(j.perTask ? "film" : "cash", j.perTask ? "Earned per video" : "Today's total · paid when all done", num("w3", j.perTask ? j.pmin : b.total, "$", 2)) + tile("trend", "Total earnings", num("w4", st._meta.totalEarned, "$", 2))
+      + tile(lock.open ? "okc" : "lock", "Withdrawals", `<b>${lock.open ? "Open" : "Opens " + (lock.unlockAt ? new Date(lock.unlockAt).toLocaleDateString() : "after 7 days")}</b>`);
+    nums($("wStats")); run(); list();
   }
-  function tick() { if (cur) $("wCount").textContent = "New tasks in " + M.formatHMS(M.msUntilNextBatch(st[cur])); }
+  function run() {
+    const j = J(cur), s = st[j.id], b = M.batchFor(j, s), box = $("run"), d = Object.keys(s.done).length;
+    if (s.active == null) {
+      const all = b.count && d >= b.count;
+      box.className = "jb-run";
+      box.innerHTML = `<div class="jb-idle"><div class="big">${mi(all ? "trophy" : "zap")}</div><div><h3>${all ? "All tasks complete" : "Ready when you are"}</h3><p>${all ? "Great work — today's queue is finished and your earnings are credited." : "Choose any task below and press Activate to begin. One task runs at a time."}</p></div></div>`;
+      return;
+    }
+    const t = b.tasks[s.active], gen = s.stage[s.active] === "generated";
+    box.className = "jb-run active";
+    box.innerHTML = `<div class="top"><div><span class="jb-live">${mi("zap")}Task #${t.i + 1} in progress</span><h3 style="margin-top:8px">${esc(t.title)}</h3></div><b style="color:#10b981;font-size:18px">${money(t.pay)}</b></div>
+      <pre class="jb-content" id="txt">${esc(t.text)}</pre>
+      <div class="jb-acts"><button class="jb-sm" data-copy="1">${mi("copy")}Copy content</button>${j.video ? (gen ? `<button class="jb-sm" style="background:var(--c1);color:#fff;border-color:var(--c1)" data-prom="${t.i}">${mi("send")}Promote now</button>` : `<button class="jb-sm" style="background:var(--c1);color:#fff;border-color:var(--c1)" data-gen="${t.i}">${mi("film")}Generate &amp; Promote</button>`) : `<button class="jb-sm" style="background:var(--c1);color:#fff;border-color:var(--c1)" data-prom="${t.i}">${mi("send")}Promote</button>`}</div>
+      <div id="stage">${gen ? `<div class="jb-gen"><div class="jb-video">${mi("play")}<em>Generated</em></div><div><b>Video generated</b><div class="ms-muted">Your advert is ready — promote it to go live.</div></div></div>` : ""}</div>`;
+  }
+  function list() {
+    const j = J(cur), s = st[j.id], b = M.batchFor(j, s), anyActive = s.active != null;
+    const rows = b.tasks.filter((t) => filter === "all" || (filter === "done" ? s.done[t.i] : !s.done[t.i]));
+    $("qInfo").textContent = "· " + Object.keys(s.done).length + " of " + b.count + " done";
+    $("tl").innerHTML = rows.map((t, k) => {
+      const done = s.done[t.i], act = s.active === t.i;
+      const a = done ? `<span class="ms-muted">${mi("okc")} Done</span>` : act ? `<span class="jb-live">${mi("zap")}In progress</span>` : `<button class="jb-sm" data-act="${t.i}" ${anyActive ? "disabled" : ""}>${mi("play")}Activate</button>`;
+      return `<li class="jb-row ${done ? "done" : ""} ${act ? "act" : ""}" style="animation-delay:${Math.min(k, 12) * 25}ms"><span class="jb-n">${done ? mi("ok") : t.i + 1}</span><div class="jb-rt"><b>${esc(t.title)}</b><small>${j.video ? "Video script" : "Ready to promote"}</small></div><span class="jb-pay">${money(t.pay)}</span>${a}</li>`;
+    }).join("") || `<li class="ms-muted" style="padding:18px;text-align:center">Nothing in this view.</li>`;
+  }
+
+  /* ---- animations while a task runs ---- */
+  function pipe(job) { return `<div class="jb-pipe go" id="pipe"><div class="jb-src">${mi("file")}<span>Your content</span></div><div class="jb-rail"><span class="jb-line"></span><i class="jb-pkt p1"></i><i class="jb-pkt p2"></i><i class="jb-pkt p3"></i></div>
+    <div class="jb-plats">${job.platforms.map((p) => `<div class="jb-plat" data-p="${p}">${badge(p)}<span>${p}</span><i class="jb-st"></i></div>`).join("")}</div></div><div class="jb-bar"><i id="pbar"></i></div><div class="jb-log" id="plog"></div>`; }
+  function runPromote(job, done) {
+    const box = $("stage"); box.innerHTML = pipe(job); const pl = [...box.querySelectorAll(".jb-plat")], log = $("plog"), bar = $("pbar");
+    const L = (h) => { log.insertAdjacentHTML("beforeend", `<div>${h}</div>`); log.scrollTop = log.scrollHeight; };
+    L("› Preparing your content…"); let n = 0;
+    const iv = setInterval(() => {
+      if (n > 0) { pl[n - 1].classList.remove("live"); pl[n - 1].classList.add("done"); L(`${mi("ok")} Live on ${esc(pl[n - 1].dataset.p)}`); }
+      if (n < pl.length) { pl[n].classList.add("live"); L(`› Posting to ${esc(pl[n].dataset.p)}…`); bar.style.width = ((n + 0.5) / pl.length) * 100 + "%"; n++; }
+      else { clearInterval(iv); bar.style.width = "100%"; L(`${mi("okc")} Promoted on ${pl.length} platforms`); $("pipe").classList.remove("go"); setTimeout(done, 700); }
+    }, 650);
+  }
+  function runGen(done) {
+    const box = $("stage"), S = ["Reading your script", "Rendering scenes", "Adding voice-over", "Finalising video"];
+    box.innerHTML = `<div class="jb-gen"><div class="jb-film"><span></span><span></span><span></span><span></span><span></span><span></span></div><div style="flex:1;min-width:180px"><b id="gtxt">${S[0]}…</b><div class="jb-bar"><i id="pbar"></i></div></div></div>`;
+    let n = 0; const iv = setInterval(() => { n++; $("pbar").style.width = (n / S.length) * 100 + "%"; if (n < S.length) $("gtxt").textContent = S[n] + "…"; else { clearInterval(iv); done(); } }, 875);
+    setTimeout(() => ($("pbar").style.width = "12%"), 30);
+  }
+
+  const fail = (e) => { busy = false; toast("warn", "Couldn't complete that", e.message || "Something went wrong"); st = M.loadState(); if (cur) ws(); };
+  addEventListener("marketsphare:state-changed", () => { st = M.loadState(); if (busy || applying) return; cards(); if (cur) ws(); });
   $("grid").onclick = (e) => { const o = e.target.closest("[data-open]"), a = e.target.closest("[data-apply]"); if (o) openWs(o.dataset.open); if (a) scr(a.dataset.apply); };
   $("back").onclick = () => { cur = null; $("vWs").classList.remove("on"); $("vJobs").classList.add("on"); cards(); };
-  const fail = (e) => { busy = false; alert(e.message || "Something went wrong"); st = M.loadState(); if (cur) ws(); };
-  addEventListener("marketsphare:state-changed", () => { st = M.loadState(); if (busy) return; cards(); if (cur) ws(); });
+  $("flt").onclick = (e) => { const b = e.target.closest("[data-f]"); if (!b) return; filter = b.dataset.f; document.querySelectorAll("#flt button").forEach((x) => x.classList.toggle("on", x === b)); list(); };
   $("tl").onclick = (e) => {
+    const x = e.target.closest("[data-act]"); if (!x || busy) return; x.disabled = true;
+    M.activate(cur, +x.dataset.act).then(() => { st = M.loadState(); ws(); toast("info", "Task activated", "Copy the content, then promote it."); $("run").scrollIntoView({ behavior: "smooth", block: "center" }); }, fail);
+  };
+  $("run").onclick = (e) => {
     const j = J(cur), s = st[cur], g = (k) => e.target.closest("[" + k + "]"); let x;
-    if ((x = g("data-act"))) { x.disabled = true; M.activate(j.id, +x.dataset.act).then(() => { st = M.loadState(); ws(); }, fail); }
-    else if (g("data-copy")) { const x2 = g("data-copy"); navigator.clipboard && navigator.clipboard.writeText($("txt").textContent); x2.innerHTML = mi("ok") + "Copied"; }
-    else if ((x = g("data-gen"))) { if (busy) return; busy = true; x.disabled = true; x.innerHTML = '<span class="ms-sp"></span> Generating…'; const gi = s.active; setTimeout(() => M.generate(j.id, gi).then(() => { busy = false; st = M.loadState(); ws(); }, fail), 3500); }
+    if ((x = g("data-copy"))) { navigator.clipboard && navigator.clipboard.writeText($("txt").textContent); x.innerHTML = mi("ok") + "Copied"; toast("info", "Copied", "Paste it anywhere you like."); }
+    else if ((x = g("data-gen"))) { if (busy) return; busy = true; document.querySelectorAll("#run .jb-acts button").forEach((b) => (b.disabled = true)); const gi = s.active; runGen(() => M.generate(j.id, gi).then(() => { busy = false; st = M.loadState(); ws(); toast("success", "Video generated", "Ready to promote."); }, fail)); }
     else if ((x = g("data-prom"))) {
-      if (busy) return; busy = true; x.disabled = true; const i = +x.dataset.prom, pl = j.platforms.slice(), p = $("pop"); let n = 0;
-      const iv = setInterval(() => {
-        if (n < pl.length) p.insertAdjacentHTML("beforeend", `<span class="ms-chip">${mi("send")}Posted to ${pl[n++]}</span>`);
-        else { clearInterval(iv); p.insertAdjacentHTML("beforeend", `<span class="ms-chip">${mi("okc")}Promoted</span>`); setTimeout(() => M.completeTask(j.id, i).then(() => { busy = false; st = M.loadState(); ws(); cards(); }, fail), 700); }
-      }, 650);
+      if (busy) return; busy = true; const i = +x.dataset.prom; document.querySelectorAll("#run .jb-acts button").forEach((b) => (b.disabled = true));
+      runPromote(j, () => M.completeTask(j.id, i).then((r) => {
+        busy = false; st = M.loadState(); const b = M.batchFor(j, st[j.id]), all = Object.keys(st[j.id].done).length >= b.count; ws(); cards();
+        if (j.perTask) toast("success", "Promoted · " + money(r.credited) + " credited", "Added to your job balance.");
+        else if (all && r.credited) dayDone(j, r.credited); else toast("success", "Promoted", "Task complete — keep going.");
+      }, fail));
     }
   };
+  function dayDone(j, amt) { confetti(); $("winBox").innerHTML = `<div class="jb-spin ok">${mi("trophy")}</div><h2 style="margin:0 0 6px">All tasks complete!</h2><p class="ms-muted">${money(amt)} has been credited to your ${esc(j.title)} balance and Total Earnings.</p><button class="ms-b" id="winX" style="margin-top:10px"><i class=mi-ok></i>Great</button>`; $("win").classList.add("on"); $("winX").onclick = () => $("win").classList.remove("on"); }
+  if (M.offline) toast("warn", "Can't reach the server", "Check your connection — your data is safe.");
+
+  /* ---- apply: 3 simple tick questions, then a 13-second review ---- */
+  const QS = { "seo-strategist": ["What is a keyword?", "A word people type into a search engine", "A type of password", "A computer brand"], "email-marketing-manager": ["What is an email subject line?", "The title people see before opening an email", "The sender's password", "A photo attachment"], "paid-social-specialist": ["What is a paid ad?", "A promotion a business pays to show people", "A free gift card", "A computer file"], "social-media-post": ["Where do people see social media posts?", "On apps like Instagram and Facebook", "Only on printed paper", "Inside a calculator"], "content-marketing-lead": ["What is a blog post?", "An article published online", "A kind of fence", "A bank form"], "social-media-manager": ["Which of these is a social media app?", "Instagram", "Microsoft Excel", "A calculator"], "advert-videos": ["What is a short video advert?", "A brief video that promotes a product", "A long documentary", "A text message"] };
+  const questions = (j) => { const q = QS[j.id]; return [{ q: q[0], o: [{ t: q[1], ok: 1 }, { t: q[2] }, { t: q[3] }] }, { q: "What will you do with the content you are given?", o: [{ t: "Copy it and promote it", ok: 1 }, { t: "Delete it", }, { t: "Ignore it" }] }, { q: "How often do you plan to work?", o: [{ t: "Every day", ok: 1 }, { t: "A few days a week", ok: 1 }, { t: "On weekends", ok: 1 }] }]; };
   function scr(id) {
     scrJob = id; const j = J(id); $("sT").textContent = "Apply — " + j.title; $("sE").textContent = "";
-    $("sQ").innerHTML = [j.q, "Why would you like this job?"].map((q, i) => `<div class="ms-f"><label>${q}</label><textarea data-q="${i}" placeholder="A short answer is fine"></textarea></div>`).join("");
+    $("sQ").innerHTML = questions(j).map((q, qi) => `<fieldset class="jb-q"><legend>${qi + 1}. ${q.q}</legend>${q.o.map((o, oi) => `<label class="jb-opt"><input type="radio" name="q${qi}" value="${oi}"><span class="jb-tick">${mi("ok")}</span><span>${o.t}</span></label>`).join("")}</fieldset>`).join("");
     $("scr").classList.add("on");
   }
   $("sC").onclick = () => $("scr").classList.remove("on");
   $("sS").onclick = () => {
-    if (![...document.querySelectorAll("[data-q]")].every((x) => M.simpleAnswerOk(x.value))) { $("sE").textContent = "Please write a few words (at least 3) for each answer."; return; }
-    $("scr").classList.remove("on"); $("rev").classList.add("on"); const id = scrJob;
-    setTimeout(() => M.applyToJob(id).then(() => { $("rev").classList.remove("on"); st = M.loadState(); cards(); openWs(id); }, (e) => { $("rev").classList.remove("on"); alert(e.message); }), 4000);
+    const j = J(scrJob), qs = questions(j); let ok = true, miss = false;
+    document.querySelectorAll(".jb-q").forEach((f, qi) => {
+      f.classList.remove("wrong"); const c = f.querySelector("input:checked");
+      if (!c) { miss = true; return; } if (!qs[qi].o[+c.value].ok) { ok = false; f.classList.add("wrong"); }
+    });
+    if (miss) return ($("sE").textContent = "Please tick an answer for every question.");
+    if (!ok) return ($("sE").textContent = "Not quite — one answer needs another look. Pick the best fit (shown in red).");
+    $("scr").classList.remove("on"); review(scrJob);
   };
-  setInterval(tick, 1000);
+  const RS = ["Checking your answers", "Verifying your profile", "Matching you with tasks", "Preparing your workspace"];
+  function review(id) {
+    const j = J(id), DUR = 13000, box = $("revBox"); applying = true; let err = null;
+    box.innerHTML = `<div class="jb-spin">${mi("shield")}</div><h2 style="margin:0 0 4px">Reviewing your application</h2><p class="ms-muted" style="margin:0">${esc(j.title)} · ${esc(j.company)}</p>
+      <div class="jb-steps">${RS.map((s, i) => `<div id="rs${i}"><b>${mi("ok")}</b>${s}</div>`).join("")}</div><div class="jb-bar"><i id="rbar"></i></div><p class="ms-muted" style="margin:10px 0 0">Please keep this page open.</p>`;
+    $("rev").classList.add("on");
+    const call = M.applyToJob(id).then(() => null, (e) => (err = e));
+    const t0 = Date.now(), iv = setInterval(() => {
+      const t = Date.now() - t0, p = Math.min(1, t / DUR), step = Math.min(RS.length, Math.floor(p * RS.length));
+      $("rbar").style.width = p * 100 + "%";
+      RS.forEach((s, i) => { const el = $("rs" + i); if (el) el.className = i < step ? "ok" : i === step ? "on" : ""; });
+      if (err) { clearInterval(iv); return fail2(err); }
+      if (t >= DUR) { clearInterval(iv); call.then(() => (err ? fail2(err) : approved(j))); }
+    }, 100);
+    function fail2(e) { applying = false; box.innerHTML = `<div class="jb-spin no">${mi("alert")}</div><h2 style="margin:0 0 6px">We couldn't submit that</h2><p class="ms-muted">${esc(e.message || "Please try again.")}</p><div class="ms-row" style="justify-content:center;margin-top:12px"><button class="ms-b g" id="rvX">Close</button><button class="ms-b" id="rvR"><i class=mi-zap></i>Try again</button></div>`; $("rvX").onclick = () => { $("rev").classList.remove("on"); st = M.loadState(); cards(); }; $("rvR").onclick = () => { $("rev").classList.remove("on"); scr(id); }; }
+  }
+  function approved(j) {
+    applying = false; st = M.loadState(); confetti();
+    $("revBox").innerHTML = `<div class="jb-spin ok">${mi("okc")}</div><h2 style="margin:0 0 6px">Application approved!</h2><p class="ms-muted">Congratulations — you're now working as <b>${esc(j.title)}</b> at ${esc(j.company)}. Your tasks are ready.</p><div class="ms-row" style="justify-content:center;margin-top:14px"><button class="ms-b g" id="apL">Maybe later</button><button class="ms-b" id="apG"><i class=mi-zap></i>Start working</button></div>`;
+    cards(); $("apL").onclick = () => $("rev").classList.remove("on"); $("apG").onclick = () => { $("rev").classList.remove("on"); openWs(j.id); };
+  }
+
   const q = new URLSearchParams(location.search).get("job");
   cards(); if (q && J(q) && st[q].applied) openWs(q);
 });
