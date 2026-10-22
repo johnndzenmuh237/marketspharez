@@ -133,3 +133,10 @@ table.data-table { width: 100%; border-collapse: collapse; }
 .ms-ai-in{display:flex;gap:8px;padding:10px;border-top:1px solid var(--border-color)}.ms-ai-in input{flex:1;min-width:0;border:1px solid var(--border-color);background:var(--bg-surface);color:var(--text-primary);border-radius:8px;padding:10px}
 .ms-qs{display:flex;gap:6px;flex-wrap:wrap;padding:0 14px 10px}.ms-qs button{border:1px solid var(--border-color);background:var(--bg-surface-alt);color:var(--text-primary);border-radius:99px;padding:5px 11px;font-size:12px;cursor:pointer}
 @media(max-width:640px){.ms-ai-b{max-width:92%}}
+
+/* ===== Mobile drawer button: sharp + clearly visible in light AND dark mode ===== */
+.sidebar-burger{width:42px!important;height:42px!important;border-radius:12px!important;border:2px solid var(--text-primary)!important;background:var(--bg-surface)!important;color:var(--text-primary)!important;box-shadow:var(--shadow-md);cursor:pointer;padding:0!important;transition:transform .15s ease,background .15s ease,color .15s ease}
+.sidebar-burger svg{width:22px!important;height:22px!important;stroke:currentColor!important;stroke-width:2.8!important;stroke-linecap:round}
+.sidebar-burger:active{transform:scale(.9)}
+.sidebar-burger[aria-expanded="true"]{background:var(--color-primary)!important;border-color:var(--color-primary)!important;color:#fff!important}
+@media (hover:hover){.sidebar-burger:hover{background:var(--color-primary)!important;border-color:var(--color-primary)!important;color:#fff!important}}
