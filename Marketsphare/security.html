@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Security | Marketsphare</title>
+<meta name="description" content="How we protect Marketsphare accounts, payments and data, and how to report a vulnerability.">
+<link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#6d5bff;--brand-2:#00c2b8;--grad:linear-gradient(135deg,#6d5bff 0%,#00c2b8 100%);--font:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;--font-head:'Plus Jakarta Sans','Inter',system-ui,sans-serif;--ease:cubic-bezier(.22,1,.36,1)}
+[data-theme="dark"]{--bg:#07080f;--bg-2:#0c0e18;--surface:#11131f;--border:rgba(255,255,255,.08);--border-2:rgba(255,255,255,.14);--text:#f2f4fb;--muted:#a3a9bf;--faint:#6c7288;--glass:rgba(10,11,20,.78);--chip:rgba(255,255,255,.06)}
+[data-theme="light"]{--bg:#f6f7fc;--bg-2:#eef0f9;--surface:#fff;--border:rgba(20,24,60,.09);--border-2:rgba(20,24,60,.16);--text:#0d1030;--muted:#566079;--faint:#8b92a8;--glass:rgba(255,255,255,.82);--chip:rgba(20,24,60,.05)}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth;scroll-padding-top:100px}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased;transition:background .4s,color .4s}
+a{color:inherit;text-decoration:none}ul{list-style:none}button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+.container{width:100%;max-width:1200px;margin:0 auto;padding:0 24px}
+h1,h2,h3{font-family:var(--font-head);line-height:1.2;letter-spacing:-.02em}
+.progress{position:fixed;top:0;left:0;height:3px;width:0;background:var(--grad);z-index:200}
+.site-header{position:sticky;top:0;z-index:100;background:var(--glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--border)}
+.navbar{display:flex;align-items:center;justify-content:space-between;height:70px;gap:1rem}
+.logo{display:flex;align-items:center;gap:.65rem;font-family:var(--font-head);font-weight:800;font-size:1.2rem}
+.logo-mark{width:36px;height:36px;border-radius:11px;background:var(--grad);display:grid;place-items:center;color:#fff;font-size:.85rem;font-weight:800;box-shadow:0 8px 22px -6px rgba(109,91,255,.8)}
+.nav-links{display:flex;gap:.2rem}.nav-links a{padding:.5rem .85rem;border-radius:10px;font-size:.9rem;font-weight:500;color:var(--muted);transition:.2s}.nav-links a:hover{color:var(--text);background:var(--chip)}
+.nav-actions{display:flex;gap:.5rem;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:.6rem 1.1rem;border-radius:12px;font-weight:600;font-size:.88rem;transition:.3s var(--ease)}
+.btn-primary{background:var(--grad);color:#fff;box-shadow:0 10px 26px -10px rgba(109,91,255,.7)}.btn-primary:hover{transform:translateY(-2px)}
+.btn-outline{border:1px solid var(--border-2);background:var(--chip)}.btn-outline:hover{border-color:var(--brand)}
+.theme-toggle{width:40px;height:40px;border-radius:12px;border:1px solid var(--border-2);display:grid;place-items:center;font-size:1rem}
+.hero{position:relative;overflow:hidden;padding:4rem 0 3rem;border-bottom:1px solid var(--border);isolation:isolate}
+.hero::before,.hero::after{content:"";position:absolute;border-radius:50%;filter:blur(90px);z-index:-1;opacity:.35}
+.hero::before{width:420px;height:420px;background:#6d5bff;top:-180px;left:-100px}.hero::after{width:360px;height:360px;background:#00c2b8;top:-120px;right:-80px}
+.crumbs{font-size:.85rem;color:var(--faint);margin-bottom:1rem}.crumbs a:hover{color:var(--brand-2)}
+.hero h1{font-size:clamp(2rem,4.4vw,3.2rem);font-weight:800;margin-bottom:.8rem}
+.hero p{color:var(--muted);max-width:640px;font-size:1.05rem}
+.meta{display:inline-flex;margin-top:1.2rem;padding:.35rem .9rem;border-radius:100px;background:var(--chip);border:1px solid var(--border);font-size:.8rem;color:var(--muted)}
+.pills{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.6rem}
+.pills a{padding:.45rem 1rem;border-radius:100px;border:1px solid var(--border-2);font-size:.85rem;font-weight:600;color:var(--muted);transition:.25s}
+.pills a:hover{color:var(--text);border-color:var(--brand)}.pills a.active{background:var(--grad);color:#fff;border-color:transparent}
+.layout{display:grid;grid-template-columns:260px 1fr;gap:3.5rem;padding:3.5rem 0 5rem;align-items:start}
+.toc{position:sticky;top:96px;padding:1.2rem;border-radius:18px;background:var(--surface);border:1px solid var(--border)}
+.toc h4{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-bottom:.8rem}
+.toc a{display:block;padding:.4rem .7rem;border-radius:9px;font-size:.86rem;color:var(--muted);border-left:2px solid transparent;transition:.2s}
+.toc a:hover{color:var(--text)}.toc a.on{color:var(--text);background:var(--chip);border-left-color:var(--brand)}
+.doc section{margin-bottom:2.6rem;padding-bottom:2.6rem;border-bottom:1px solid var(--border)}.doc section:last-of-type{border-bottom:0}
+.doc h2{font-size:1.5rem;margin-bottom:1rem}.doc h2 span{color:var(--brand-2);margin-right:.5rem}
+.doc h3{font-size:1.05rem;margin:1.3rem 0 .5rem}
+.doc p{color:var(--muted);margin-bottom:1rem}.doc ul.list{margin:0 0 1rem 0}
+.doc ul.list li{position:relative;padding-left:1.4rem;color:var(--muted);margin-bottom:.5rem}
+.doc ul.list li::before{content:"";position:absolute;left:0;top:.72em;width:7px;height:7px;border-radius:50%;background:var(--grad)}
+.doc a.lnk{color:var(--brand-2);text-decoration:underline;text-underline-offset:3px}
+.doc strong{color:var(--text)}
+.callout{padding:1.1rem 1.3rem;border-radius:16px;background:rgba(109,91,255,.1);border:1px solid rgba(109,91,255,.3);margin-bottom:1.3rem;color:var(--muted);font-size:.95rem}
+.tbl{width:100%;border-collapse:collapse;margin:0 0 1.2rem;font-size:.9rem;border:1px solid var(--border);border-radius:14px;overflow:hidden;display:block;overflow-x:auto}
+.tbl th,.tbl td{padding:.8rem 1rem;text-align:left;border-bottom:1px solid var(--border);vertical-align:top}
+.tbl th{background:var(--chip);color:var(--text);font-weight:700;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em}
+.tbl td{color:var(--muted)}.tbl tr:last-child td{border-bottom:0}
+.contact-card{padding:1.6rem;border-radius:20px;background:var(--surface);border:1px solid var(--border);display:flex;justify-content:space-between;gap:1rem;align-items:center;flex-wrap:wrap}
+.contact-card h3{margin:0 0 .2rem}.contact-card p{margin:0}
+.site-footer{border-top:1px solid var(--border);background:var(--bg-2);padding:2rem 0}
+.foot{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;color:var(--faint);font-size:.85rem}
+.foot nav{display:flex;gap:1.2rem;flex-wrap:wrap}.foot a:hover{color:var(--text)}
+@media(max-width:900px){.layout{grid-template-columns:1fr;gap:1.5rem}.toc{position:static}.nav-links{display:none}}
+@media print{.site-header,.toc,.progress,.site-footer,.pills{display:none}.layout{display:block}body{background:#fff;color:#000}.doc p,.doc li{color:#222}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<header class="site-header"><div class="container navbar">
+  <a href="index.html" class="logo"><span class="logo-mark">MS</span><span>Marketsphare</span></a>
+  <nav class="nav-links"><a href="index.html">Home</a><a href="about.html">About</a><a href="services.html">Services</a><a href="jobs.html">Find Jobs</a><a href="pricing.html">Pricing</a><a href="contact.html">Contact</a></nav>
+  <div class="nav-actions"><button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">◐</button><a href="auth/login.html" class="btn btn-outline">Log In</a><a href="auth/register.html" class="btn btn-primary">Sign Up</a></div>
+</div></header>
+<section class="hero"><div class="container">
+  <div class="crumbs"><a href="index.html">Home</a> / Legal / Security</div>
+  <h1>Security</h1><p>How we protect Marketsphare accounts, payments and data, and how to report a vulnerability.</p>
+  <span class="meta">Last updated: October 22, 2026</span>
+  <div class="pills"><a href="terms.html">Terms of Service</a><a href="privacy.html">Privacy Policy</a><a href="cookies.html">Cookie Policy</a><a href="security.html" class="active">Security</a></div>
+</div></section>
+<div class="container layout">
+  <aside class="toc"><h4>On this page</h4><a href="#s1">Our approach</a><a href="#s2">Protecting accounts</a><a href="#s3">Protecting payments</a><a href="#s4">Protecting data</a><a href="#s5">Staying safe on Marketsphare</a><a href="#s6">Responsible disclosure</a><a href="#s7">Incident response</a><a href="#s8">Contact</a></aside>
+  <article class="doc"><section id="s1"><h2><span>01</span>Our approach</h2><p>Trust is the foundation of a marketplace. We design Marketsphare with security and privacy in mind, apply the principle of least privilege, and continuously improve our controls as threats evolve.</p></section><section id="s2"><h2><span>02</span>Protecting accounts</h2><ul class="list"><li><strong>Identity verification:</strong> Talent and Employers complete identity checks so you know who you work with.</li><li><strong>Strong authentication:</strong> passwords are stored using salted, industry-standard hashing, and we support additional sign-in protections.</li><li><strong>Suspicious activity monitoring:</strong> automated and manual reviews flag unusual sign-ins and behaviour.</li></ul></section><section id="s3"><h2><span>03</span>Protecting payments</h2><ul class="list"><li><strong>Escrow:</strong> funds are held securely and released only on approval or dispute resolution.</li><li><strong>PCI-compliant partners:</strong> card and bank details are processed by certified payment providers, not stored on our servers.</li><li><strong>Fraud controls:</strong> transaction screening and payout checks help prevent abuse.</li></ul></section><section id="s4"><h2><span>04</span>Protecting data</h2><ul class="list"><li>Encryption in transit using TLS and encryption at rest for sensitive data.</li><li>Role-based access controls, logging and regular access reviews for our team.</li><li>Backups and recovery procedures to protect against data loss.</li><li>Secure development practices, dependency monitoring and code review.</li></ul></section><section id="s5"><h2><span>05</span>Staying safe on Marketsphare</h2><ul class="list"><li>Keep all communication and payments on the Platform so you stay protected by escrow.</li><li>Never share your password or one-time codes. We will never ask for them.</li><li>Be cautious of offers that seem too good to be true, requests to move to other apps, or links to unfamiliar sites.</li><li>Use a unique password and keep your devices and browser up to date.</li><li>Report suspicious users or messages from the profile or through the contact page.</li></ul></section><section id="s6"><h2><span>06</span>Responsible disclosure</h2><p>If you believe you have found a security vulnerability, please tell us privately so we can fix it before it is exploited. Email <a class="lnk" href="mailto:security@marketsphare.com">security@marketsphare.com</a> with:</p><ul class="list"><li>a clear description of the issue and its potential impact;</li><li>steps to reproduce, proof-of-concept or relevant logs;</li><li>your contact details if you would like updates.</li></ul><p>Please act in good faith: avoid accessing or modifying other users' data, do not degrade the service, and give us reasonable time to respond before any public disclosure. We will acknowledge reports promptly and keep you informed of progress.</p></section><section id="s7"><h2><span>07</span>Incident response</h2><p>We maintain an incident response process to detect, contain and remediate security events. Where a breach affects personal data, we will notify affected users and regulators as required by law.</p></section><section id="s8"><h2><span>08</span>Contact</h2><div class="contact-card"><div><h3>Found a vulnerability or need help with account security?</h3><p><a class="lnk" href="mailto:security@marketsphare.com">security@marketsphare.com</a></p></div><a class="btn btn-primary" href="contact.html">Contact page</a></div></section></article>
+</div>
+<footer class="site-footer"><div class="container foot">
+  <span>&copy; 2026 Marketsphare. All rights reserved.</span>
+  <nav><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="cookies.html">Cookies</a><a href="security.html">Security</a><a href="contact.html">Contact</a></nav>
+</div></footer>
+<script>
+(function(){
+  var root=document.documentElement;
+  try{var s=localStorage.getItem('ms-theme');if(s)root.setAttribute('data-theme',s);}catch(e){}
+  document.getElementById('themeToggle').addEventListener('click',function(){
+    var n=root.getAttribute('data-theme')==='dark'?'light':'dark';
+    root.setAttribute('data-theme',n);try{localStorage.setItem('ms-theme',n);}catch(e){}
+  });
+  var bar=document.getElementById('progress');
+  var links=[].slice.call(document.querySelectorAll('.toc a')),secs=links.map(function(a){return document.querySelector(a.getAttribute('href'))});
+  function onScroll(){
+    var h=document.documentElement.scrollHeight-innerHeight;bar.style.width=(h>0?scrollY/h*100:0)+'%';
+    var cur=0;secs.forEach(function(s,i){if(s&&s.getBoundingClientRect().top<140)cur=i;});
+    links.forEach(function(a,i){a.classList.toggle('on',i===cur)});
+  }
+  addEventListener('scroll',onScroll,{passive:true});onScroll();
+})();
+</script>
+</body>
+</html>
