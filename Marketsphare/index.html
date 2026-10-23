@@ -372,7 +372,91 @@ h1,h2,h3,h4{font-family:var(--font-head);line-height:1.15;letter-spacing:-.02em}
 .to-top{position:fixed;right:22px;bottom:22px;width:48px;height:48px;border-radius:16px;background:var(--grad);color:#fff;display:grid;place-items:center;box-shadow:0 14px 30px -8px rgba(109,91,255,.8);opacity:0;visibility:hidden;transform:translateY(20px);transition:.4s var(--ease);z-index:90}
 .to-top.show{opacity:1;visibility:visible;transform:none}
 
+/* ---------- People / avatars ---------- */
+.av{display:block;overflow:hidden;background:var(--chip)}
+.av svg,.av img{width:100%;height:100%;object-fit:cover;display:block}
+.avatars span.av{padding:0}
+.m-av.av{padding:0;border-radius:12px}
+.t-av.av{padding:0;overflow:hidden}
+
+/* ---------- Community mosaic ---------- */
+.mosaic{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:175px;gap:1rem}
+.tile{position:relative;border-radius:24px;overflow:hidden;border:1px solid var(--border);background:var(--surface);transition:transform .5s var(--ease),box-shadow .5s}
+.tile:hover{transform:translateY(-6px);box-shadow:var(--shadow)}
+.tile.big{grid-column:span 2;grid-row:span 2}.tile.wide{grid-column:span 2}
+.tile .label{position:absolute;left:14px;bottom:14px;padding:.35rem .8rem;border-radius:100px;background:rgba(8,9,18,.62);backdrop-filter:blur(10px);color:#fff;font-size:.74rem;font-weight:600;z-index:4}
+.team-scene{background:linear-gradient(135deg,#2b1f8f,#0a6c74);border:0}
+.team-scene::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 70% 20%,rgba(255,255,255,.18),transparent 55%)}
+.ts-av{position:absolute;border-radius:50%;border:4px solid rgba(255,255,255,.88);overflow:hidden;box-shadow:0 20px 40px -12px rgba(0,0,0,.55);animation:bob2 6s ease-in-out infinite;z-index:2}
+.ts-av .av{width:100%;height:100%}
+.ts-av.a{width:150px;height:150px;left:10%;top:10%}
+.ts-av.b{width:122px;height:122px;right:12%;top:20%;animation-delay:-2s}
+.ts-av.c{width:104px;height:104px;left:36%;bottom:20%;animation-delay:-4s}
+.ts-card{position:absolute;display:flex;align-items:center;gap:.6rem;padding:.55rem .8rem;border-radius:14px;background:rgba(10,11,22,.6);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:.78rem;z-index:3;animation:bob2 7s ease-in-out infinite}
+.ts-card i{font-style:normal;font-size:1rem}.ts-card b{display:block;font-size:.8rem}.ts-card small{opacity:.7;font-size:.68rem}
+.ts-card.k1{left:6%;bottom:16%;animation-delay:-1s}.ts-card.k2{right:6%;bottom:30%;animation-delay:-3s}
+.scene-laptop{background:linear-gradient(135deg,#0d1030,#1b1560);border:0;display:grid;place-items:center}
+.scene-laptop svg{width:88%;height:auto;max-height:100%}
+.scene-laptop .lp-bar{transform-origin:bottom;transform-box:fill-box;animation:lpbar 3.2s ease-in-out infinite;animation-delay:calc(var(--i)*.15s)}
+@keyframes lpbar{0%,100%{transform:scaleY(.55)}50%{transform:scaleY(1)}}
+.scene-laptop .lp-line{stroke-dasharray:300;stroke-dashoffset:300;animation:lpline 4s ease-in-out infinite}
+@keyframes lpline{0%{stroke-dashoffset:300}55%,100%{stroke-dashoffset:0}}
+.scene-laptop .chipf{position:absolute;padding:.35rem .7rem;border-radius:12px;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:.74rem;font-weight:700;animation:bob2 5s ease-in-out infinite}
+.scene-laptop .chipf.l{left:6%;top:14%}.scene-laptop .chipf.r{right:6%;bottom:22%;animation-delay:-2s}
+.scene-camp{background:linear-gradient(135deg,#ff6bb5,#f59e0b);border:0;display:grid;place-items:center;color:#fff}
+.scene-camp .icon{width:76px;height:76px;stroke-width:1.5;animation:pulse 3s ease-in-out infinite}
+.scene-camp i{position:absolute;border-radius:50%;background:rgba(255,255,255,.35);animation:bob2 4s ease-in-out infinite}
+.scene-camp i:nth-child(1){width:14px;height:14px;top:18%;left:20%}.scene-camp i:nth-child(2){width:9px;height:9px;top:30%;right:18%;animation-delay:-1s}.scene-camp i:nth-child(3){width:18px;height:18px;bottom:24%;right:26%;animation-delay:-2s}
+.post{padding:1rem;height:100%;display:flex;flex-direction:column;gap:.6rem}
+.post-h{display:flex;align-items:center;gap:.6rem}.post-h .av{width:34px;height:34px;border-radius:50%}
+.post-h b{display:block;font-size:.82rem;line-height:1.2}.post-h small{font-size:.7rem;color:var(--faint)}
+.post-img{flex:1;border-radius:14px;background:linear-gradient(135deg,rgba(109,91,255,.25),rgba(0,194,184,.25));display:grid;place-items:center;color:var(--brand-2)}
+.post-img .icon{width:34px;height:34px}
+.post-f{display:flex;gap:1rem;font-size:.76rem;color:var(--muted)}
+.email-tile{padding:1.2rem;display:flex;flex-direction:column;justify-content:center;gap:.7rem}
+.email-tile .row{display:flex;align-items:center;gap:.8rem}
+.email-tile .ei{width:44px;height:44px;border-radius:14px;background:var(--grad);display:grid;place-items:center;color:#fff}
+.email-tile b{display:block;font-size:.92rem}.email-tile small{color:var(--faint);font-size:.76rem}
+.meter{height:8px;border-radius:8px;background:var(--chip);overflow:hidden}
+.meter i{display:block;height:100%;width:0;border-radius:8px;background:var(--grad);transition:width 1.6s var(--ease) .3s}
+.tile.in .meter i{width:48%}
+.people-tile{padding:1.4rem;display:flex;flex-direction:column;justify-content:center;gap:.8rem}
+.people-tile .stack{display:flex}
+.people-tile .stack .av{width:46px;height:46px;border-radius:50%;border:3px solid var(--surface);margin-left:-12px}
+.people-tile .stack .av:first-child{margin-left:0}
+.people-tile h4{font-size:1.15rem}.people-tile p{color:var(--muted);font-size:.85rem}
+.portrait{border:0}
+.portrait .av{position:absolute;inset:0;width:100%;height:100%;transition:transform 1.2s var(--ease)}
+.portrait:hover .av{transform:scale(1.08)}
+.portrait::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(6,7,16,.75));z-index:1}
+.portrait .label{z-index:3}
+.portrait .badge{position:absolute;top:14px;right:14px;z-index:3;padding:.3rem .7rem;border-radius:100px;background:rgba(255,255,255,.92);color:#0d1030;font-size:.7rem;font-weight:700;display:flex;gap:.35rem;align-items:center}
+.portrait .badge i{width:7px;height:7px;border-radius:50%;background:#22c55e;animation:blink 1.4s infinite}
+
+/* ---------- Team ---------- */
+.team{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem}
+.member{text-align:center;padding:2rem 1.3rem 1.6rem;border-radius:var(--radius);background:var(--surface);border:1px solid var(--border);transition:transform .45s var(--ease),box-shadow .45s,border-color .3s}
+.member:hover{transform:translateY(-8px);box-shadow:var(--shadow);border-color:var(--border-2)}
+.m-photo{width:118px;height:118px;margin:0 auto 1.2rem;border-radius:50%;padding:4px;background:var(--grad);position:relative}
+.m-photo::after{content:"";position:absolute;inset:-7px;border-radius:50%;border:1px dashed var(--border-2);animation:spin 24s linear infinite}
+.m-photo .av{width:100%;height:100%;border-radius:50%;border:3px solid var(--surface)}
+.member h3{font-size:1.05rem}.member .role{color:var(--brand-2);font-size:.82rem;font-weight:600;margin-bottom:.6rem}
+.member p{color:var(--muted);font-size:.86rem}
+.mini-social{display:flex;justify-content:center;gap:.5rem;margin-top:1.1rem}
+.mini-social a{width:34px;height:34px;border-radius:10px;border:1px solid var(--border-2);display:grid;place-items:center;color:var(--muted);transition:.3s}
+.mini-social a:hover{background:var(--grad);color:#fff;border-color:transparent;transform:translateY(-3px)}
+.mini-social .icon{width:15px;height:15px}
+
+/* ---------- Cookie banner ---------- */
+.cookie{position:fixed;left:50%;bottom:20px;transform:translate(-50%,160%);width:min(94vw,720px);padding:1.1rem 1.3rem;border-radius:20px;background:var(--glass);backdrop-filter:blur(18px);border:1px solid var(--border-2);box-shadow:var(--shadow);display:flex;gap:1.1rem;align-items:center;z-index:180;transition:transform .7s var(--ease)}
+.cookie.show{transform:translate(-50%,0)}
+.cookie p{font-size:.86rem;color:var(--muted);flex:1}.cookie p a{color:var(--brand-2);text-decoration:underline}
+.cookie .acts{display:flex;gap:.5rem;flex-shrink:0}
+@media(max-width:640px){.cookie{flex-direction:column;align-items:stretch;bottom:12px}.cookie .acts .btn{flex:1}}
+
 /* ---------- Responsive ---------- */
+@media(max-width:1024px){.team{grid-template-columns:repeat(2,1fr)}.mosaic{grid-template-columns:repeat(2,1fr);grid-auto-rows:170px}.tile.wide{grid-column:span 2}.tile.big{grid-row:span 2}}
+@media(max-width:640px){.team{grid-template-columns:1fr 1fr;gap:.8rem}.member{padding:1.4rem .8rem}.m-photo{width:92px;height:92px}.mosaic{grid-auto-rows:150px;gap:.7rem}.ts-av.a{width:104px;height:104px}.ts-av.b{width:84px;height:84px}.ts-av.c{width:74px;height:74px}.ts-card{display:none}}
 @media(max-width:1024px){
   .nav-links,.nav-actions .btn{display:none}.mobile-toggle{display:flex}
   .hero-grid{grid-template-columns:1fr;gap:3.5rem}.hero-visual{max-width:560px;margin:0 auto;width:100%}
@@ -518,7 +602,7 @@ h1,h2,h3,h4{font-family:var(--font-head);line-height:1.15;letter-spacing:-.02em}
       <div class="popular"><span>Popular:</span><a href="jobs.html?q=seo">SEO</a><a href="jobs.html?q=paid%20social">Paid Social</a><a href="jobs.html?q=email">Email</a><a href="jobs.html?q=content">Content</a></div>
 
       <div class="trust">
-        <div class="avatars"><span style="background:#6d5bff">JM</span><span style="background:#00a7a0">RK</span><span style="background:#ff6bb5">TC</span><span style="background:#f59e0b">AL</span><span style="background:#334155">+</span></div>
+        <div class="avatars"><span class="av" data-p="0" data-name="Jamie"></span><span class="av" data-p="1" data-name="Riya"></span><span class="av" data-p="2" data-name="Theo"></span><span class="av" data-p="3" data-name="Amara"></span><span style="background:#334155">+</span></div>
         <small><span class="stars">★★★★★</span><br>Trusted by 18,400+ marketers &amp; teams</small>
         <a href="services.html" class="btn btn-outline btn-sm" style="margin-left:auto">Hire an Expert <svg class="icon" style="width:1em"><use href="#i-arrow"/></svg></a>
       </div>
@@ -535,10 +619,10 @@ h1,h2,h3,h4{font-family:var(--font-head);line-height:1.15;letter-spacing:-.02em}
           <!-- Scene 1 -->
           <div class="scene active">
             <h5>AI-matched for you</h5>
-            <div class="match"><div class="m-av" style="background:#6d5bff">SE</div><div class="m-info"><strong>SEO Strategist</strong><span>BrightWave · $3,200/wk</span></div><div class="ring" style="--p:97"><b>97</b></div></div>
-            <div class="match"><div class="m-av" style="background:#00a7a0">PS</div><div class="m-info"><strong>Paid Social Specialist</strong><span>Cobalt Co. · $45/hr</span></div><div class="ring" style="--p:94"><b>94</b></div></div>
-            <div class="match"><div class="m-av" style="background:#ff6bb5">EM</div><div class="m-info"><strong>Email Marketing Manager</strong><span>Vertex Labs · $2,100/mo</span></div><div class="ring" style="--p:91"><b>91</b></div></div>
-            <div class="match"><div class="m-av" style="background:#f59e0b">CW</div><div class="m-info"><strong>Content Lead</strong><span>Lumio · $60/hr</span></div><div class="ring" style="--p:88"><b>88</b></div></div>
+            <div class="match"><div class="m-av av" data-p="4"></div><div class="m-info"><strong>SEO Strategist</strong><span>BrightWave · $3,200/wk</span></div><div class="ring" style="--p:97"><b>97</b></div></div>
+            <div class="match"><div class="m-av av" data-p="1"></div><div class="m-info"><strong>Paid Social Specialist</strong><span>Cobalt Co. · $45/hr</span></div><div class="ring" style="--p:94"><b>94</b></div></div>
+            <div class="match"><div class="m-av av" data-p="7"></div><div class="m-info"><strong>Email Marketing Manager</strong><span>Vertex Labs · $2,100/mo</span></div><div class="ring" style="--p:91"><b>91</b></div></div>
+            <div class="match"><div class="m-av av" data-p="5"></div><div class="m-info"><strong>Content Lead</strong><span>Lumio · $60/hr</span></div><div class="ring" style="--p:88"><b>88</b></div></div>
           </div>
           <!-- Scene 2 -->
           <div class="scene">
@@ -744,21 +828,81 @@ h1,h2,h3,h4{font-family:var(--font-head);line-height:1.15;letter-spacing:-.02em}
   </div>
 </section>
 
+<!-- COMMUNITY MOSAIC -->
+<section class="section">
+  <div class="container">
+    <div class="section-header reveal"><span class="eyebrow">Our Community</span><h2>Real people. Real campaigns. Real results.</h2><p>A global network of marketers and teams collaborating across time zones.</p></div>
+    <div class="mosaic">
+      <div class="tile big team-scene reveal">
+        <div class="ts-av a"><span class="av" data-p="3" data-name="Amara" data-photo="assets/images/team-collab-1.jpg"></span></div>
+        <div class="ts-av b"><span class="av" data-p="6" data-name="David" data-photo="assets/images/team-collab-2.jpg"></span></div>
+        <div class="ts-av c"><span class="av" data-p="0" data-name="Jamie" data-photo="assets/images/team-collab-3.jpg"></span></div>
+        <div class="ts-card k1"><i>💬</i><div><b>Campaign kickoff</b><small>3 teammates online</small></div></div>
+        <div class="ts-card k2"><i>✅</i><div><b>Brief approved</b><small>Just now</small></div></div>
+        <span class="label">Collaborate in one workspace</span>
+      </div>
+      <div class="tile wide scene-laptop reveal" style="--d:.08s">
+        <svg viewBox="0 0 360 190" fill="none" aria-hidden="true">
+          <rect x="84" y="14" width="192" height="116" rx="11" fill="#0b0e24" stroke="rgba(255,255,255,.25)" stroke-width="2"/>
+          <rect x="94" y="24" width="172" height="96" rx="6" fill="#151a3a"/>
+          <g fill="url(#lpg)">
+            <rect class="lp-bar" style="--i:0" x="108" y="84" width="14" height="28" rx="3"/><rect class="lp-bar" style="--i:1" x="130" y="72" width="14" height="40" rx="3"/><rect class="lp-bar" style="--i:2" x="152" y="78" width="14" height="34" rx="3"/><rect class="lp-bar" style="--i:3" x="174" y="60" width="14" height="52" rx="3"/><rect class="lp-bar" style="--i:4" x="196" y="52" width="14" height="60" rx="3"/><rect class="lp-bar" style="--i:5" x="218" y="40" width="14" height="72" rx="3"/><rect class="lp-bar" style="--i:6" x="240" y="34" width="14" height="78" rx="3"/>
+          </g>
+          <polyline class="lp-line" points="108,78 130,66 152,70 174,52 196,44 218,34 247,28" stroke="#00e5d6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M62 134H298L284 150H76Z" fill="#2a2f60"/><rect x="150" y="134" width="60" height="5" rx="2.5" fill="#3b4180"/>
+          <defs><linearGradient id="lpg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8b7bff"/><stop offset="1" stop-color="#6d5bff" stop-opacity=".35"/></linearGradient></defs>
+        </svg>
+        <span class="chipf l">📈 +142% ROI</span><span class="chipf r">CTR 4.8%</span>
+        <span class="label">Analytics that prove results</span>
+      </div>
+      <div class="tile scene-camp reveal" style="--d:.16s"><i></i><i></i><i></i><svg class="icon"><use href="#i-ads"/></svg><span class="label">Campaigns</span></div>
+      <div class="tile reveal" style="--d:.24s">
+        <div class="post">
+          <div class="post-h"><span class="av" data-p="1" data-name="Riya Kapoor"></span><div><b>Riya Kapoor</b><small>Growth Lead · 2h</small></div></div>
+          <div class="post-img"><svg class="icon"><use href="#i-chart"/></svg></div>
+          <div class="post-f"><span>❤ 2.4k</span><span>💬 184</span><span>↗ 96</span></div>
+        </div>
+      </div>
+      <div class="tile wide reveal">
+        <div class="email-tile">
+          <div class="row"><div class="ei"><svg class="icon"><use href="#i-mail"/></svg></div><div><b>Weekly growth report</b><small>Email campaign · 12,480 recipients</small></div></div>
+          <div><small style="color:var(--muted)">Open rate 48.2%</small><div class="meter" style="margin-top:.4rem"><i></i></div></div>
+        </div>
+      </div>
+      <div class="tile portrait reveal" style="--d:.08s"><span class="av" data-p="3" data-name="Amara" data-photo="assets/images/portrait-1.jpg"></span><span class="badge"><i></i>Available</span><span class="label">Amara · SEO Pro</span></div>
+      <div class="tile portrait reveal" style="--d:.16s"><span class="av" data-p="7" data-name="Mei" data-photo="assets/images/portrait-2.jpg"></span><span class="badge"><i></i>Hired</span><span class="label">Mei · Paid Social</span></div>
+    </div>
+  </div>
+</section>
+
 <!-- TESTIMONIALS -->
 <section class="section alt">
   <div class="container">
     <div class="section-header reveal"><span class="eyebrow">Testimonials</span><h2>Loved by marketers and employers alike</h2></div>
     <div class="t-wrap reveal">
       <div class="t-stage" id="tStage">
-        <div class="t-card active"><div class="q">“</div><p>I landed three contracts in my first month. The AI matching is shockingly accurate.</p><div class="t-author"><div class="t-av" style="background:linear-gradient(135deg,#6d5bff,#9b8dff)">JM</div><div><strong>Jamie Morales</strong><span>SEO Consultant</span></div><div class="stars">★★★★★</div></div></div>
-        <div class="t-card"><div class="q">“</div><p>We hired our entire paid media team through this platform. Incredible quality of talent.</p><div class="t-author"><div class="t-av" style="background:linear-gradient(135deg,#00c2b8,#0891b2)">RK</div><div><strong>Riya Kapoor</strong><span>Head of Growth, Hatchway</span></div><div class="stars">★★★★★</div></div></div>
-        <div class="t-card"><div class="q">“</div><p>Escrow payments give me total peace of mind. I always get paid on time.</p><div class="t-author"><div class="t-av" style="background:linear-gradient(135deg,#ff6bb5,#f43f5e)">TC</div><div><strong>Theo Chen</strong><span>Email Marketing Freelancer</span></div><div class="stars">★★★★★</div></div></div>
+        <div class="t-card active"><div class="q">“</div><p>I landed three contracts in my first month. The AI matching is shockingly accurate.</p><div class="t-author"><div class="t-av av" data-p="0" data-name="Jamie Morales" data-photo="assets/images/testimonial-jamie.jpg"></div><div><strong>Jamie Morales</strong><span>SEO Consultant</span></div><div class="stars">★★★★★</div></div></div>
+        <div class="t-card"><div class="q">“</div><p>We hired our entire paid media team through this platform. Incredible quality of talent.</p><div class="t-author"><div class="t-av av" data-p="1" data-name="Riya Kapoor" data-photo="assets/images/testimonial-riya.jpg"></div><div><strong>Riya Kapoor</strong><span>Head of Growth, Hatchway</span></div><div class="stars">★★★★★</div></div></div>
+        <div class="t-card"><div class="q">“</div><p>Escrow payments give me total peace of mind. I always get paid on time.</p><div class="t-author"><div class="t-av av" data-p="2" data-name="Theo Chen" data-photo="assets/images/testimonial-theo.jpg"></div><div><strong>Theo Chen</strong><span>Email Marketing Freelancer</span></div><div class="stars">★★★★★</div></div></div>
       </div>
       <div class="t-nav">
         <button class="arrow" id="tPrev" aria-label="Previous"><svg class="icon"><use href="#i-left"/></svg></button>
         <button class="dot active" aria-label="Testimonial 1"></button><button class="dot" aria-label="Testimonial 2"></button><button class="dot" aria-label="Testimonial 3"></button>
         <button class="arrow" id="tNext" aria-label="Next"><svg class="icon"><use href="#i-right"/></svg></button>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section class="section">
+  <div class="container">
+    <div class="section-header reveal"><span class="eyebrow">Our Team</span><h2>The people behind Marketsphare</h2><p>A distributed team of marketers, engineers and trust &amp; safety specialists building a fairer marketplace.</p></div>
+    <div class="team">
+      <div class="member reveal"><div class="m-photo"><div class="av" data-p="3" data-name="Amara Okafor" data-photo="assets/images/team-amara.jpg"></div></div><h3>Amara Okafor</h3><div class="role">Founder &amp; CEO</div><p>Ten years scaling growth teams across Africa and Europe.</p><div class="mini-social"><a href="#" aria-label="LinkedIn"><svg class="icon"><use href="#i-in"/></svg></a><a href="#" aria-label="X"><svg class="icon"><use href="#i-x"/></svg></a></div></div>
+      <div class="member reveal" style="--d:.08s"><div class="m-photo"><div class="av" data-p="2" data-name="Lucas Meyer" data-photo="assets/images/team-lucas.jpg"></div></div><h3>Lucas Meyer</h3><div class="role">Chief Technology Officer</div><p>Builds the AI matching engine and payments platform.</p><div class="mini-social"><a href="#" aria-label="LinkedIn"><svg class="icon"><use href="#i-in"/></svg></a><a href="#" aria-label="X"><svg class="icon"><use href="#i-x"/></svg></a></div></div>
+      <div class="member reveal" style="--d:.16s"><div class="m-photo"><div class="av" data-p="5" data-name="Sofia Alvarez" data-photo="assets/images/team-sofia.jpg"></div></div><h3>Sofia Alvarez</h3><div class="role">Head of Talent</div><p>Vets every professional so employers hire with confidence.</p><div class="mini-social"><a href="#" aria-label="LinkedIn"><svg class="icon"><use href="#i-in"/></svg></a><a href="#" aria-label="X"><svg class="icon"><use href="#i-x"/></svg></a></div></div>
+      <div class="member reveal" style="--d:.24s"><div class="m-photo"><div class="av" data-p="6" data-name="David Mensah" data-photo="assets/images/team-david.jpg"></div></div><h3>David Mensah</h3><div class="role">Head of Trust &amp; Safety</div><p>Keeps escrow, identity checks and disputes fair for everyone.</p><div class="mini-social"><a href="#" aria-label="LinkedIn"><svg class="icon"><use href="#i-in"/></svg></a><a href="#" aria-label="X"><svg class="icon"><use href="#i-x"/></svg></a></div></div>
     </div>
   </div>
 </section>
@@ -799,13 +943,18 @@ h1,h2,h3,h4{font-family:var(--font-head);line-height:1.15;letter-spacing:-.02em}
       <div class="footer-col"><h4>Company</h4><ul><li><a href="about.html">About Us</a></li><li><a href="contact.html">Contact</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="#">Careers</a></li></ul></div>
       <div class="footer-col"><h4>For Talent</h4><ul><li><a href="jobs.html">Browse Jobs</a></li><li><a href="auth/register.html">Create Profile</a></li><li><a href="dashboard/applications.html">My Applications</a></li><li><a href="dashboard/earnings.html">Earnings</a></li></ul></div>
       <div class="footer-col"><h4>For Employers</h4><ul><li><a href="services.html">Hire Experts</a></li><li><a href="dashboard/jobs.html">Post a Job</a></li><li><a href="pricing.html">Plans</a></li><li><a href="contact.html">Talk to Sales</a></li></ul></div>
-      <div class="footer-col"><h4>Legal</h4><ul><li><a href="#">Terms of Service</a></li><li><a href="#">Privacy Policy</a></li><li><a href="#">Cookie Policy</a></li><li><a href="#">Security</a></li></ul></div>
+      <div class="footer-col"><h4>Legal</h4><ul><li><a href="terms.html">Terms of Service</a></li><li><a href="privacy.html">Privacy Policy</a></li><li><a href="cookies.html">Cookie Policy</a></li><li><a href="security.html">Security</a></li></ul></div>
     </div>
     <div class="footer-bottom"><span>&copy; 2026 Marketsphare. All rights reserved.</span><span>Built for remote digital marketing talent &amp; employers worldwide.</span></div>
   </div>
 </footer>
 
 <button class="to-top" id="toTop" aria-label="Back to top"><svg class="icon"><use href="#i-up"/></svg></button>
+
+<div class="cookie" id="cookie" role="dialog" aria-label="Cookie consent">
+  <p>We use cookies to keep Marketsphare secure, remember your preferences and understand how the site is used. Read our <a href="cookies.html">Cookie Policy</a> and <a href="privacy.html">Privacy Policy</a>.</p>
+  <div class="acts"><button class="btn btn-outline btn-sm" id="cookieEss">Essential only</button><button class="btn btn-primary btn-sm" id="cookieAll">Accept all</button></div>
+</div>
 
 <script>
 (function(){
@@ -927,6 +1076,56 @@ h1,h2,h3,h4{font-family:var(--font-head);line-height:1.15;letter-spacing:-.02em}
       if(!open){item.classList.add('open');a.style.maxHeight=a.scrollHeight+'px';}
     });
   });
+})();
+</script>
+<script>
+/* Illustrated people avatars. Add data-photo="path.jpg" to any .av and a real
+   photo replaces the illustration automatically once it loads. */
+(function(){
+  var P=[
+    {s:'#c68642',h:'#1b1b1f',st:'short',sh:'#6d5bff',bg:['#cfc9ff','#8f83ff']},
+    {s:'#e0ac69',h:'#14110f',st:'long',sh:'#00a7a0',bg:['#b8f3ee','#4fd1c5']},
+    {s:'#f1c27d',h:'#4a3220',st:'short',sh:'#334155',bg:['#d5dde8','#94a3b8'],g:1},
+    {s:'#8d5524',h:'#0f0d0c',st:'curly',sh:'#ff6bb5',bg:['#ffd6ea','#ff9ccd']},
+    {s:'#ffdbac',h:'#d6a85a',st:'short',sh:'#f59e0b',bg:['#ffeab8','#fbbf24'],b:1},
+    {s:'#c68642',h:'#4b2e1e',st:'bun',sh:'#22c55e',bg:['#c9f7d8','#68d391']},
+    {s:'#6b4423',h:'#0f0d0c',st:'bald',sh:'#3b82f6',bg:['#c9dcff','#7aa7ff'],b:1},
+    {s:'#f1c27d',h:'#1b1b1f',st:'bob',sh:'#ef4444',bg:['#ffd0d0','#fb7185'],g:1}
+  ];
+  var n=0;
+  function art(p){
+    var id='avg'+(n++),back='',front='',x='';
+    if(p.st==='long')back='<path d="M29 48C26 20 74 20 71 48L74 90H26Z" fill="'+p.h+'"/>';
+    if(p.st==='bob')back='<path d="M30 50C27 20 73 20 70 50L70 65Q50 71 30 65Z" fill="'+p.h+'"/>';
+    if(p.st==='curly')back='<g fill="'+p.h+'"><circle cx="50" cy="27" r="16"/><circle cx="35" cy="33" r="10"/><circle cx="65" cy="33" r="10"/><circle cx="31" cy="45" r="8"/><circle cx="69" cy="45" r="8"/></g>';
+    if(p.st==='bun')back='<circle cx="50" cy="15" r="8" fill="'+p.h+'"/>';
+    if(p.st!=='bald')front='<path d="M32 42C31 22 69 22 68 42C63 33 40 31 32 42Z" fill="'+p.h+'"/>';
+    if(p.b)x+='<path d="M34 48C34 68 66 68 66 48C62 59 38 59 34 48Z" fill="'+p.h+'"/>';
+    if(p.g)x+='<g fill="none" stroke="#1f2937" stroke-width="1.4"><circle cx="43" cy="45" r="5.5"/><circle cx="57" cy="45" r="5.5"/><path d="M48.5 45h3"/></g>';
+    return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="'+id+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+p.bg[0]+'"/><stop offset="1" stop-color="'+p.bg[1]+'"/></linearGradient></defs>'
+      +'<rect width="100" height="100" fill="url(#'+id+')"/>'+back
+      +'<rect x="43" y="58" width="14" height="16" rx="6" fill="'+p.s+'"/>'
+      +'<path d="M10 100C10 79 29 70 50 70S90 79 90 100Z" fill="'+p.sh+'"/>'
+      +'<path d="M41 70L50 82L59 70" fill="#fff" fill-opacity=".92"/>'
+      +'<circle cx="33" cy="46" r="3.2" fill="'+p.s+'"/><circle cx="67" cy="46" r="3.2" fill="'+p.s+'"/>'
+      +'<ellipse cx="50" cy="44" rx="17" ry="19" fill="'+p.s+'"/>'+front+x
+      +'<circle cx="43.5" cy="45" r="1.9" fill="#1f2937"/><circle cx="56.5" cy="45" r="1.9" fill="#1f2937"/>'
+      +'<path d="M44 53Q50 58.5 56 53" fill="none" stroke="#5b2a22" stroke-width="1.8" stroke-linecap="round"/></svg>';
+  }
+  document.querySelectorAll('[data-p]').forEach(function(el){
+    var p=P[parseInt(el.getAttribute('data-p'),10)%P.length],nm=el.getAttribute('data-name')||'Profile picture';
+    el.innerHTML=art(p);el.setAttribute('role','img');el.setAttribute('aria-label',nm);
+    var ph=el.getAttribute('data-photo');
+    if(ph){var im=new Image();im.alt=nm;im.onload=function(){el.innerHTML='';el.appendChild(im);};im.src=ph;}
+  });
+
+  /* Cookie consent */
+  var ck=document.getElementById('cookie'),seen=null;
+  try{seen=localStorage.getItem('ms-cookie');}catch(e){}
+  if(!seen){setTimeout(function(){ck.classList.add('show');},1400);}
+  function choose(v){try{localStorage.setItem('ms-cookie',v);}catch(e){}ck.classList.remove('show');}
+  document.getElementById('cookieAll').addEventListener('click',function(){choose('all')});
+  document.getElementById('cookieEss').addEventListener('click',function(){choose('essential')});
 })();
 </script>
 </body>
