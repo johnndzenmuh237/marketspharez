@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terms of Service | Marketsphare</title>
+<meta name="description" content="The rules that apply when you use Marketsphare as a freelancer, employer or visitor.">
+<link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#6d5bff;--brand-2:#00c2b8;--grad:linear-gradient(135deg,#6d5bff 0%,#00c2b8 100%);--font:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;--font-head:'Plus Jakarta Sans','Inter',system-ui,sans-serif;--ease:cubic-bezier(.22,1,.36,1)}
+[data-theme="dark"]{--bg:#07080f;--bg-2:#0c0e18;--surface:#11131f;--border:rgba(255,255,255,.08);--border-2:rgba(255,255,255,.14);--text:#f2f4fb;--muted:#a3a9bf;--faint:#6c7288;--glass:rgba(10,11,20,.78);--chip:rgba(255,255,255,.06)}
+[data-theme="light"]{--bg:#f6f7fc;--bg-2:#eef0f9;--surface:#fff;--border:rgba(20,24,60,.09);--border-2:rgba(20,24,60,.16);--text:#0d1030;--muted:#566079;--faint:#8b92a8;--glass:rgba(255,255,255,.82);--chip:rgba(20,24,60,.05)}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth;scroll-padding-top:100px}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased;transition:background .4s,color .4s}
+a{color:inherit;text-decoration:none}ul{list-style:none}button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+.container{width:100%;max-width:1200px;margin:0 auto;padding:0 24px}
+h1,h2,h3{font-family:var(--font-head);line-height:1.2;letter-spacing:-.02em}
+.progress{position:fixed;top:0;left:0;height:3px;width:0;background:var(--grad);z-index:200}
+.site-header{position:sticky;top:0;z-index:100;background:var(--glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--border)}
+.navbar{display:flex;align-items:center;justify-content:space-between;height:70px;gap:1rem}
+.logo{display:flex;align-items:center;gap:.65rem;font-family:var(--font-head);font-weight:800;font-size:1.2rem}
+.logo-mark{width:36px;height:36px;border-radius:11px;background:var(--grad);display:grid;place-items:center;color:#fff;font-size:.85rem;font-weight:800;box-shadow:0 8px 22px -6px rgba(109,91,255,.8)}
+.nav-links{display:flex;gap:.2rem}.nav-links a{padding:.5rem .85rem;border-radius:10px;font-size:.9rem;font-weight:500;color:var(--muted);transition:.2s}.nav-links a:hover{color:var(--text);background:var(--chip)}
+.nav-actions{display:flex;gap:.5rem;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:.6rem 1.1rem;border-radius:12px;font-weight:600;font-size:.88rem;transition:.3s var(--ease)}
+.btn-primary{background:var(--grad);color:#fff;box-shadow:0 10px 26px -10px rgba(109,91,255,.7)}.btn-primary:hover{transform:translateY(-2px)}
+.btn-outline{border:1px solid var(--border-2);background:var(--chip)}.btn-outline:hover{border-color:var(--brand)}
+.theme-toggle{width:40px;height:40px;border-radius:12px;border:1px solid var(--border-2);display:grid;place-items:center;font-size:1rem}
+.hero{position:relative;overflow:hidden;padding:4rem 0 3rem;border-bottom:1px solid var(--border);isolation:isolate}
+.hero::before,.hero::after{content:"";position:absolute;border-radius:50%;filter:blur(90px);z-index:-1;opacity:.35}
+.hero::before{width:420px;height:420px;background:#6d5bff;top:-180px;left:-100px}.hero::after{width:360px;height:360px;background:#00c2b8;top:-120px;right:-80px}
+.crumbs{font-size:.85rem;color:var(--faint);margin-bottom:1rem}.crumbs a:hover{color:var(--brand-2)}
+.hero h1{font-size:clamp(2rem,4.4vw,3.2rem);font-weight:800;margin-bottom:.8rem}
+.hero p{color:var(--muted);max-width:640px;font-size:1.05rem}
+.meta{display:inline-flex;margin-top:1.2rem;padding:.35rem .9rem;border-radius:100px;background:var(--chip);border:1px solid var(--border);font-size:.8rem;color:var(--muted)}
+.pills{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.6rem}
+.pills a{padding:.45rem 1rem;border-radius:100px;border:1px solid var(--border-2);font-size:.85rem;font-weight:600;color:var(--muted);transition:.25s}
+.pills a:hover{color:var(--text);border-color:var(--brand)}.pills a.active{background:var(--grad);color:#fff;border-color:transparent}
+.layout{display:grid;grid-template-columns:260px 1fr;gap:3.5rem;padding:3.5rem 0 5rem;align-items:start}
+.toc{position:sticky;top:96px;padding:1.2rem;border-radius:18px;background:var(--surface);border:1px solid var(--border)}
+.toc h4{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-bottom:.8rem}
+.toc a{display:block;padding:.4rem .7rem;border-radius:9px;font-size:.86rem;color:var(--muted);border-left:2px solid transparent;transition:.2s}
+.toc a:hover{color:var(--text)}.toc a.on{color:var(--text);background:var(--chip);border-left-color:var(--brand)}
+.doc section{margin-bottom:2.6rem;padding-bottom:2.6rem;border-bottom:1px solid var(--border)}.doc section:last-of-type{border-bottom:0}
+.doc h2{font-size:1.5rem;margin-bottom:1rem}.doc h2 span{color:var(--brand-2);margin-right:.5rem}
+.doc h3{font-size:1.05rem;margin:1.3rem 0 .5rem}
+.doc p{color:var(--muted);margin-bottom:1rem}.doc ul.list{margin:0 0 1rem 0}
+.doc ul.list li{position:relative;padding-left:1.4rem;color:var(--muted);margin-bottom:.5rem}
+.doc ul.list li::before{content:"";position:absolute;left:0;top:.72em;width:7px;height:7px;border-radius:50%;background:var(--grad)}
+.doc a.lnk{color:var(--brand-2);text-decoration:underline;text-underline-offset:3px}
+.doc strong{color:var(--text)}
+.callout{padding:1.1rem 1.3rem;border-radius:16px;background:rgba(109,91,255,.1);border:1px solid rgba(109,91,255,.3);margin-bottom:1.3rem;color:var(--muted);font-size:.95rem}
+.tbl{width:100%;border-collapse:collapse;margin:0 0 1.2rem;font-size:.9rem;border:1px solid var(--border);border-radius:14px;overflow:hidden;display:block;overflow-x:auto}
+.tbl th,.tbl td{padding:.8rem 1rem;text-align:left;border-bottom:1px solid var(--border);vertical-align:top}
+.tbl th{background:var(--chip);color:var(--text);font-weight:700;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em}
+.tbl td{color:var(--muted)}.tbl tr:last-child td{border-bottom:0}
+.contact-card{padding:1.6rem;border-radius:20px;background:var(--surface);border:1px solid var(--border);display:flex;justify-content:space-between;gap:1rem;align-items:center;flex-wrap:wrap}
+.contact-card h3{margin:0 0 .2rem}.contact-card p{margin:0}
+.site-footer{border-top:1px solid var(--border);background:var(--bg-2);padding:2rem 0}
+.foot{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;color:var(--faint);font-size:.85rem}
+.foot nav{display:flex;gap:1.2rem;flex-wrap:wrap}.foot a:hover{color:var(--text)}
+@media(max-width:900px){.layout{grid-template-columns:1fr;gap:1.5rem}.toc{position:static}.nav-links{display:none}}
+@media print{.site-header,.toc,.progress,.site-footer,.pills{display:none}.layout{display:block}body{background:#fff;color:#000}.doc p,.doc li{color:#222}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<header class="site-header"><div class="container navbar">
+  <a href="index.html" class="logo"><span class="logo-mark">MS</span><span>Marketsphare</span></a>
+  <nav class="nav-links"><a href="index.html">Home</a><a href="about.html">About</a><a href="services.html">Services</a><a href="jobs.html">Find Jobs</a><a href="pricing.html">Pricing</a><a href="contact.html">Contact</a></nav>
+  <div class="nav-actions"><button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">◐</button><a href="auth/login.html" class="btn btn-outline">Log In</a><a href="auth/register.html" class="btn btn-primary">Sign Up</a></div>
+</div></header>
+<section class="hero"><div class="container">
+  <div class="crumbs"><a href="index.html">Home</a> / Legal / Terms of Service</div>
+  <h1>Terms of Service</h1><p>The rules that apply when you use Marketsphare as a freelancer, employer or visitor.</p>
+  <span class="meta">Last updated: October 22, 2026</span>
+  <div class="pills"><a href="terms.html" class="active">Terms of Service</a><a href="privacy.html">Privacy Policy</a><a href="cookies.html">Cookie Policy</a><a href="security.html">Security</a></div>
+</div></section>
+<div class="container layout">
+  <aside class="toc"><h4>On this page</h4><a href="#s1">Acceptance of these Terms</a><a href="#s2">About Marketsphare</a><a href="#s3">Eligibility and accounts</a><a href="#s4">Using the marketplace</a><a href="#s5">Fees, escrow and payments</a><a href="#s6">Disputes between users</a><a href="#s7">Prohibited conduct</a><a href="#s8">Content and intellectual property</a><a href="#s9">AI-assisted features</a><a href="#s10">Suspension and termination</a><a href="#s11">Disclaimers</a><a href="#s12">Limitation of liability</a><a href="#s13">Indemnity</a><a href="#s14">Governing law</a><a href="#s15">Changes to these Terms</a><a href="#s16">Contact us</a></aside>
+  <article class="doc"><section id="s1"><h2><span>01</span>Acceptance of these Terms</h2><p>By creating an account, accessing or using Marketsphare (the "Platform"), you agree to these Terms of Service (the "Terms") and to our <a class="lnk" href="privacy.html">Privacy Policy</a> and <a class="lnk" href="cookies.html">Cookie Policy</a>. If you do not agree, do not use the Platform.</p><p>If you use the Platform on behalf of a company or other organisation, you confirm that you have authority to bind it, and "you" includes that organisation.</p></section><section id="s2"><h2><span>02</span>About Marketsphare</h2><p>Marketsphare is an online marketplace that connects digital marketing professionals ("Talent") with businesses and individuals who wish to hire them ("Employers"). We provide tools for profiles, AI-assisted matching, messaging, project tracking and escrow-based payments.</p><div class="callout"><strong>Marketsphare is not an employer or agency.</strong> Unless a separate written agreement says otherwise, we are not a party to the contract between Talent and Employers, and we do not supervise, direct or control the work performed.</div></section><section id="s3"><h2><span>03</span>Eligibility and accounts</h2><ul class="list"><li>You must be at least 18 years old and able to enter into a binding contract.</li><li>You must provide accurate, current and complete information, including for identity verification, and keep it up to date.</li><li>You are responsible for all activity under your account and for keeping your password and devices secure. Notify us immediately of any unauthorised use.</li><li>You may hold only one personal account unless we agree otherwise in writing. Accounts may not be sold, shared or transferred.</li></ul></section><section id="s4"><h2><span>04</span>Using the marketplace</h2><h3>For Talent</h3><ul class="list"><li>Describe your skills, experience and availability truthfully.</li><li>Deliver work that matches the agreed scope, deadline and quality, and respect confidentiality obligations.</li><li>Do not misrepresent portfolio work or credentials.</li></ul><h3>For Employers</h3><ul class="list"><li>Describe jobs, budgets and deliverables clearly and in good faith.</li><li>Fund agreed milestones or contracts through the Platform and review submitted work promptly.</li><li>Do not request work that is unlawful, deceptive or infringes the rights of others.</li></ul></section><section id="s5"><h2><span>05</span>Fees, escrow and payments</h2><p>Fees applicable to your plan are shown on our <a class="lnk" href="pricing.html">Pricing page</a> and at the point you accept an engagement. We may change fees with reasonable prior notice; changes do not affect engagements already funded.</p><p>Employers fund the agreed amount into escrow. Funds are released to Talent when the Employer approves the work, when an approval period lapses, or following dispute resolution. Payment processing is provided by third-party payment partners, whose terms also apply.</p><ul class="list"><li>You are responsible for any taxes that apply to your earnings or purchases.</li><li>Payouts may be delayed or withheld where we reasonably suspect fraud, a security issue, or a breach of these Terms, or where required by law.</li><li>Refunds and chargebacks are handled according to the dispute process described below.</li></ul></section><section id="s6"><h2><span>06</span>Disputes between users</h2><p>If an Employer and Talent disagree about delivered work or payment, they should first try to resolve it directly through Platform messaging. If that fails, either party may open a dispute. We may review evidence submitted by both parties and decide how escrowed funds are allocated. Our decision on the allocation of escrowed funds is final for the purposes of the Platform, but does not limit rights you may have under applicable law.</p></section><section id="s7"><h2><span>07</span>Prohibited conduct</h2><p>You agree not to:</p><ul class="list"><li>circumvent the Platform to avoid fees on engagements that began on Marketsphare;</li><li>post false, misleading, discriminatory, harassing or unlawful content, or fake reviews;</li><li>scrape, reverse engineer, probe or disrupt the Platform, or attempt to access data you are not authorised to see;</li><li>upload malware or use the Platform to send spam or phishing;</li><li>impersonate any person or organisation, or create accounts to evade a suspension;</li><li>use the Platform for money laundering, fraud or any activity that violates sanctions or applicable law.</li></ul></section><section id="s8"><h2><span>08</span>Content and intellectual property</h2><p><strong>Your content.</strong> You retain ownership of the content you submit (profiles, portfolios, job posts, messages). You grant Marketsphare a worldwide, non-exclusive, royalty-free licence to host, display, reproduce and process that content solely to operate, secure, improve and promote the Platform.</p><p><strong>Work product.</strong> Ownership of work delivered between Talent and Employers is governed by their agreement. Unless they agree otherwise, rights in the final deliverables transfer to the Employer upon full payment.</p><p><strong>Our property.</strong> The Platform, including its software, design, trademarks and AI matching technology, belongs to Marketsphare or its licensors. These Terms do not grant you any rights in them except the limited right to use the Platform as intended.</p><p>If you believe content on the Platform infringes your rights, please contact us at the address below with enough detail for us to investigate.</p></section><section id="s9"><h2><span>09</span>AI-assisted features</h2><p>Matching scores, recommendations and other AI-assisted outputs are provided to help you make decisions faster. They are estimates, not guarantees of quality, suitability or outcome, and you remain responsible for your hiring and work decisions.</p></section><section id="s10"><h2><span>10</span>Suspension and termination</h2><p>You may close your account at any time, subject to completing or cancelling active engagements. We may suspend or terminate access, remove content or withhold payouts if you breach these Terms, create risk or legal exposure for us or other users, or where required by law. Provisions that by their nature should survive termination (including payment obligations, intellectual property, disclaimers, liability limits and dispute provisions) will survive.</p></section><section id="s11"><h2><span>11</span>Disclaimers</h2><p>The Platform is provided "as is" and "as available". To the fullest extent permitted by law, we disclaim all warranties, express or implied, including merchantability, fitness for a particular purpose and non-infringement. We do not warrant that the Platform will be uninterrupted or error-free, or that any user is qualified, reliable or will perform as represented.</p></section><section id="s12"><h2><span>12</span>Limitation of liability</h2><p>To the fullest extent permitted by law, Marketsphare will not be liable for indirect, incidental, special, consequential or punitive damages, or for loss of profits, revenue, data or goodwill, arising from your use of the Platform. Our total liability for any claim relating to the Platform will not exceed the greater of the fees you paid to us in the twelve months before the claim arose or one hundred US dollars (US$100). Nothing in these Terms excludes liability that cannot be excluded under applicable law.</p></section><section id="s13"><h2><span>13</span>Indemnity</h2><p>You agree to indemnify and hold harmless Marketsphare and its team from claims, losses and expenses (including reasonable legal fees) arising out of your content, your breach of these Terms, or your violation of any law or third-party right.</p></section><section id="s14"><h2><span>14</span>Governing law</h2><p>These Terms are governed by the laws of the jurisdiction in which Marketsphare is registered, without regard to conflict-of-law rules. Courts of that jurisdiction will have exclusive jurisdiction, except where mandatory consumer protection law in your country of residence provides otherwise.</p></section><section id="s15"><h2><span>15</span>Changes to these Terms</h2><p>We may update these Terms from time to time. If changes are material, we will notify you by email or through the Platform before they take effect. Continued use after the effective date means you accept the updated Terms.</p></section><section id="s16"><h2><span>16</span>Contact us</h2><div class="contact-card"><div><h3>Questions about these Terms?</h3><p><a class="lnk" href="mailto:legal@marketsphare.com">legal@marketsphare.com</a></p></div><a class="btn btn-primary" href="contact.html">Contact page</a></div></section></article>
+</div>
+<footer class="site-footer"><div class="container foot">
+  <span>&copy; 2026 Marketsphare. All rights reserved.</span>
+  <nav><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="cookies.html">Cookies</a><a href="security.html">Security</a><a href="contact.html">Contact</a></nav>
+</div></footer>
+<script>
+(function(){
+  var root=document.documentElement;
+  try{var s=localStorage.getItem('ms-theme');if(s)root.setAttribute('data-theme',s);}catch(e){}
+  document.getElementById('themeToggle').addEventListener('click',function(){
+    var n=root.getAttribute('data-theme')==='dark'?'light':'dark';
+    root.setAttribute('data-theme',n);try{localStorage.setItem('ms-theme',n);}catch(e){}
+  });
+  var bar=document.getElementById('progress');
+  var links=[].slice.call(document.querySelectorAll('.toc a')),secs=links.map(function(a){return document.querySelector(a.getAttribute('href'))});
+  function onScroll(){
+    var h=document.documentElement.scrollHeight-innerHeight;bar.style.width=(h>0?scrollY/h*100:0)+'%';
+    var cur=0;secs.forEach(function(s,i){if(s&&s.getBoundingClientRect().top<140)cur=i;});
+    links.forEach(function(a,i){a.classList.toggle('on',i===cur)});
+  }
+  addEventListener('scroll',onScroll,{passive:true});onScroll();
+})();
+</script>
+</body>
+</html>
