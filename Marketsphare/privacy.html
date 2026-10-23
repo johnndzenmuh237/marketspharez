@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy | Marketsphare</title>
+<meta name="description" content="How Marketsphare collects, uses, shares and protects your personal information.">
+<link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#6d5bff;--brand-2:#00c2b8;--grad:linear-gradient(135deg,#6d5bff 0%,#00c2b8 100%);--font:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;--font-head:'Plus Jakarta Sans','Inter',system-ui,sans-serif;--ease:cubic-bezier(.22,1,.36,1)}
+[data-theme="dark"]{--bg:#07080f;--bg-2:#0c0e18;--surface:#11131f;--border:rgba(255,255,255,.08);--border-2:rgba(255,255,255,.14);--text:#f2f4fb;--muted:#a3a9bf;--faint:#6c7288;--glass:rgba(10,11,20,.78);--chip:rgba(255,255,255,.06)}
+[data-theme="light"]{--bg:#f6f7fc;--bg-2:#eef0f9;--surface:#fff;--border:rgba(20,24,60,.09);--border-2:rgba(20,24,60,.16);--text:#0d1030;--muted:#566079;--faint:#8b92a8;--glass:rgba(255,255,255,.82);--chip:rgba(20,24,60,.05)}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth;scroll-padding-top:100px}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased;transition:background .4s,color .4s}
+a{color:inherit;text-decoration:none}ul{list-style:none}button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+.container{width:100%;max-width:1200px;margin:0 auto;padding:0 24px}
+h1,h2,h3{font-family:var(--font-head);line-height:1.2;letter-spacing:-.02em}
+.progress{position:fixed;top:0;left:0;height:3px;width:0;background:var(--grad);z-index:200}
+.site-header{position:sticky;top:0;z-index:100;background:var(--glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--border)}
+.navbar{display:flex;align-items:center;justify-content:space-between;height:70px;gap:1rem}
+.logo{display:flex;align-items:center;gap:.65rem;font-family:var(--font-head);font-weight:800;font-size:1.2rem}
+.logo-mark{width:36px;height:36px;border-radius:11px;background:var(--grad);display:grid;place-items:center;color:#fff;font-size:.85rem;font-weight:800;box-shadow:0 8px 22px -6px rgba(109,91,255,.8)}
+.nav-links{display:flex;gap:.2rem}.nav-links a{padding:.5rem .85rem;border-radius:10px;font-size:.9rem;font-weight:500;color:var(--muted);transition:.2s}.nav-links a:hover{color:var(--text);background:var(--chip)}
+.nav-actions{display:flex;gap:.5rem;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:.6rem 1.1rem;border-radius:12px;font-weight:600;font-size:.88rem;transition:.3s var(--ease)}
+.btn-primary{background:var(--grad);color:#fff;box-shadow:0 10px 26px -10px rgba(109,91,255,.7)}.btn-primary:hover{transform:translateY(-2px)}
+.btn-outline{border:1px solid var(--border-2);background:var(--chip)}.btn-outline:hover{border-color:var(--brand)}
+.theme-toggle{width:40px;height:40px;border-radius:12px;border:1px solid var(--border-2);display:grid;place-items:center;font-size:1rem}
+.hero{position:relative;overflow:hidden;padding:4rem 0 3rem;border-bottom:1px solid var(--border);isolation:isolate}
+.hero::before,.hero::after{content:"";position:absolute;border-radius:50%;filter:blur(90px);z-index:-1;opacity:.35}
+.hero::before{width:420px;height:420px;background:#6d5bff;top:-180px;left:-100px}.hero::after{width:360px;height:360px;background:#00c2b8;top:-120px;right:-80px}
+.crumbs{font-size:.85rem;color:var(--faint);margin-bottom:1rem}.crumbs a:hover{color:var(--brand-2)}
+.hero h1{font-size:clamp(2rem,4.4vw,3.2rem);font-weight:800;margin-bottom:.8rem}
+.hero p{color:var(--muted);max-width:640px;font-size:1.05rem}
+.meta{display:inline-flex;margin-top:1.2rem;padding:.35rem .9rem;border-radius:100px;background:var(--chip);border:1px solid var(--border);font-size:.8rem;color:var(--muted)}
+.pills{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.6rem}
+.pills a{padding:.45rem 1rem;border-radius:100px;border:1px solid var(--border-2);font-size:.85rem;font-weight:600;color:var(--muted);transition:.25s}
+.pills a:hover{color:var(--text);border-color:var(--brand)}.pills a.active{background:var(--grad);color:#fff;border-color:transparent}
+.layout{display:grid;grid-template-columns:260px 1fr;gap:3.5rem;padding:3.5rem 0 5rem;align-items:start}
+.toc{position:sticky;top:96px;padding:1.2rem;border-radius:18px;background:var(--surface);border:1px solid var(--border)}
+.toc h4{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-bottom:.8rem}
+.toc a{display:block;padding:.4rem .7rem;border-radius:9px;font-size:.86rem;color:var(--muted);border-left:2px solid transparent;transition:.2s}
+.toc a:hover{color:var(--text)}.toc a.on{color:var(--text);background:var(--chip);border-left-color:var(--brand)}
+.doc section{margin-bottom:2.6rem;padding-bottom:2.6rem;border-bottom:1px solid var(--border)}.doc section:last-of-type{border-bottom:0}
+.doc h2{font-size:1.5rem;margin-bottom:1rem}.doc h2 span{color:var(--brand-2);margin-right:.5rem}
+.doc h3{font-size:1.05rem;margin:1.3rem 0 .5rem}
+.doc p{color:var(--muted);margin-bottom:1rem}.doc ul.list{margin:0 0 1rem 0}
+.doc ul.list li{position:relative;padding-left:1.4rem;color:var(--muted);margin-bottom:.5rem}
+.doc ul.list li::before{content:"";position:absolute;left:0;top:.72em;width:7px;height:7px;border-radius:50%;background:var(--grad)}
+.doc a.lnk{color:var(--brand-2);text-decoration:underline;text-underline-offset:3px}
+.doc strong{color:var(--text)}
+.callout{padding:1.1rem 1.3rem;border-radius:16px;background:rgba(109,91,255,.1);border:1px solid rgba(109,91,255,.3);margin-bottom:1.3rem;color:var(--muted);font-size:.95rem}
+.tbl{width:100%;border-collapse:collapse;margin:0 0 1.2rem;font-size:.9rem;border:1px solid var(--border);border-radius:14px;overflow:hidden;display:block;overflow-x:auto}
+.tbl th,.tbl td{padding:.8rem 1rem;text-align:left;border-bottom:1px solid var(--border);vertical-align:top}
+.tbl th{background:var(--chip);color:var(--text);font-weight:700;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em}
+.tbl td{color:var(--muted)}.tbl tr:last-child td{border-bottom:0}
+.contact-card{padding:1.6rem;border-radius:20px;background:var(--surface);border:1px solid var(--border);display:flex;justify-content:space-between;gap:1rem;align-items:center;flex-wrap:wrap}
+.contact-card h3{margin:0 0 .2rem}.contact-card p{margin:0}
+.site-footer{border-top:1px solid var(--border);background:var(--bg-2);padding:2rem 0}
+.foot{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;color:var(--faint);font-size:.85rem}
+.foot nav{display:flex;gap:1.2rem;flex-wrap:wrap}.foot a:hover{color:var(--text)}
+@media(max-width:900px){.layout{grid-template-columns:1fr;gap:1.5rem}.toc{position:static}.nav-links{display:none}}
+@media print{.site-header,.toc,.progress,.site-footer,.pills{display:none}.layout{display:block}body{background:#fff;color:#000}.doc p,.doc li{color:#222}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<header class="site-header"><div class="container navbar">
+  <a href="index.html" class="logo"><span class="logo-mark">MS</span><span>Marketsphare</span></a>
+  <nav class="nav-links"><a href="index.html">Home</a><a href="about.html">About</a><a href="services.html">Services</a><a href="jobs.html">Find Jobs</a><a href="pricing.html">Pricing</a><a href="contact.html">Contact</a></nav>
+  <div class="nav-actions"><button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">◐</button><a href="auth/login.html" class="btn btn-outline">Log In</a><a href="auth/register.html" class="btn btn-primary">Sign Up</a></div>
+</div></header>
+<section class="hero"><div class="container">
+  <div class="crumbs"><a href="index.html">Home</a> / Legal / Privacy Policy</div>
+  <h1>Privacy Policy</h1><p>How Marketsphare collects, uses, shares and protects your personal information.</p>
+  <span class="meta">Last updated: October 22, 2026</span>
+  <div class="pills"><a href="terms.html">Terms of Service</a><a href="privacy.html" class="active">Privacy Policy</a><a href="cookies.html">Cookie Policy</a><a href="security.html">Security</a></div>
+</div></section>
+<div class="container layout">
+  <aside class="toc"><h4>On this page</h4><a href="#s1">Introduction</a><a href="#s2">Information we collect</a><a href="#s3">How we use your information</a><a href="#s4">Legal bases (where applicable)</a><a href="#s5">How we share information</a><a href="#s6">International transfers</a><a href="#s7">Data retention</a><a href="#s8">Your rights and choices</a><a href="#s9">Cookies and similar technologies</a><a href="#s10">Security</a><a href="#s11">Children's privacy</a><a href="#s12">Changes to this Policy</a><a href="#s13">Contact us</a></aside>
+  <article class="doc"><section id="s1"><h2><span>01</span>Introduction</h2><p>This Privacy Policy explains how Marketsphare ("we", "us") handles personal information when you visit our website or use our marketplace. We process personal data in line with the principles of lawfulness, fairness, transparency, purpose limitation, data minimisation, accuracy, storage limitation and security.</p><div class="callout">By using the Platform you acknowledge this Policy. If you disagree with it, please do not use our services.</div></section><section id="s2"><h2><span>02</span>Information we collect</h2><table class="tbl"><thead><tr><th>Category</th><th>Examples</th><th>Source</th></tr></thead><tbody><tr><td>Account data</td><td>Name, email, password hash, country, role (Talent or Employer)</td><td>You</td></tr><tr><td>Profile and work data</td><td>Skills, portfolio, rates, job posts, proposals, messages, files</td><td>You</td></tr><tr><td>Verification data</td><td>Government ID details and selfie checks, business registration</td><td>You, via our verification provider</td></tr><tr><td>Payment data</td><td>Payout details, transaction history, billing country. Card numbers are handled by our payment partners, not stored by us</td><td>You, payment partners</td></tr><tr><td>Usage and device data</td><td>IP address, browser, device type, pages viewed, actions taken, approximate location</td><td>Automatically</td></tr><tr><td>Support communications</td><td>Messages and attachments you send to our team</td><td>You</td></tr></tbody></table></section><section id="s3"><h2><span>03</span>How we use your information</h2><ul class="list"><li><strong>Provide the service:</strong> create accounts, publish profiles and jobs, enable messaging, process escrow and payouts.</li><li><strong>Match and recommend:</strong> power AI matching between jobs and professionals.</li><li><strong>Keep the Platform safe:</strong> verify identities, detect fraud and abuse, enforce our <a class="lnk" href="terms.html">Terms</a>.</li><li><strong>Communicate:</strong> send service notices, security alerts and, where permitted, product updates you can opt out of.</li><li><strong>Improve:</strong> analyse usage to fix issues and develop features.</li><li><strong>Comply with law:</strong> meet tax, accounting, anti-money-laundering and legal-process obligations.</li></ul></section><section id="s4"><h2><span>04</span>Legal bases (where applicable)</h2><p>Where laws such as the GDPR apply, we rely on: <strong>contract</strong> (to deliver the services you request), <strong>legitimate interests</strong> (security, fraud prevention, product improvement), <strong>legal obligation</strong> (tax and compliance) and <strong>consent</strong> (for non-essential cookies and certain marketing). You may withdraw consent at any time.</p></section><section id="s5"><h2><span>05</span>How we share information</h2><p>We do not sell your personal information. We share it only as follows:</p><ul class="list"><li><strong>Other users:</strong> profile information and content you choose to make public, and necessary details when you engage with a counterparty.</li><li><strong>Service providers:</strong> hosting, payment processing, identity verification, analytics, email delivery and customer support, bound by contract to protect your data.</li><li><strong>Legal and safety:</strong> where required by law or to protect rights, safety and the integrity of the Platform.</li><li><strong>Business transfers:</strong> in connection with a merger, acquisition or sale of assets, with notice where required.</li></ul></section><section id="s6"><h2><span>06</span>International transfers</h2><p>Marketsphare serves users worldwide, so your information may be processed in countries other than your own. Where required, we use appropriate safeguards such as standard contractual clauses to protect transferred data.</p></section><section id="s7"><h2><span>07</span>Data retention</h2><p>We keep personal information only as long as needed for the purposes described above. Account data is generally retained while your account is active and for a limited period afterwards. Transaction and tax records are kept as long as law requires. When data is no longer needed, we delete or anonymise it.</p></section><section id="s8"><h2><span>08</span>Your rights and choices</h2><p>Depending on where you live, you may have the right to:</p><ul class="list"><li>access the personal data we hold about you and receive a copy;</li><li>correct inaccurate or incomplete data;</li><li>delete your data, subject to legal retention duties;</li><li>object to or restrict certain processing, including direct marketing;</li><li>data portability, where processing is based on consent or contract;</li><li>withdraw consent at any time and lodge a complaint with your local data protection authority.</li></ul><p>To exercise these rights, email <a class="lnk" href="mailto:privacy@marketsphare.com">privacy@marketsphare.com</a>. We may need to verify your identity before acting on a request, and we aim to respond within 30 days.</p></section><section id="s9"><h2><span>09</span>Cookies and similar technologies</h2><p>We use cookies and similar tools to run and improve the Platform. See our <a class="lnk" href="cookies.html">Cookie Policy</a> for details and how to manage your preferences.</p></section><section id="s10"><h2><span>10</span>Security</h2><p>We use technical and organisational measures to protect your information, including encryption in transit, access controls and monitoring. No system is completely secure; see our <a class="lnk" href="security.html">Security page</a> for more detail and how to report a vulnerability.</p></section><section id="s11"><h2><span>11</span>Children's privacy</h2><p>Marketsphare is not directed at anyone under 18, and we do not knowingly collect personal data from children. If you believe a child has provided us data, contact us and we will delete it.</p></section><section id="s12"><h2><span>12</span>Changes to this Policy</h2><p>We may update this Policy to reflect changes in our practices or law. We will post the updated version with a new "last updated" date and, for material changes, notify you directly.</p></section><section id="s13"><h2><span>13</span>Contact us</h2><div class="contact-card"><div><h3>Questions about your privacy or this Policy?</h3><p><a class="lnk" href="mailto:privacy@marketsphare.com">privacy@marketsphare.com</a></p></div><a class="btn btn-primary" href="contact.html">Contact page</a></div></section></article>
+</div>
+<footer class="site-footer"><div class="container foot">
+  <span>&copy; 2026 Marketsphare. All rights reserved.</span>
+  <nav><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="cookies.html">Cookies</a><a href="security.html">Security</a><a href="contact.html">Contact</a></nav>
+</div></footer>
+<script>
+(function(){
+  var root=document.documentElement;
+  try{var s=localStorage.getItem('ms-theme');if(s)root.setAttribute('data-theme',s);}catch(e){}
+  document.getElementById('themeToggle').addEventListener('click',function(){
+    var n=root.getAttribute('data-theme')==='dark'?'light':'dark';
+    root.setAttribute('data-theme',n);try{localStorage.setItem('ms-theme',n);}catch(e){}
+  });
+  var bar=document.getElementById('progress');
+  var links=[].slice.call(document.querySelectorAll('.toc a')),secs=links.map(function(a){return document.querySelector(a.getAttribute('href'))});
+  function onScroll(){
+    var h=document.documentElement.scrollHeight-innerHeight;bar.style.width=(h>0?scrollY/h*100:0)+'%';
+    var cur=0;secs.forEach(function(s,i){if(s&&s.getBoundingClientRect().top<140)cur=i;});
+    links.forEach(function(a,i){a.classList.toggle('on',i===cur)});
+  }
+  addEventListener('scroll',onScroll,{passive:true});onScroll();
+})();
+</script>
+</body>
+</html>
