@@ -4,6 +4,7 @@ admin.initializeApp({ projectId: process.env.FIREBASE_PROJECT_ID || "swiftchain-
 const ADMINS = (process.env.ADMIN_EMAILS || "").toLowerCase().split(",").map((s) => s.trim()).filter(Boolean);
 const app = express();
 app.use(cors({ origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(",") : true }));
+try { app.use(require("compression")()); } catch (e) { /* optional */ }
 app.use(express.json({ limit: "3mb" }));
 
 const bad = (m, c) => { const e = new Error(m); e.http = c || 400; return e; };
@@ -29,93 +30,105 @@ async function tx(u, fn) {
   } catch (e) { await c.query("ROLLBACK"); throw e; } finally { c.release(); }
 }
 const r2 = (n) => Math.round(n * 100) / 100, num = (x) => (x == null ? null : Number(x));
-const rowToJS = (r) => r ? { appliedAt: num(r.applied_at), dayIdx: r.day_idx, done: r.done || {}, stage: r.stage || {}, active: r.active, activeAt: num(r.active_at), stageAt: num(r.stage_at), daysCompleted: r.days_completed, paid: Number(r.paid), history: r.history || [] }
-  : { appliedAt: null, dayIdx: -1, done: {}, stage: {}, active: null, activeAt: null, stageAt: null, daysCompleted: 0, paid: 0, history: [] };
-const saveJS = (c, uid, id, s) => c.query(`INSERT INTO job_state(uid,job_id,applied_at,day_idx,done,stage,active,active_at,stage_at,days_completed,paid,history) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
-  ON CONFLICT (uid,job_id) DO UPDATE SET applied_at=$3,day_idx=$4,done=$5,stage=$6,active=$7,active_at=$8,stage_at=$9,days_completed=$10,paid=$11,history=$12`,
-  [uid, id, s.appliedAt, s.dayIdx, JSON.stringify(s.done), JSON.stringify(s.stage), s.active, s.activeAt, s.stageAt, s.daysCompleted, s.paid, JSON.stringify(s.history)]);
-const getJS = async (c, uid, id) => rowToJS((await c.query("SELECT * FROM job_state WHERE uid=$1 AND job_id=$2", [uid, id])).rows[0]);
-function rollover(s, now) { // unfinished work from a past day is forfeited
-  if (s.appliedAt == null) return false; const d = Math.floor((now - s.appliedAt) / E.DAY);
-  if (d === s.dayIdx) return false; s.dayIdx = d; s.done = {}; s.stage = {}; s.active = null; s.activeAt = null; s.stageAt = null; return true;
+const rowToJS = (r) => !r ? E.newJS() : { appliedAt: num(r.applied_at), dayIdx: r.day_idx, baseDay: r.base_day || 0, done: r.done || {}, stage: r.stage || {}, credited: r.credited || {}, active: r.active, activeAt: num(r.active_at), stageAt: num(r.stage_at), lastActive: num(r.last_active), daysCompleted: r.days_completed, paid: Number(r.paid), history: r.history || [], ver: r.ver || 0 };
+const saveJS = (c, uid, id, s) => c.query(`INSERT INTO job_state(uid,job_id,applied_at,day_idx,done,stage,active,active_at,stage_at,days_completed,paid,history,last_active,base_day,credited,ver)
+  VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+  ON CONFLICT (uid,job_id) DO UPDATE SET applied_at=EXCLUDED.applied_at, day_idx=EXCLUDED.day_idx, done=EXCLUDED.done, stage=EXCLUDED.stage, active=EXCLUDED.active, active_at=EXCLUDED.active_at, stage_at=EXCLUDED.stage_at,
+  days_completed=EXCLUDED.days_completed, paid=EXCLUDED.paid, history=EXCLUDED.history, last_active=EXCLUDED.last_active, base_day=EXCLUDED.base_day, credited=EXCLUDED.credited, ver=EXCLUDED.ver`,
+  [uid, id, s.appliedAt, s.dayIdx, JSON.stringify(s.done), JSON.stringify(s.stage), s.active, s.activeAt, s.stageAt, s.daysCompleted, s.paid, JSON.stringify(s.history), s.lastActive, s.baseDay, JSON.stringify(s.credited), 2]);
+/* loads a job's state, brings it up to date (new day, deactivation after 7 idle days) and saves if it changed */
+async function loadJS(c, uid, job, now) {
+  const row = (await c.query("SELECT * FROM job_state WHERE uid=$1 AND job_id=$2", [uid, job.id])).rows[0], s = rowToJS(row), was = s.appliedAt != null;
+  const ch = E.normalize(job, uid, s, now); if (ch || (row && row.ver !== 2)) await saveJS(c, uid, job.id, s);
+  s.wasDeactivated = was && s.appliedAt == null; return s;
 }
 const pubJS = (s) => ({ applied: s.appliedAt != null, appliedAt: s.appliedAt, dayIdx: s.dayIdx, done: s.done, stage: s.stage, active: s.active, daysCompleted: s.daysCompleted, pending: 0, paid: s.paid, history: s.history.slice(0, 50) });
-async function metaFor(c, uid, ur) {
+const slim = (q, s) => ({ count: q.count, total: q.total, tasks: q.tasks.map((t) => (t.k === s.active ? t : { k: t.k, d: t.d, title: t.title, pay: t.pay })) });
+const DAYMS = E.DAY, utcDay = (ms) => new Date(ms).toISOString().slice(0, 10);
+/* Withdrawal rules: every completed block of 7 WORKED days unlocks the earnings made up to the 7th day of that block.
+   Unlocked earnings stay withdrawable at any time and add up, while the next block keeps counting. */
+async function metaFor(c, uid) {
+  const now = Date.now();
   const u = (await c.query("SELECT total_earned, plan, kyc FROM users WHERE uid=$1", [uid])).rows[0];
-  const m = (await c.query("SELECT MIN(applied_at) m FROM job_state WHERE uid=$1 AND applied_at IS NOT NULL", [uid])).rows[0].m;
-  const p = (await c.query("SELECT COALESCE(SUM((data->>'amount')::numeric),0) s FROM requests WHERE uid=$1 AND type='withdrawal' AND status='pending'", [uid])).rows[0].s;
-  const d = new Date(); const ms = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1);
-  const mo = (await c.query("SELECT COALESCE(SUM(amount),0) s FROM transactions WHERE uid=$1 AND type='earning' AND ts>=$2", [uid, ms])).rows[0].s;
-  const total = Number(u.total_earned);
-  return { totalEarned: total, plan: u.plan, kyc: u.kyc, available: r2(total - Number(p)), unlockAt: m == null ? null : Number(m) + 7 * E.DAY, month: Number(mo), now: Date.now() };
+  const W = (await c.query("SELECT COUNT(*)::int AS n FROM work_days WHERE uid=$1", [uid])).rows[0].n, blocks = Math.floor(W / 7);
+  let unlocked = 0;
+  if (blocks > 0) {
+    const d = (await c.query("SELECT to_char(day,'YYYY-MM-DD') AS d FROM work_days WHERE uid=$1 ORDER BY day OFFSET $2 LIMIT 1", [uid, blocks * 7 - 1])).rows[0];
+    const until = Date.parse(d.d + "T00:00:00Z") + DAYMS;
+    unlocked = Number((await c.query("SELECT COALESCE(SUM(amount),0) AS s FROM transactions WHERE uid=$1 AND type='earning' AND ts < $2", [uid, until])).rows[0].s);
+  }
+  const withdrawn = Number((await c.query("SELECT COALESCE(SUM(-amount),0) AS s FROM transactions WHERE uid=$1 AND type='withdrawal'", [uid])).rows[0].s);
+  const pend = Number((await c.query("SELECT COALESCE(SUM((data->>'amount')::numeric),0) AS s FROM requests WHERE uid=$1 AND type='withdrawal' AND status='pending'", [uid])).rows[0].s);
+  const today = (await c.query("SELECT 1 FROM work_days WHERE uid=$1 AND day=$2::date", [uid, utcDay(now)])).rows.length > 0;
+  const hasJob = (await c.query("SELECT 1 FROM job_state WHERE uid=$1 AND applied_at IS NOT NULL LIMIT 1", [uid])).rows.length > 0;
+  const mo = Number((await c.query("SELECT COALESCE(SUM(amount),0) AS s FROM transactions WHERE uid=$1 AND type='earning' AND ts>=$2", [uid, Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1)])).rows[0].s);
+  const total = Number(u.total_earned), open = blocks > 0, remaining = 7 - (W % 7);
+  const unlockAt = open ? 1 : (W > 0 || hasJob ? now + Math.max(1, remaining - (today ? 1 : 0)) * DAYMS : null); // estimate while locked
+  return { totalEarned: total, plan: u.plan, kyc: u.kyc, available: Math.max(0, r2(unlocked - withdrawn - pend)), open, workedDays: W, daysToUnlock: remaining, unlockAt, month: mo, now };
 }
 const reqPub = (r) => ({ id: r.id, type: r.type, status: r.status, adminMessage: r.admin_message, receipt: r.receipt, ts: Number(r.ts), data: r.type === "kyc" ? { fullName: r.data.fullName, docType: r.data.docType } : r.data });
 async function fullState(c, uid, ur) {
-  const now = Date.now(), rows = (await c.query("SELECT * FROM job_state WHERE uid=$1", [uid])).rows, by = {}; rows.forEach((r) => (by[r.job_id] = r));
-  const jobs = {}, batches = {};
-  for (const j of E.J) {
-    const s = rowToJS(by[j.id]);
-    if (rollover(s, now)) await saveJS(c, uid, j.id, s);
-    jobs[j.id] = pubJS(s); if (s.appliedAt != null) batches[j.id] = E.batchFor(j, uid, s.dayIdx);
-  }
-  const meta = await metaFor(c, uid, ur);
+  const now = Date.now(), jobs = {}, batches = {};
+  for (const j of E.J) { const s = await loadJS(c, uid, j, now); jobs[j.id] = pubJS(s); if (s.appliedAt != null) batches[j.id] = slim(E.queue(j, uid, s), s); }
+  const meta = await metaFor(c, uid);
   meta.tx = (await c.query("SELECT * FROM transactions WHERE uid=$1 ORDER BY ts DESC LIMIT 300", [uid])).rows.map((t) => ({ id: t.id, type: t.type, desc: t.descr, amount: Number(t.amount), status: t.status, ts: Number(t.ts), dest: t.dest, method: t.method, account: t.account }));
   const requests = (await c.query("SELECT * FROM requests WHERE uid=$1 ORDER BY ts DESC LIMIT 100", [uid])).rows.map(reqPub);
   return { jobs, batches, meta, requests, isAdmin: !!ur && ADMINS.includes((ur.email || "").toLowerCase()) };
 }
 const jobOr400 = (id) => E.J.find((j) => j.id === id) || (() => { throw bad("Unknown job"); })();
 const newId = (p) => p + Date.now().toString(36).toUpperCase() + crypto.randomBytes(2).toString("hex").toUpperCase();
+const GONE = "Your workspace for this job was deactivated after 7 days without activity. Your earnings are safe — apply again to continue.";
 
 app.get("/api/health", (q, s) => s.json({ ok: true }));
 app.get("/api/state", auth, wrap(async (req, res) => res.json(await tx(req.u, (c, ur) => fullState(c, req.u.uid, ur)))));
 
 app.post("/api/apply", auth, wrap(async (req, res) => {
   const job = jobOr400(req.body.jobId), uid = req.u.uid;
-  res.json(await tx(req.u, async (c, ur) => {
-    const s = await getJS(c, uid, job.id); if (s.appliedAt != null) throw bad("Already applied");
-    s.appliedAt = Date.now(); s.dayIdx = -1; rollover(s, s.appliedAt); await saveJS(c, uid, job.id, s);
-    return { job: pubJS(s), batch: E.batchFor(job, uid, s.dayIdx), meta: await metaFor(c, uid, ur) };
+  res.json(await tx(req.u, async (c) => {
+    const now = Date.now(), s = await loadJS(c, uid, job, now); if (s.appliedAt != null) throw bad("Already applied");
+    Object.assign(s, { appliedAt: now, dayIdx: -1, baseDay: 0, done: {}, stage: {}, credited: {}, active: null, activeAt: null, stageAt: null, lastActive: now });
+    E.normalize(job, uid, s, now); await saveJS(c, uid, job.id, s);
+    return { job: pubJS(s), batch: slim(E.queue(job, uid, s), s), meta: await metaFor(c, uid) };
   }));
 }));
 app.post("/api/activate", auth, wrap(async (req, res) => {
-  const job = jobOr400(req.body.jobId), i = req.body.i, uid = req.u.uid;
-  res.json(await tx(req.u, async (c, ur) => {
-    const now = Date.now(), s = await getJS(c, uid, job.id); if (s.appliedAt == null) throw bad("Apply first");
-    rollover(s, now); const b = E.batchFor(job, uid, s.dayIdx);
-    if (!Number.isInteger(i) || i < 0 || i >= b.count) throw bad("Bad task");
-    if (s.done[i]) throw bad("Task already done"); if (s.active != null) throw bad("Finish your active task first");
-    s.active = i; s.activeAt = now; await saveJS(c, uid, job.id, s); return { job: pubJS(s) };
+  const job = jobOr400(req.body.jobId), k = req.body.i, uid = req.u.uid;
+  res.json(await tx(req.u, async (c) => {
+    const now = Date.now(), s = await loadJS(c, uid, job, now); if (s.appliedAt == null) throw bad(s.wasDeactivated ? GONE : "Apply first");
+    if (!E.validKey(job, uid, s, k)) throw bad("That task is no longer available");
+    if (s.done[k]) throw bad("Task already done"); if (s.active != null) throw bad("Finish your active task first");
+    s.active = k; s.activeAt = now; s.lastActive = now; await saveJS(c, uid, job.id, s);
+    const t = E.queue(job, uid, s).tasks.find((x) => x.k === k); return { job: pubJS(s), key: k, text: t.text };
   }));
 }));
 app.post("/api/generate", auth, wrap(async (req, res) => {
-  const job = jobOr400(req.body.jobId), i = req.body.i, uid = req.u.uid; if (!job.video) throw bad("Not a video job");
+  const job = jobOr400(req.body.jobId), k = req.body.i, uid = req.u.uid; if (!job.video) throw bad("Not a video job");
   res.json(await tx(req.u, async (c) => {
-    const now = Date.now(), s = await getJS(c, uid, job.id); rollover(s, now);
-    if (s.active !== i) throw bad("Activate this task first"); if (now - s.activeAt < 3000) throw bad("Generation still running", 429);
-    s.stage[i] = "generated"; s.stageAt = now; await saveJS(c, uid, job.id, s); return { job: pubJS(s) };
+    const now = Date.now(), s = await loadJS(c, uid, job, now); if (s.appliedAt == null) throw bad(s.wasDeactivated ? GONE : "Apply first");
+    if (s.active !== k) throw bad("Activate this task first"); if (now - s.activeAt < 3000) throw bad("Generation still running", 429);
+    s.stage[k] = "generated"; s.stageAt = now; s.lastActive = now; await saveJS(c, uid, job.id, s); return { job: pubJS(s) };
   }));
 }));
 app.post("/api/complete", auth, wrap(async (req, res) => {
-  const job = jobOr400(req.body.jobId), i = req.body.i, uid = req.u.uid;
-  res.json(await tx(req.u, async (c, ur) => {
-    const now = Date.now(), s = await getJS(c, uid, job.id); if (s.appliedAt == null) throw bad("Apply first");
-    rollover(s, now); const b = E.batchFor(job, uid, s.dayIdx);
-    if (!Number.isInteger(i) || i < 0 || i >= b.count) throw bad("Bad task");
-    if (s.done[i]) throw bad("Already done"); if (s.active !== i) throw bad("Activate this task first");
-    if (job.video) { if (s.stage[i] !== "generated") throw bad("Generate the video first"); if (now - s.stageAt < 2500) throw bad("Promotion still running", 429); }
+  const job = jobOr400(req.body.jobId), k = req.body.i, uid = req.u.uid;
+  res.json(await tx(req.u, async (c) => {
+    const now = Date.now(), s = await loadJS(c, uid, job, now); if (s.appliedAt == null) throw bad(s.wasDeactivated ? GONE : "Apply first");
+    if (!E.validKey(job, uid, s, k)) throw bad("That task is no longer available");
+    if (s.done[k]) throw bad("Already done"); if (s.active !== k) throw bad("Activate this task first");
+    if (job.video) { if (s.stage[k] !== "generated") throw bad("Generate the video first"); if (now - s.stageAt < 2500) throw bad("Promotion still running", 429); }
     else if (now - s.activeAt < 2500) throw bad("Promotion still running", 429);
-    s.done[i] = 1; s.active = null; s.activeAt = null; s.stageAt = null;
-    const credit = async (amt, desc) => {
-      amt = r2(amt); s.paid = r2(s.paid + amt);
+    const before = s.baseDay + ":" + s.dayIdx, credits = E.finishTask(job, uid, s, k); let credited = 0;
+    for (const cr of credits) {
+      const amt = r2(cr.amount); credited += amt; s.paid = r2(s.paid + amt);
       await c.query("UPDATE users SET total_earned = total_earned + $1 WHERE uid=$2", [amt, uid]);
-      await c.query("INSERT INTO transactions(id,uid,type,descr,amount,status,ts) VALUES($1,$2,'earning',$3,$4,'Credited',$5)", [newId("TX-"), uid, job.title + " — " + desc, amt, now]);
+      await c.query("INSERT INTO transactions(id,uid,type,descr,amount,status,ts) VALUES($1,$2,'earning',$3,$4,'Credited',$5)", [newId("TX-"), uid, job.title + " — " + cr.desc, amt, now]);
       s.history.unshift({ date: new Date(now).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }), amount: amt }); s.history = s.history.slice(0, 200);
-    };
-    let credited = 0;
-    if (job.perTask) { credited += b.tasks[i].pay; await credit(b.tasks[i].pay, "video submitted"); }
-    if (Object.keys(s.done).length >= b.count) { if (!job.perTask) { credited += b.total; await credit(b.total, "daily batch complete"); } s.daysCompleted++; }
-    await saveJS(c, uid, job.id, s);
-    return { job: pubJS(s), credited: r2(credited), meta: await metaFor(c, uid, ur) };
+    }
+    await c.query("INSERT INTO work_days(uid, day) VALUES($1, $2::date) ON CONFLICT DO NOTHING", [uid, utcDay(now)]);
+    s.lastActive = now; E.normalize(job, uid, s, now); await saveJS(c, uid, job.id, s);
+    const out = { job: pubJS(s), credited: r2(credited), meta: await metaFor(c, uid) };
+    if (before !== s.baseDay + ":" + s.dayIdx) out.batch = slim(E.queue(job, uid, s), s);
+    return out;
   }));
 }));
 
@@ -127,8 +140,8 @@ app.post("/api/withdraw", auth, wrap(async (req, res) => {
   else { ["bankName", "accountName", "accountNumber", "swift", "country"].forEach((k) => (data[k] = str(b[k], 100))); if (!data.bankName || !data.accountName || data.accountNumber.length < 6 || data.swift.length < 6 || !data.country) throw bad("Please complete all bank details."); }
   if (!(amount > 0)) throw bad("Enter an amount.");
   await tx(req.u, async (c, ur) => {
-    const m = await metaFor(c, uid, ur);
-    if (!m.unlockAt || Date.now() < m.unlockAt) throw bad("Withdrawals open 7 days after you start working.");
+    const m = await metaFor(c, uid);
+    if (!m.open) throw bad("Withdrawals unlock after you complete 7 days of work (" + m.workedDays + " of 7 so far).");
     if (amount > m.available + 1e-6) throw bad("Amount exceeds your available balance.");
     await c.query("INSERT INTO requests(id,uid,user_name,type,data,ts) VALUES($1,$2,$3,'withdrawal',$4,$5)", [newId("RQ-"), uid, req.u.name, JSON.stringify(data), Date.now()]);
   });
