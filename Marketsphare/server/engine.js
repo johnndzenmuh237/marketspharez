@@ -27,4 +27,61 @@ function batchFor(job, uid, dayIdx) {
   for (let i = 0; i < count; i++) { const g = job.gen(r), pay = +(job.pmin + r() * (job.pmax - job.pmin)).toFixed(2); tasks.push({ i, title: g.title, text: g.text, pay }); total += pay; }
   const b = { count, tasks, total: +total.toFixed(2) }; if (cache.size > 2000) cache.clear(); cache.set(k, b); return b;
 }
-module.exports = { DAY, J, batchFor };
+
+/* ================= Workspace rules (pure functions, no database) =================
+   - Tasks are added every day (24h windows from the day you applied) and skipped tasks ROLL OVER: nothing is cleared.
+   - A day's earnings are credited when every task of THAT day's group is done (video jobs credit per video).
+   - A workspace is deactivated only after 7 days with no activity. Earnings and worked days are always kept.
+   - Skipped tasks older than 7 days are dropped so the queue cannot grow forever. */
+const STRIDE = 200, INACTIVE_MS = 7 * DAY, BACKLOG_DAYS = 7;
+const newJS = () => ({ appliedAt: null, dayIdx: -1, baseDay: 0, done: {}, stage: {}, credited: {}, active: null, activeAt: null, stageAt: null, lastActive: null, daysCompleted: 0, paid: 0, history: [], ver: 2 });
+const dayOf = (k) => Math.floor(k / STRIDE), idxOf = (k) => k % STRIDE;
+function dropDays(s, from, to) { // remove bookkeeping for days in [from, to)
+  for (const m of [s.done, s.stage]) for (const k of Object.keys(m)) { const d = dayOf(+k); if (d >= from && d < to) delete m[k]; }
+  for (const k of Object.keys(s.credited)) if (+k >= from && +k < to) delete s.credited[k];
+  if (s.active != null && dayOf(s.active) >= from && dayOf(s.active) < to) { s.active = null; s.activeAt = null; s.stageAt = null; }
+}
+const doneCount = (s, d) => { let n = 0; for (const k of Object.keys(s.done)) if (dayOf(+k) === d) n++; return n; };
+function migrate(job, uid, s) { // old rows stored one day only, keyed by task number
+  if (s.ver >= 2) return false;
+  const d = Math.max(0, s.dayIdx), b = s.appliedAt != null ? batchFor(job, uid, d) : null, sh = (m) => { const o = {}; for (const k of Object.keys(m || {})) o[d * STRIDE + (+k)] = m[k]; return o; };
+  s.done = sh(s.done); s.stage = sh(s.stage); if (s.active != null) s.active = d * STRIDE + s.active;
+  s.credited = {}; s.baseDay = d; if (b && Object.keys(s.done).length >= b.count && b.count) s.credited[d] = 1;
+  s.ver = 2; return true;
+}
+/** Brings a job state up to date for time `now`. Returns true if anything changed (so it must be saved). */
+function normalize(job, uid, s, now) {
+  let ch = migrate(job, uid, s);
+  if (s.appliedAt == null) return ch;
+  if (s.lastActive == null) { s.lastActive = now; ch = true; }
+  if (now - s.lastActive >= INACTIVE_MS) { // deactivated: earnings (paid), history and worked days are kept
+    Object.assign(s, { appliedAt: null, dayIdx: -1, baseDay: 0, done: {}, stage: {}, credited: {}, active: null, activeAt: null, stageAt: null, lastActive: null });
+    return true;
+  }
+  const d = Math.floor((now - s.appliedAt) / DAY);
+  if (d !== s.dayIdx) { s.dayIdx = d; ch = true; }
+  const minBase = Math.max(0, s.dayIdx - BACKLOG_DAYS);
+  if (s.baseDay < minBase) { dropDays(s, s.baseDay, minBase); s.baseDay = minBase; ch = true; }
+  while (s.baseDay < s.dayIdx && doneCount(s, s.baseDay) >= batchFor(job, uid, s.baseDay).count) { dropDays(s, s.baseDay, s.baseDay + 1); s.baseDay++; ch = true; }
+  return ch;
+}
+/** All tasks currently in the workspace, oldest day first. `k` is the stable task key. */
+function queue(job, uid, s) {
+  const tasks = []; let total = 0;
+  if (s.appliedAt == null) return { count: 0, tasks, total: 0 };
+  for (let d = s.baseDay; d <= s.dayIdx; d++) { const b = batchFor(job, uid, d); for (const t of b.tasks) { tasks.push({ k: d * STRIDE + t.i, d, title: t.title, text: t.text, pay: t.pay }); total += t.pay; } }
+  return { count: tasks.length, tasks, total: +total.toFixed(2) };
+}
+function validKey(job, uid, s, k) {
+  if (!Number.isInteger(k) || k < 0) return false; const d = dayOf(k);
+  return d >= s.baseDay && d <= s.dayIdx && idxOf(k) < batchFor(job, uid, d).count;
+}
+/** Marks task k done. Returns the credits to pay: [{amount, desc}]. */
+function finishTask(job, uid, s, k) {
+  const d = dayOf(k), b = batchFor(job, uid, d), credits = [];
+  s.done[k] = 1; s.active = null; s.activeAt = null; s.stageAt = null; delete s.stage[k];
+  if (job.perTask) credits.push({ amount: b.tasks[idxOf(k)].pay, desc: "video submitted" });
+  if (doneCount(s, d) >= b.count) { if (!job.perTask && !s.credited[d]) { s.credited[d] = 1; credits.push({ amount: b.total, desc: "daily batch complete" }); } s.daysCompleted++; }
+  return credits;
+}
+module.exports = { DAY, J, batchFor, STRIDE, INACTIVE_MS, newJS, normalize, queue, validKey, finishTask, dayOf, idxOf };
