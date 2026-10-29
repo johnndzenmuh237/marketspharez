@@ -12,13 +12,29 @@
     { id: "social-media-manager", logo: "NP", title: "Social Media Manager", company: "NorthPeak", min: 145, max: 155, pmin: 5, pmax: 5, unit: "social media tasks to promote", platforms: ["Instagram","TikTok","Facebook","Pinterest"], q: "Name one social media app you know." },
     { id: "advert-videos", logo: "AR", title: "Advert Videos", company: "AdReel", min: 100, max: 120, pmin: 4, pmax: 4, unit: "video scripts to generate and promote", platforms: ["YouTube","TikTok","Instagram Reels","Facebook"], q: "What is a short video advert?", video: true, perTask: true }
   ];
-  J.forEach((j) => { j.payType = "daily"; j.currency = "$"; j.match = 90; j.matchTone = "success"; j.payAmount = j.pmax; j.location = "Remote"; });
+  J.forEach((j) => { j.payType = "daily"; j.currency = "$"; j.match = 90; j.matchTone = "success"; j.payAmount = j.pmax; j.location = "Worldwide"; });
 
-  let cache = null, offset = 0;
+  let cache = null, offset = 0, lastMut = 0; const raw = {}; // raw[id] = { job, batch } exactly as the server sent them
   const emptyJob = () => ({ applied: false, appliedAt: null, dayIdx: -1, done: {}, stage: {}, active: null, daysCompleted: 0, pending: 0, paid: 0, history: [] });
-  const blank = () => { const st = { _meta: { totalEarned: 0, tx: [], plan: "Free", kyc: null, available: 0, unlockAt: null, month: 0 }, _batches: {}, _requests: [] }; J.forEach((j) => (st[j.id] = emptyJob())); return st; };
+  const blank = () => { const st = { _meta: { totalEarned: 0, tx: [], plan: "Free", kyc: null, available: 0, unlockAt: null, month: 0, workedDays: 0 }, _batches: {}, _requests: [] }; J.forEach((j) => (st[j.id] = emptyJob())); return st; };
   const fire = () => w.dispatchEvent(new CustomEvent("marketsphare:state-changed", { detail: cache }));
-  const now = () => Date.now() + offset;
+  const now = () => Date.now() + offset, sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  function bar(msg) {
+    let b = document.getElementById("ms-net"); if (!msg) { if (b) b.remove(); return; }
+    if (!b) { b = document.createElement("div"); b.id = "ms-net"; b.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:3000;background:#f59e0b;color:#111;text-align:center;padding:8px 12px;font:600 13px system-ui,sans-serif"; (document.body || document.documentElement).appendChild(b); }
+    b.textContent = msg;
+  }
+  /* The server keeps tasks under stable keys. Pages work with plain positions 0..n-1, so we translate both ways here. */
+  function project(id) {
+    const r = raw[id]; if (!r || !r.job) return;
+    const tasks = (r.batch && r.batch.tasks) || [], pos = {}; tasks.forEach((t, i) => (pos[t.k] = i));
+    const rekey = (m) => { const o = {}; Object.keys(m || {}).forEach((k) => { if (pos[k] != null) o[pos[k]] = m[k]; }); return o; };
+    const j = Object.assign({}, r.job);
+    j.done = rekey(r.job.done); j.stage = rekey(r.job.stage); j.active = r.job.active != null && pos[r.job.active] != null ? pos[r.job.active] : null;
+    cache[id] = j;
+    cache._batches[id] = { count: tasks.length, total: r.batch ? r.batch.total : 0, tasks: tasks.map((t, i) => ({ i, title: t.title, text: t.text || "", pay: t.pay, day: t.d })) };
+  }
+  const keyOf = (id, i) => { const t = raw[id] && raw[id].batch && raw[id].batch.tasks[i]; if (!t) throw new Error("That task is no longer available"); return t.k; };
 
   async function call(path, body, method) {
     const u = M.currentUser; if (!u) throw new Error("Not signed in");
@@ -28,32 +44,47 @@
     if (!r.ok) throw Object.assign(new Error(j.error || "Request failed"), { status: r.status });
     return j;
   }
-  async function refresh() {
-    try {
-      const s = await call("/state"), st = blank();
-      J.forEach((j) => s.jobs[j.id] && (st[j.id] = s.jobs[j.id]));
-      st._meta = s.meta; st._batches = s.batches; st._requests = s.requests; offset = s.meta.now - Date.now(); M.isAdmin = s.isAdmin; M.offline = false;
-      cache = st; fire();
-    } catch (e) { console.error("Marketsphare: could not load state", e); M.offline = true; if (!cache) cache = blank(); }
-    return cache;
+  async function fetchState(force) {
+    const t0 = Date.now(), s = await call("/state");
+    if (!force && lastMut > t0) return cache; // an action finished while this request was in flight: keep the newer data
+    const st = blank(); cache = st;
+    J.forEach((j) => { raw[j.id] = { job: s.jobs[j.id], batch: s.batches[j.id] }; project(j.id); });
+    st._meta = s.meta; st._requests = s.requests; offset = s.meta.now - Date.now(); M.isAdmin = s.isAdmin; M.offline = false; fire(); return cache;
   }
-  const merge = (id, r) => { if (!cache) cache = blank(); if (r.job) cache[id] = r.job; if (r.batch) cache._batches[id] = r.batch; if (r.meta) cache._meta = Object.assign({}, cache._meta, r.meta, { tx: cache._meta.tx }); fire(); };
+  /* First load never falls back to an empty "apply again" screen: it waits for the server (which may be waking up). */
+  async function boot() {
+    for (let n = 0; ; n++) {
+      try { await fetchState(true); bar(""); return cache; }
+      catch (e) {
+        if (e.status && e.status < 500 && e.status !== 429 && e.status !== 408) { bar(e.message); if (!cache) cache = blank(); return cache; }
+        bar("Connecting to the server… this can take up to a minute after a quiet period."); await sleep(Math.min(2000 + n * 1000, 8000));
+      }
+    }
+  }
+  async function refresh(force) { try { await fetchState(force); bar(""); } catch (e) { console.error("Marketsphare: refresh failed", e); if (!e.status || e.status >= 500) bar("Connection lost — retrying…"); } return cache; }
+  const merge = (id, r) => {
+    lastMut = Date.now(); raw[id] = raw[id] || {};
+    if (r.job) raw[id].job = r.job; if (r.batch) raw[id].batch = r.batch;
+    if (r.text != null && r.key != null && raw[id].batch) { const t = raw[id].batch.tasks.find((x) => x.k === r.key); if (t) t.text = r.text; }
+    if (r.meta) cache._meta = Object.assign({}, cache._meta, r.meta, { tx: cache._meta.tx });
+    project(id); fire();
+  };
   const msg = (e) => e.message || "Something went wrong";
 
   const act = {
-    async applyToJob(id) { const r = await call("/apply", { jobId: id }); merge(id, r); return r; },
-    async activate(id, i) { const r = await call("/activate", { jobId: id, i }); merge(id, r); return r; },
-    async generate(id, i) { const r = await call("/generate", { jobId: id, i }); merge(id, r); return r; },
-    async completeTask(id, i) { const r = await call("/complete", { jobId: id, i }); merge(id, r); if (r.credited > 0) await refresh(); return r; },
-    async requestWithdrawal(o) { try { await call("/withdraw", o); await refresh(); return { ok: true }; } catch (e) { return { ok: false, msg: msg(e) }; } },
-    async submitRequest(type, data) { try { await call("/" + type, data); await refresh(); return { ok: true }; } catch (e) { return { ok: false, msg: msg(e) }; } },
+    async applyToJob(id) { const r = await call("/apply", { jobId: id }); if (!cache) cache = blank(); merge(id, r); return r; },
+    async activate(id, i) { const r = await call("/activate", { jobId: id, i: keyOf(id, i) }); merge(id, r); return r; },
+    async generate(id, i) { const r = await call("/generate", { jobId: id, i: keyOf(id, i) }); merge(id, r); return r; },
+    async completeTask(id, i) { const r = await call("/complete", { jobId: id, i: keyOf(id, i) }); merge(id, r); if (r.credited > 0) await refresh(true); return r; },
+    async requestWithdrawal(o) { try { await call("/withdraw", o); await refresh(true); return { ok: true }; } catch (e) { return { ok: false, msg: msg(e) }; } },
+    async submitRequest(type, data) { try { await call("/" + type, data); await refresh(true); return { ok: true }; } catch (e) { return { ok: false, msg: msg(e) }; } },
     async getChat() { try { return (await call("/chat")).messages; } catch (e) { return []; } },
     async saveChat(messages) { try { await call("/chat", { messages }, "PUT"); } catch (e) {} },
     async adminList(types) { return call("/admin/requests?types=" + types.join(",")); },
     async adminReview(id, decision, message) { return call("/admin/review", { id, decision, message }); }
   };
   const st0 = () => cache || (cache = blank());
-  const lock = (st) => { const u = (st || st0())._meta.unlockAt; return { open: !!u && now() >= u, unlockAt: u || null }; };
+  const lock = (st) => { const u = (st || st0())._meta.unlockAt; return { open: !!u && now() >= u, unlockAt: u && u > 1e6 ? u : null }; };
   const myRequests = (type) => (st0()._requests || []).filter((r) => !type || r.type === type);
   const batchFor = (job) => st0()._batches[job.id] || { count: 0, tasks: [], total: 0 };
 
@@ -72,8 +103,8 @@
     POSTED_JOBS_KEY: "marketsphare_posted_jobs_v1", loadPostedJobs: () => [], savePostedJobs() {} });
 
   if (!w.MS_ADMIN_PAGE && M.authReady) {
-    M.stateReady = M.authReady.then(refresh);
-    setInterval(() => { if (!document.hidden && M.currentUser) refresh(); }, 20000);
+    M.stateReady = M.authReady.then(boot);
+    setInterval(() => { if (!document.hidden && M.currentUser) refresh(); }, 30000);
     document.addEventListener("visibilitychange", () => { if (!document.hidden && M.currentUser) refresh(); });
   }
 })(window);
