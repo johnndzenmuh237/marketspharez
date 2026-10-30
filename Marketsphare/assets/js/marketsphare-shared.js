@@ -1,4 +1,4 @@
-/* Marketsphare client engine (server-backed). All money logic lives on the server (server/server.js);
+/* build: notif-2 — Marketsphare client engine (server-backed). All money logic lives on the server (server/server.js);
    this file only fetches state, sends actions and keeps a cache the pages read synchronously. */
 (function (w) {
   "use strict";
@@ -102,8 +102,61 @@
     compressImage, simpleAnswerOk: (t) => t.trim().split(/\s+/).filter(Boolean).length >= 3,
     POSTED_JOBS_KEY: "marketsphare_posted_jobs_v1", loadPostedJobs: () => [], savePostedJobs() {} });
 
+  /* ---------- Notification bell: opens a panel with real updates (feedback, credits, withdrawals) ---------- */
+  let notifRender = null, notifLoaded = false;
+  function initNotifications() {
+    const bell = document.querySelector(".notif-bell"); if (!bell || bell.dataset.msNotif) return; bell.dataset.msNotif = "1";
+    if (!document.getElementById("ms-notif-css")) {
+      const css = document.createElement("style"); css.id = "ms-notif-css";
+      css.textContent = ".ms-notif-panel{display:none;position:fixed;z-index:1600;width:min(380px,calc(100vw - 24px));max-height:min(70vh,520px);flex-direction:column;overflow:hidden;background:var(--bg-surface);color:var(--text-primary);border:1px solid var(--border-color);border-radius:14px;box-shadow:var(--shadow-lg)}"
+        + ".ms-notif-panel.open{display:flex}.ms-notif-panel .hd{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border-color)}"
+        + ".ms-notif-panel .hd button{border:0;background:none;color:var(--color-primary);font-weight:700;font-size:12px;cursor:pointer}.ms-notif-panel .bd{overflow-y:auto}"
+        + ".ms-notif-panel .it{display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border-color)}.ms-notif-panel .it.new{background:color-mix(in srgb,var(--color-primary) 8%,transparent)}"
+        + ".ms-notif-panel .ic{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:var(--bg-surface-alt);flex-shrink:0}"
+        + ".ms-notif-panel .ic.good{background:rgba(26,158,107,.15);color:#1a9e6b}.ms-notif-panel .ic.bad{background:rgba(194,59,59,.15);color:#c23b3b}.ms-notif-panel .ic.warn{background:rgba(185,119,14,.15);color:#b9770e}"
+        + ".ms-notif-panel .it b{font-size:13px;display:block}.ms-notif-panel .it p{margin:3px 0 0;font-size:12.5px;color:var(--text-secondary);overflow-wrap:anywhere}.ms-notif-panel .it small{color:var(--text-muted);font-size:11px}"
+        + ".ms-notif-panel .em{padding:26px 16px;text-align:center;color:var(--text-muted);font-size:13px}.ms-notif-panel .ft{display:block;text-align:center;padding:12px;font-size:13px;font-weight:700;color:var(--color-primary);border-top:1px solid var(--border-color)}";
+      document.head.appendChild(css);
+    }
+    const panel = document.createElement("div"); panel.className = "ms-notif-panel"; document.body.appendChild(panel);
+    const keyName = () => "ms_notif_seen:" + ((M.currentUser && M.currentUser.uid) || "guest"), seenList = () => { try { return JSON.parse(localStorage.getItem(keyName()) || "[]"); } catch (e) { return []; } };
+    const esc = (x) => String(x == null ? "" : x).replace(/[&<>"]/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m]));
+    const fmt = (ts) => new Date(ts).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+    let current = [];
+    function items() {
+      const st = st0(), out = [];
+      (st._requests || []).slice(0, 12).forEach((r) => {
+        const label = r.type === "withdrawal" ? "Withdrawal" : r.type === "kyc" ? "KYC verification" : "Plan upgrade";
+        const extra = r.type === "withdrawal" ? " ($" + Number(r.data.amount).toFixed(2) + ")" : r.type === "upgrade" ? " to " + r.data.plan : "";
+        const what = r.status === "pending" ? "is awaiting review" : r.status === "approved" ? "was approved" : "was declined";
+        out.push({ key: "r:" + r.id + ":" + r.status, icon: r.status === "approved" ? "okc" : r.status === "rejected" ? "xc" : "clock", tone: r.status === "approved" ? "good" : r.status === "rejected" ? "bad" : "warn", title: label + extra + " " + what, body: r.status !== "pending" && r.adminMessage ? "Feedback: " + r.adminMessage : "", ts: r.ts });
+      });
+      (st._meta.tx || []).slice(0, 8).forEach((t) => out.push({ key: "t:" + t.id, icon: t.type === "withdrawal" ? "bank" : "cash", tone: t.type === "withdrawal" ? "good" : "", title: t.type === "withdrawal" ? "Withdrawal completed — $" + Math.abs(t.amount).toFixed(2) : "$" + Number(t.amount).toFixed(2) + " credited", body: t.desc, ts: t.ts }));
+      return out.sort((a, b) => b.ts - a.ts).slice(0, 15);
+    }
+    function render() {
+      if (!notifLoaded) { panel.innerHTML = '<div class="hd"><b>Notifications</b></div><div class="bd"><div class="em">Loading your notifications…</div></div><a class="ft" href="messages.html">Need help? Open Messages</a>'; bell.classList.remove("badge-notification"); bell.removeAttribute("data-count"); return; }
+      try { current = items(); } catch (err) { current = []; console.error(err); } const sn = new Set(seenList()), unread = current.filter((i) => !sn.has(i.key)).length;
+      panel.innerHTML = '<div class="hd"><b>Notifications</b>' + (unread ? '<button data-read="1">Mark all read</button>' : "") + '</div><div class="bd">'
+        + (current.length ? current.map((i) => '<div class="it ' + (sn.has(i.key) ? "" : "new") + '"><span class="ic ' + (i.tone || "") + '"><i class=mi-' + i.icon + "></i></span><div><b>" + esc(i.title) + "</b>" + (i.body ? "<p>" + esc(i.body) + "</p>" : "") + "<small>" + fmt(i.ts) + "</small></div></div>").join("") : '<div class="em">No notifications yet. Apply to a job to get started.</div>')
+        + '</div><a class="ft" href="messages.html">Need help? Open Messages</a>';
+      if (unread) { bell.classList.add("badge-notification"); bell.setAttribute("data-count", unread > 9 ? "9+" : String(unread)); } else { bell.classList.remove("badge-notification"); bell.removeAttribute("data-count"); }
+    }
+    function markRead() { try { localStorage.setItem(keyName(), JSON.stringify(Array.from(new Set(seenList().concat(current.map((i) => i.key)))).slice(-300))); } catch (e) {} }
+    function close() { if (panel.classList.contains("open")) { panel.classList.remove("open"); markRead(); render(); } }
+    function open() { try { render(); } catch (err) { console.error(err); } const r = bell.getBoundingClientRect(); panel.style.top = r.bottom + 8 + "px"; panel.style.right = Math.max(12, innerWidth - r.right) + "px"; panel.classList.add("open"); }
+    bell.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); panel.classList.contains("open") ? close() : open(); });
+    panel.addEventListener("click", (e) => { e.stopPropagation(); if (e.target.closest("[data-read]")) { markRead(); render(); } });
+    document.addEventListener("click", () => close()); document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+    notifRender = (force) => { if (force || !panel.classList.contains("open")) render(); };
+    render();
+  }
+
   if (!w.MS_ADMIN_PAGE && M.authReady) {
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initNotifications); else initNotifications();
     M.stateReady = M.authReady.then(boot);
+    M.stateReady.then(() => { notifLoaded = true; if (notifRender) notifRender(true); });
+    w.addEventListener("marketsphare:state-changed", () => { if (notifRender) notifRender(); });
     setInterval(() => { if (!document.hidden && M.currentUser) refresh(); }, 30000);
     document.addEventListener("visibilitychange", () => { if (!document.hidden && M.currentUser) refresh(); });
   }

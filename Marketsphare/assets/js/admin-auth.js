@@ -13,14 +13,14 @@ window.MS_ADMIN_PAGE = true; window.Marketsphare = window.Marketsphare || {};
       + '<p><button id="msOut" style="padding:9px 16px;border-radius:8px;border:0;background:#4f46e5;color:#fff;font-weight:700;cursor:pointer">Log out and use another account</button> '
       + '<a href="../dashboard/index.html" style="margin-left:10px">Back to dashboard</a></p></div>';
     const b = document.getElementById("msOut");
-    if (b) b.onclick = () => (typeof auth !== "undefined" ? auth.signOut() : Promise.resolve()).then(() => (location.href = "../auth/login.html"));
+    if (b) b.onclick = () => (typeof auth !== "undefined" ? auth.signOut() : Promise.resolve()).then(() => (location.href = "login.html"));
   }
   M.authReady = new Promise((resolve) => {
     if (typeof auth === "undefined") { problem("", "Firebase did not load on this page", "Check that <code>assets/js/firebase-config.js</code> is uploaded and that the page has internet access."); return; }
     const timer = setTimeout(() => problem("", "No response from sign-in", "Refresh the page. If it keeps happening, check your internet connection and that your Render domain is in Firebase Authorized domains."), 15000);
     auth.onAuthStateChanged(async (user) => {
       clearTimeout(timer);
-      if (!user) { location.href = "../auth/login.html"; return; }
+      if (!user) { location.href = "login.html"; return; }
       M.currentUser = user;
       try { await M.call("/admin/ping"); }
       catch (e) {
